@@ -1,0 +1,23 @@
+{
+    "cSpell.words": [
+        "devtool",
+        "lockfile",
+        "parens",
+        "shakirzianov",
+        "template",
+        "version",
+        "webapp",
+        "webpack",
+        "webpack's"
+    ],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/node_modules/**": true,
+        "**/dist/**": true,
+        "package-lock.json": true
+    }
+}
