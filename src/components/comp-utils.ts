@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as Radium from "radium";
-import { TypeDiff, Partialize, Undefined, KeyRestriction } from "../utils";
+import { Partialize, Undefined, KeyRestriction } from "../utils";
 
 // TODO: put back key restrictions
 // export type Comp<P extends KeyRestriction<P, keyof A>, A = {}> = React.SFC<P & CallbacksOpt<A>>;
