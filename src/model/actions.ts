@@ -1,4 +1,4 @@
-import { defOpt, def } from "../utils";
+import { def } from "../utils";
 
 export const actionsTemplate = {
     click: def(),

@@ -1,4 +1,4 @@
-import { buildReducer, buildPartialReducer } from "./redux-utils";
+import { buildReducer } from "./redux-utils";
 import { ActionsTemplate } from "../model/actions";
 import { combineReducers } from "./react-redux-utils";
 import { App, HelloWorld } from "../model/app";

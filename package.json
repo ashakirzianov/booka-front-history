@@ -1,77 +1,31 @@
 {
   "name": "booka",
-  "version": "1.0.0",
-  "description": "Booka app",
-  "main": "index.js",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "local-init": "npm install -g webpack && npm install -g webpack-dev-server",
-    "prestart": "npm run build",
-    "full": "npm run build && npm run test && npm run lint && npm run site",
-    "test": "mocha -r ts-node/register src/test-setup.ts src/*.spec.ts src/**/*.spec.ts src/**/*.spec.tsx",
-    "lint": "tslint ./src/**",
-    "build:ts": "tsc",
-    "build:wp": "webpack --p --progress",
-    "build": "npm run build:wp",
-    "start": "node ./index.js",
-    "eb-start": "npm start",
-    "site": "webpack --p --progress & webpack-dev-server --progress --colors --open --watch"
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ashakirzianov/booka.git"
-  },
-  "keywords": [
-    "booka",
-    "reader",
-    "ebook"
-  ],
-  "author": "Anton Shakirzianov",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ashakirzianov/booka/issues"
-  },
-  "homepage": "https://github.com/ashakirzianov/booka#readme",
   "dependencies": {
-    "@types/chai": "^4.1.2",
-    "@types/enzyme": "^3.1.9",
-    "@types/enzyme-adapter-react-16": "^1.0.2",
-    "@types/lodash": "^4.14.104",
-    "@types/mocha": "^2.2.48",
+    "@types/lodash": "^4.14.106",
     "@types/radium": "^0.18.24",
-    "@types/react": "^16.0.40",
-    "@types/react-dnd": "^2.0.36",
-    "@types/react-dnd-html5-backend": "^2.1.9",
-    "@types/react-dnd-multi-backend": "^3.0.1",
-    "@types/react-dnd-touch-backend": "^0.3.3",
-    "@types/react-dom": "^16.0.4",
     "@types/react-redux": "^5.0.15",
-    "@types/redux": "^3.6.31",
-    "@types/redux-logger": "^3.0.5",
-    "awesome-typescript-loader": "^3.4.1",
-    "chai": "^4.1.2",
-    "enzyme": "^3.3.0",
-    "enzyme-adapter-react-16": "^1.1.1",
-    "express": "^4.16.2",
     "lodash": "^4.17.5",
-    "mocha": "^4.1.0",
-    "radium": "^0.19.6",
-    "react": "^16.3.0-alpha.1",
-    "react-dnd": "^2.5.4",
-    "react-dnd-html5-backend": "^2.5.4",
-    "react-dnd-multi-backend": "^3.1.2",
-    "react-dnd-touch-backend": "^0.3.21",
+    "radium": "^0.23.0",
+    "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-redux": "^5.0.7",
+    "react-scripts-ts": "2.14.0",
     "redux": "^3.7.2",
-    "redux-logger": "^3.0.6",
-    "source-map-loader": "^0.2.3",
-    "store": "^2.0.12",
-    "typescript": "^2.7.2",
-    "webpack": "^3.11.0"
+    "store": "^2.0.12"
   },
   "devDependencies": {
-    "react-addons-test-utils": "^15.6.2",
-    "ts-node": "^3.3.0",
-    "tslint": "^5.9.1"
+    "@types/jest": "^22.2.2",
+    "@types/node": "^9.6.0",
+    "@types/react": "^16.0.40",
+    "@types/react-dom": "^16.0.4",
+    "typescript": "^2.7.2"
   }
 }
