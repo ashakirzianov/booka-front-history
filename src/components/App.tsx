@@ -2,6 +2,7 @@ import * as React from "react";
 import { App } from "../model/app";
 import { ActionsTemplate } from "../model/actions";
 import { Callbacks } from "./comp-utils";
+import { Test } from "./Atom";
 
 const AppComp: React.SFC<{
     store: App,
@@ -10,6 +11,7 @@ const AppComp: React.SFC<{
         <div>
             {props.store.hello.text}
             <button onClick={() => { props.callbacks.click({}); }}>!</button>
+            <Test />
         </div>;
 
 export { AppComp };

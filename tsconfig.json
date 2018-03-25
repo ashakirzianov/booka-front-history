@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "types": [
+      "lodash", "radium", "react-native", "react-redux",
+      "jest", "react", "react-dom"
+    ],
     "baseUrl": ".",
     "outDir": "build/dist",
     "module": "esnext",
