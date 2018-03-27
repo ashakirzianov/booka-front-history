@@ -23,7 +23,11 @@ export function defaults<T>(Cmp: SFC<T>): Undefined<T> {
 
 export function partial<T>(Cmp: SFC<T>) {
     return <P extends keyof T>(partials: Pick<T, P>): SFC<Partialize<T, Pick<T, P>>> => {
-        return props => React.createElement(Cmp, { ...(partials as any), ...(props as any) });
+        return props => React.createElement(
+            Cmp,
+            { ...(partials as any), ...(props as any) },
+            props.children
+        );
     };
 }
 
