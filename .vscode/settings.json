@@ -19,5 +19,6 @@
         "**/node_modules/**": true,
         "**/build/**": true,
         "package-lock.json": true
-    }
+    },
+    "tslint.autoFixOnSave": true
 }

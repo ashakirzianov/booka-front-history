@@ -75,6 +75,10 @@ export function exp<T>(f: () => T): T {
     return f();
 }
 
+export function assertNever(arg: never): never {
+    throw new Error(`Should have not happen: ${arg}`);
+}
+
 export function itemAtIndex<T>(arr: T[], idx: number | undefined): T | undefined {
     return idx === undefined ? undefined : arr[idx];
 }

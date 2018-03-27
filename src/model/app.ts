@@ -1,7 +1,5 @@
-export type App = {
-    hello: HelloWorld,
-};
+import { Book } from "./book";
 
-export type HelloWorld = {
-    text: string,
+export type App = {
+    book: Book,
 };
