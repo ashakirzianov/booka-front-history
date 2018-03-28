@@ -15,14 +15,14 @@ export type Part = {
     content: BookNode[],
 };
 
-export type SubPart = {
+export type Subpart = {
     kind: "subpart",
     title: string,
     content: SubChapterNode[],
 };
 
-export type BookNode = Part | Chapter | SubPart | Paragraph;
-export type SubChapterNode = SubPart | Paragraph;
+export type BookNode = Part | Chapter | Subpart | Paragraph;
+export type SubChapterNode = Subpart | Paragraph;
 
 export type Book = {
     kind: "book",
