@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Comp } from './comp-utils';
-import { Book, BookNode, Chapter, Part, SubPart, Paragraph } from '../model/book';
+import { Book, BookNode, Chapter, Part, SubPart, Paragraph, isParagraph } from '../model/book';
 import { TextBlock, Column, Title } from './Elements';
 import { assertNever } from '../utils';
 
@@ -26,7 +26,7 @@ const ChapterComp: Comp<Chapter> = props =>
     </Column>;
 
 const BookNodeComp: Comp<{ node: BookNode }> = props =>
-    typeof props.node === 'string' ? <ParagraphComp p={props.node} />
+    isParagraph(props.node) ? <ParagraphComp p={props.node} />
         : props.node.kind === 'chapter' ? <ChapterComp {...props.node} />
             : props.node.kind === 'part' ? <PartComp {...props.node} />
                 : props.node.kind === 'subpart' ? <SubpartComp {...props.node} />

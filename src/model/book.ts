@@ -1,4 +1,7 @@
+import { typeGuard } from "../utils";
+
 export type Paragraph = string;
+export const isParagraph = typeGuard<BookNode, Paragraph>(bn => typeof bn === 'string');
 
 export type Chapter = {
     kind: "chapter",
