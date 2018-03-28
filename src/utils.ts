@@ -118,3 +118,9 @@ export function defOpt<T>() {
 export function buildMap<T>() {
     return <M extends Map<T>>(obj: M) => obj;
 }
+
+export function typeGuard<TIn, TOut extends TIn>(predicate: (obj: TIn) => boolean): TypeGuard<TIn, TOut> {
+    return predicate as TypeGuard<TIn, TOut>;
+}
+
+export type TypeGuard<TIn, TOut extends TIn> = (guarded: TIn) => guarded is TOut;
