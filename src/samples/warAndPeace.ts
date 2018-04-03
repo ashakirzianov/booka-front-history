@@ -1,6 +1,5 @@
-/* tslint:disable:max-line-length */
-/* tslint:disable:no-trailing-whitespace */
-/* spellchecker: disable */
+/* tslint:disable */
+/* spellchecker:disable */
 
 const text: string = `
 <html>

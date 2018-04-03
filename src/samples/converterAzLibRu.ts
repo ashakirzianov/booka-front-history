@@ -1,4 +1,4 @@
-// import { parseString } from 'xml2js';
+import { parseXmlSync } from '../xmlParser';
 
 export function testParse() {
     const test = `
@@ -9,5 +9,5 @@ export function testParse() {
     <test1></test1>
 </hello>
 `;
-    return test;
+    return parseXmlSync(test);
 }
