@@ -2,7 +2,7 @@ import { Book } from "../model/book";
 
 /* tslint:disable:max-line-length */
 /* spellchecker: disable */
-export const lorem: Book = {
+export const book: Book = {
     kind: "book",
     title: "Lorem Ipsum",
     content: [
