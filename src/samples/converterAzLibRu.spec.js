@@ -1,4 +1,5 @@
-import { testParse } from "./converterAzLibRu";
+const converterAzLibRu = require('./converterAzLibRu');
+const testParse = converterAzLibRu.testParse;
 
 describe('Converter for az.lib.ru examples', () => {
     it('test', () => {

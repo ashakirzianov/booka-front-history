@@ -12,9 +12,9 @@
     "@types/xml2js": "^0.4.2",
     "lodash": "^4.17.5",
     "radium": "^0.23.0",
-    "react": "^16.3.0",
-    "react-dom": "^16.3.0",
-    "react-native-web": "^0.5.3",
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1",
+    "react-native-web": "^0.5.4",
     "react-redux": "^5.0.7",
     "react-scripts-ts": "2.14.0",
     "redux": "^3.7.2",
@@ -24,13 +24,16 @@
   "devDependencies": {
     "@types/jest": "^22.2.2",
     "@types/lodash": "^4.14.106",
-    "@types/node": "^9.6.1",
+    "@types/node": "^9.6.2",
     "@types/radium": "^0.18.24",
-    "@types/react": "^16.1.0",
+    "@types/react": "^16.3.4",
     "@types/react-dom": "^16.0.4",
-    "@types/react-native": "^0.52.22",
+    "@types/react-native": "^0.52.23",
     "@types/react-redux": "^5.0.15",
+    "jest": "^22.4.3",
+    "jest-cli": "^22.4.3",
     "react-native": "^0.54.4",
+    "ts-jest": "^22.4.2",
     "typescript": "^2.8.1"
   }
 }
