@@ -1,8 +1,6 @@
 import { parseString } from 'xml2js';
 
-export type XmlObject = {
-    [key in string]?: XmlObject;
-};
+export type XmlObject = any;
 
 export async function parseXml(xml: string): Promise<XmlObject> {
     return new Promise((resolve, reject) => {
@@ -17,10 +15,15 @@ export async function parseXml(xml: string): Promise<XmlObject> {
 }
 
 export function parseXmlSync(xml: string): XmlObject {
-    let result: XmlObject = {};
-    parseXml(xml)
-        .then(res => { result = res; })
-        .catch(err => { throw err; });
+    let result: XmlObject;
+
+    parseString(xml, (err, res) => {
+        if (err) {
+            throw err;
+        } else {
+            result = res;
+        }
+    });
 
     return result; // rely on the fact that xml2js is implemented synchronously
 }
