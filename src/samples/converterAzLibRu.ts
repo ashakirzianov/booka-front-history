@@ -1,4 +1,4 @@
-import { parseXmlSync } from '../xmlParser';
+import { parseXml } from '../xmlParser';
 
 export function testParse() {
     const test = `
@@ -9,5 +9,5 @@ export function testParse() {
     <test1></test1>
 </hello>
 `;
-    return parseXmlSync(test);
+    return parseXml(test);
 }
