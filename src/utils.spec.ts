@@ -21,7 +21,7 @@ describe("Utils", () => {
     });
 
     it("distinct arrays", () => {
-        expect(distinct(sameArrays)([
+        expect(distinct<number[]>(sameArrays)([
             [1, 2, 3],
             [4, 5, 6],
             [1, 2, 3],
