@@ -17,7 +17,7 @@ export async function parseXml(xml: string): Promise<XmlObject> {
 export function parseXmlSync(xml: string): XmlObject {
     let result: XmlObject;
 
-    parseString(xml, (err, res) => {
+    parseString(xml, { async: false }, (err, res) => {
         if (err) {
             throw err;
         } else {
