@@ -10,6 +10,13 @@ export type XmlNodeCData = XmlNodeBase<'cdata'> & { text: string };
 export type XmlNodeComment = XmlNodeBase<'comment'> & { content: string };
 
 export function parseXml(xml: string): XmlNode {
-    const result = parseXmlLib(xml);
-    return result;
+    // try {
+        const result = parseXmlLib(xml);
+        return result;
+    // } catch (err) {
+    //     if (err && err.pos) {
+    //         console.log(xml.substr(0, err.pos)); // tslint:disable-line
+    //     }
+    //     throw err;
+    // }
 }
