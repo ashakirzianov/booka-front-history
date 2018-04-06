@@ -4,13 +4,15 @@
     "cSpell.words": [
         "devtool",
         "lockfile",
+        "noindex",
         "parens",
         "shakirzianov",
         "template",
         "version",
         "webapp",
         "webpack",
-        "webpack's"
+        "webpack's",
+        "Статистика"
     ],
     "files.exclude": {
         "**/.git": true,
