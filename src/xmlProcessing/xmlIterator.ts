@@ -24,42 +24,31 @@ export function rootIterator(root: XmlNodeDocument): XmlIterator {
         prevSibling: nullIterator,
         nextSibling: nullIterator,
         parent: nullIterator,
-        children: buildIterator(root.children, 0),
+        children: buildChildIteratorThunk(root.children),
         node: root,
     });
 }
 
-function buildParentIterator(parent: XmlNodeWithChildren | undefined): Thunk<XmlIterator> {
-    if (!parent) {
+function buildIteratorThunk(node: XmlNode | undefined): Thunk<XmlIterator> {
+    if (!node) {
         return nullIterator;
     }
 
-    if (parent.type === 'document') {
-        return () => rootIterator(parent);
+    if (node.type === 'document') {
+        return () => rootIterator(node);
     }
 
-    const indexInParent = parent.parent.children.indexOf(parent);
-    return () => make({
-        ...buildSiblingIterators(parent.parent.children, indexInParent),
-        children: buildIterator(parent.children),
-        parent: buildParentIterator(parent.parent),
-        node: parent,
-    });
+    const indexInParent = node.parent.children.indexOf(node);
+    return buildChildIteratorThunk(node.parent.children, indexInParent);
 }
 
-function buildIterator(siblings: XmlNode[], index: number = 0): Thunk<XmlIterator> {
+function buildChildIteratorThunk(siblings: XmlNode[], index: number = 0): Thunk<XmlIterator> {
     const node = siblings[index];
     return () => make({
-        ...buildSiblingIterators(siblings, index),
-        children: hasChildren(node) ? buildIterator(node.children) : buildIterator([]),
-        parent: buildParentIterator(node.parent),
+        prevSibling: index > 0 ? buildChildIteratorThunk(siblings, index - 1) : nullIterator,
+        nextSibling: index < siblings.length - 1 ? buildChildIteratorThunk(siblings, index + 1) : nullIterator,
+        children: hasChildren(node) ? buildChildIteratorThunk(node.children) : buildChildIteratorThunk([]),
+        parent: buildIteratorThunk(node.parent),
         node: node,
     });
-}
-
-function buildSiblingIterators(siblings: XmlNode[], index: number = 0) {
-    return {
-        prevSibling: index > 0 ? buildIterator(siblings, index - 1) : nullIterator,
-        nextSibling: index < siblings.length - 1 ? buildIterator(siblings, index + 1) : nullIterator,
-    };
 }
