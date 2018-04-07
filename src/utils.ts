@@ -1,3 +1,5 @@
+export type Thunk<T> = () => T;
+
 export type StringDiff<T extends string, U extends string> =
     ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
 
