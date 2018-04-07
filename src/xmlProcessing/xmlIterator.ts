@@ -1,36 +1,18 @@
 import { Thunk } from "../utils";
 import { XmlNode, XmlNodeDocument, hasChildren, isElement } from "./xmlNode";
 
-export type XmlIteratorValue = {
+export type XmlIterator = {
     prevSibling: Thunk<XmlIterator>,
     nextSibling: Thunk<XmlIterator>,
     child: Thunk<XmlIterator>,
     node: XmlNode,
     parent: Thunk<XmlIterator>,
-};
-export type XmlIterator = { value: XmlIteratorValue, done: false } | { done: true };
+} | undefined;
 
-export const doneIterator: XmlIterator = { done: true };
-export const nullIteratorThunk: Thunk<XmlIterator> = () => doneIterator;
+export const nullIteratorThunk: Thunk<XmlIterator> = () => undefined;
 
-export function name(xi: XmlIterator) {
-    return !xi.done && isElement(xi.value.node) ? xi.value.node.name : undefined;
-}
-
-export function attributes(xi: XmlIterator) {
-    return !xi.done && isElement(xi.value.node) ? xi.value.node.attributes : undefined;
-}
-
-export function child(xi: XmlIterator) {
-    const children = !xi.done ? xi.value.child() : undefined;
-    return children && !children.done ? children : undefined;
-}
-
-function make(value: XmlIteratorValue): XmlIterator {
-    return {
-        value,
-        done: false,
-    };
+function make(value: XmlIterator): XmlIterator {
+    return value;
 }
 
 export function rootIterator(root: XmlNodeDocument): XmlIterator {
