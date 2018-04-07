@@ -1,5 +1,5 @@
 import { Thunk } from "../utils";
-import { XmlNode, XmlNodeDocument, hasChildren, isElement } from "./xmlNode";
+import { XmlNode, XmlNodeDocument, hasChildren } from "./xmlNode";
 
 export type XmlIterator = {
     prevSibling: Thunk<XmlIterator>,
