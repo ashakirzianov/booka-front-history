@@ -1,5 +1,5 @@
-import { parseXml } from '../xmlParser';
 import { combineFs } from '../utils';
+import { parseXml } from './xmlParser';
 import { html2xmlFixes } from './html2xml';
 
 export function parseAzLibRuHtml(html: string) {
