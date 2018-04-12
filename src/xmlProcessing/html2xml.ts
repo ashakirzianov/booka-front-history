@@ -5,10 +5,9 @@ export function multiRun(f: (s: string) => string) {
         let next = input;
         let current;
         do {
-            debugger; // tslint:disable-line
             current = next;
             next = f(current);
-        } while (current.length !== next.length);
+        } while (current.length !== next.length && current !== next);
         return next;
     };
 }
