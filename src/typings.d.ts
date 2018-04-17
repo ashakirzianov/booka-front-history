@@ -1,4 +1,4 @@
-declare namespace Store {
+declare module 'store' {
     interface Store {
         get(key: string): object | undefined;
         set(key: string, value: object): void;
@@ -6,10 +6,14 @@ declare namespace Store {
         clearAll(): void;
         each(f: (key: string, value: object) => void): void;
     }
-}
-declare const store: Store.Store;
-declare module "store" {
+
+    const store: Store;
     export = store;
+}
+
+declare module '@rgrove/parse-xml' {
+    const parseXml: (xml: string) => any;
+    export = parseXml;
 }
 
 // TODO: bug workaround: https://github.com/Microsoft/TypeScript-React-Native-Starter/issues/19

@@ -1,14 +1,20 @@
 {
+    "jest.pathToJest": "node_modules/jest/bin/jest.js",
+    "jest.pathToConfig": "jest.json",
     "cSpell.words": [
+        "cellspacing",
         "devtool",
         "lockfile",
+        "noindex",
         "parens",
+        "pegts",
         "shakirzianov",
         "template",
         "version",
         "webapp",
         "webpack",
-        "webpack's"
+        "webpack's",
+        "Статистика"
     ],
     "files.exclude": {
         "**/.git": true,
@@ -17,7 +23,6 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "**/node_modules/**": true,
-        "**/build/**": true,
         "package-lock.json": true
     },
     "tslint.autoFixOnSave": true

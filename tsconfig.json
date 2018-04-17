@@ -4,6 +4,7 @@
       "lodash", "radium", "react-native", "react-redux",
       "jest", "react", "react-dom"
     ],
+    "skipLibCheck": true,
     "baseUrl": ".",
     "outDir": "build/dist",
     "module": "esnext",

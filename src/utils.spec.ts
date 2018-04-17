@@ -1,4 +1,4 @@
-import { distinct, sameArrays } from "./utils";
+import { distinct, sameArrays, combineFs } from "./utils";
 
 describe("Utils", () => {
     it("sameArrays same", () => {
@@ -31,5 +31,12 @@ describe("Utils", () => {
             [4, 5, 6],
             [7, 8, 9],
         ]);
+    });
+
+    it('combineFs last-to-first order', () => {
+        expect(combineFs<number>(
+            x => x * x,
+            x => x + x,
+        )(5)).toBe(100);
     });
 });
