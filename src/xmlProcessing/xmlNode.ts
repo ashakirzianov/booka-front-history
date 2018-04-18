@@ -12,6 +12,8 @@ export type XmlNodeText = XmlNodeBase<'text'> & { text: string };
 export type XmlNodeCData = XmlNodeBase<'cdata'> & { text: string };
 export type XmlNodeComment = XmlNodeBase<'comment'> & { content: string };
 
+export type XmlNodeType = XmlNode['type'];
+
 export type XmlNodeWithChildren = XmlNodeDocument | XmlNodeElement;
 export function hasChildren(node: XmlNode): node is XmlNodeWithChildren {
     return (node.type === 'document' || node.type === 'element') && node.children !== undefined;
