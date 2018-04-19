@@ -1,11 +1,12 @@
-import { Input, Parser, Success, Fail } from "pegts";
+import { Input, Parser, Success, Fail, anyNumberOf, ifNotStarts } from "pegts";
 import { XmlNode, XmlNodeType, hasChildren } from "./xmlNode";
+import { fparser } from "./pegtsExtensions";
 
 export type XmlInput = Input<XmlNode[]>;
 export type XmlTreeParser<T = XmlNode> = Parser<XmlNode[], T>;
 
 class XmlInputImpl implements Input<XmlNode[]> {
-    constructor(readonly stream: XmlNode[]) {}
+    constructor(readonly stream: XmlNode[]) { }
 
     bite(n: number) {
         return n > this.stream.length
@@ -63,7 +64,7 @@ export function nodeName(name: string) {
 }
 
 class XmlChildrenParser<T> implements XmlTreeParser<T> {
-    constructor(readonly childrenParser: XmlTreeParser<T>) {}
+    constructor(readonly childrenParser: XmlTreeParser<T>) { }
 
     parse(input: XmlInput) {
         const node = firstNode(input.stream);
@@ -76,4 +77,30 @@ class XmlChildrenParser<T> implements XmlTreeParser<T> {
 
 export function children<T>(childrenParser: XmlTreeParser<T>) {
     return new XmlChildrenParser(childrenParser);
+}
+
+class XmlNodeAnyParser extends XmlNodeParser {
+    match(node: XmlNode) {
+        return true;
+    }
+}
+
+export function any() {
+    return new XmlNodeAnyParser();
+}
+
+export function notNode(parser: XmlTreeParser) {
+    return ifNotStarts(parser).followedBy(any()).map((ignore, actual) => actual);
+}
+
+export function between<T>(left: XmlTreeParser, right: XmlTreeParser, inside: XmlTreeParser<T>): XmlTreeParser<T> {
+    return fparser<XmlNode[], T>(input => {
+        const result = anyNumberOf(notNode(left))
+            .followedBy(left)
+            .followedBy(anyNumberOf(notNode(right)))
+            .followedBy(right)
+            .map((pre, l, i, r) => inside.parse(xmlInput(i))).parse(input);
+
+        return result.success ? result.value : result;
+    });
 }
