@@ -1,4 +1,4 @@
-import { Input, Parser, Success, Fail, anyNumberOf, ifNotStarts } from "pegts";
+import { Input, Parser, Success, Fail, anyNumberOf, ifNotStarts, builder } from "pegts";
 import { XmlNode, XmlNodeType, hasChildren } from "./xmlNode";
 import { fparser } from "./pegtsExtensions";
 
@@ -48,7 +48,7 @@ class XmlNodeTypeParser extends XmlNodeParser {
 }
 
 export function nodeType(type: XmlNodeType) {
-    return new XmlNodeTypeParser(type);
+    return builder(new XmlNodeTypeParser(type));
 }
 
 class XmlNodeNameParser extends XmlNodeParser {
@@ -60,7 +60,7 @@ class XmlNodeNameParser extends XmlNodeParser {
 }
 
 export function nodeName(name: string) {
-    return new XmlNodeNameParser(name);
+    return builder(new XmlNodeNameParser(name));
 }
 
 class XmlChildrenParser<T> implements XmlTreeParser<T> {
@@ -76,7 +76,7 @@ class XmlChildrenParser<T> implements XmlTreeParser<T> {
 }
 
 export function children<T>(childrenParser: XmlTreeParser<T>) {
-    return new XmlChildrenParser(childrenParser);
+    return builder(new XmlChildrenParser(childrenParser));
 }
 
 class XmlNodeAnyParser extends XmlNodeParser {
@@ -85,16 +85,33 @@ class XmlNodeAnyParser extends XmlNodeParser {
     }
 }
 
-export function any() {
-    return new XmlNodeAnyParser();
+export function anyNode() {
+    return builder(new XmlNodeAnyParser());
+}
+
+class XmlNodeFuncParser<T> implements XmlTreeParser<T> {
+    constructor(readonly f: (node: XmlNode) => T | null) {}
+
+    parse(input: XmlInput) {
+        const node = firstNode(input.stream);
+        const result = node ? this.f(node) : null;
+        return result !== null
+            ? new Success(result, input.bite(1), 1)
+            : new Fail(1)
+            ;
+    }
+}
+
+export function nodeFunc<T>(f: (node: XmlNode) => T | null) {
+    return builder(new XmlNodeFuncParser(f));
 }
 
 export function notNode(parser: XmlTreeParser) {
-    return ifNotStarts(parser).followedBy(any()).map((ignore, actual) => actual);
+    return ifNotStarts(parser).followedBy(anyNode()).map((ignore, actual) => actual);
 }
 
 export function between<T>(left: XmlTreeParser, right: XmlTreeParser, inside: XmlTreeParser<T>): XmlTreeParser<T> {
-    return fparser<XmlNode[], T>(input => {
+    return builder(fparser<XmlNode[], T>(input => {
         const result = anyNumberOf(notNode(left))
             .followedBy(left)
             .followedBy(anyNumberOf(notNode(right)))
@@ -102,5 +119,5 @@ export function between<T>(left: XmlTreeParser, right: XmlTreeParser, inside: Xm
             .map((pre, l, i, r) => inside.parse(xmlInput(i))).parse(input);
 
         return result.success ? result.value : result;
-    });
+    }));
 }
