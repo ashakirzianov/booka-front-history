@@ -1,9 +1,9 @@
-import { nodeFunc, anyNode, between } from "./xml2json";
+import { nodeFunc, anyNode, between, children, nodeName, nodeType } from "./xml2json";
 import { anyNumberOf } from "pegts";
 import { choice } from "./pegtsExtensions";
 
-const startMarker = '  Собственно произведение  '; // spellchecker:disable-line
-const stopMarker = '  ';
+const startMarker = 'Собственно произведение'; // spellchecker:disable-line
+const stopMarker = '';
 
 function commentMarkerParser(marker: string) {
     return nodeFunc(node =>
@@ -31,6 +31,13 @@ const primitiveBookParser = anyNumberOf(nodeParser)
         kind: 'book',
         title: 'Test',
         content: nodes.filter(node => node !== null) as string[],
-    }));
+    })
+);
 
-export const azLibRuParser = between(bookStartParser, bookEndParser, primitiveBookParser);
+export const azLibRuParser = children(
+    nodeType('text')
+        .followedBy(nodeName('head'))
+        .followedBy(nodeType('text'))
+        .followedBy(children(between(bookStartParser, bookEndParser, primitiveBookParser)))
+        .map((t1, head, t2, book) => book)
+);

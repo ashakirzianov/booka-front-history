@@ -30,7 +30,7 @@ function firstNode(nodes: XmlNode[]): XmlNode | undefined {
 abstract class XmlNodeParser implements XmlTreeParser {
     parse(input: XmlInput) {
         const node = firstNode(input.stream);
-        return node
+        return node && this.match(node)
             ? new Success(node, input.bite(1), 1)
             : new Fail(1)
             ;
@@ -116,7 +116,9 @@ export function between<T>(left: XmlTreeParser, right: XmlTreeParser, inside: Xm
             .followedBy(left)
             .followedBy(anyNumberOf(notNode(right)))
             .followedBy(right)
-            .map((pre, l, i, r) => inside.parse(xmlInput(i))).parse(input);
+            .map((pre, l, i, r) => {
+                return inside.parse(xmlInput(i));
+            }).parse(input);
 
         return result.success ? result.value : result;
     }));

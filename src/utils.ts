@@ -73,6 +73,10 @@ export function letExp<T, U>(x: T, f: (x: T) => U) {
     return f(x);
 }
 
+export function throwExp<T>(error: T): never {
+    throw error;
+}
+
 export function exp<T>(f: () => T): T {
     return f();
 }

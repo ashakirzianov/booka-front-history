@@ -1,6 +1,6 @@
 import * as parseXmlLib from '@rgrove/parse-xml';
-import { XmlNode } from './xmlNode';
+import { XmlNodeDocument } from './xmlNode';
 
-export function parseXml(xml: string): XmlNode {
-    return parseXmlLib(xml);
+export function parseXml(xml: string): XmlNodeDocument {
+    return parseXmlLib(xml, { preserveComments: true });
 }
