@@ -179,3 +179,7 @@ export function skipToNode<T>(node: Parser<any>, then: Parser<T>): Parser<T> {
         ([pre, [n, result]]) => result,
     );
 }
+
+export function parsePath<T>(path: string[], then: Parser<T>): Parser<T> {
+    return children(path.reduceRight((res, p) => skipToNode(nodeName(p), children(res)), then));
+}

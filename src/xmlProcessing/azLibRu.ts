@@ -1,7 +1,7 @@
 import { combineFs, throwExp } from '../utils';
 import { parseXml } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
-import { firstNode, translate, nodeAny, choice, some, children, nodeName, between, nodeComment, skipToNode } from "./xml2json";
+import { firstNode, translate, nodeAny, choice, some, between, nodeComment, parsePath } from "./xml2json";
 
 function fixSpecialCaseAzLibRu(html: string) {
     return html
@@ -45,11 +45,7 @@ const primitiveBookParser = translate(
 
 const bodyParser = between(bookStartParser, bookEndParser, primitiveBookParser);
 
-export const tree2book = children(
-    children(
-        skipToNode(nodeName('body'), children(bodyParser)),
-    ),
-);
+export const tree2book = parsePath(['html', 'body'], bodyParser);
 
 export function string2book(html: string) {
     const xmlString = html2xml(html);
