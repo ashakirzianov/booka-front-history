@@ -3,7 +3,8 @@ import { applyMiddleware, createStore } from "redux";
 import { throttle } from "lodash";
 import { reducer } from "./reducers";
 import { Store, storeState, restoreState } from "./storage";
-import { book } from "../samples/loremIpsum";
+import { text } from "../samples/warAndPeace";
+import { string2book } from "../xmlProcessing/azLibRu";
 
 const middleware = applyMiddleware(
     // logger,
@@ -15,7 +16,7 @@ function validateStore(restored: Store | undefined) {
 
 function createNewStore(): Store {
     return {
-        book: book,
+        book: string2book(text),
     };
 }
 
