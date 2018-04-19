@@ -169,3 +169,13 @@ export function between<T>(left: Parser<any>, right: Parser<any>, inside: Parser
             ;
     };
 }
+
+export function skipToNode<T>(node: Parser<any>, then: Parser<T>): Parser<T> {
+    return translate(
+        seq(
+            some(not(node)),
+            and(node, then),
+        ),
+        ([pre, [n, result]]) => result,
+    );
+}
