@@ -1,4 +1,5 @@
 import { typeGuard } from "../utils";
+import * as parseXmlLib from '@rgrove/parse-xml';
 
 export type XmlAttributes = { [key: string]: string | undefined };
 export type XmlNodeBase<T extends string> = { type: T, parent: XmlNodeWithChildren };
@@ -23,3 +24,7 @@ export function hasChildren(node: XmlNode): node is XmlNodeWithChildren {
 
 export const isElement = typeGuard<XmlNode, XmlNodeElement>(node => node.type === 'element');
 export const isComment = typeGuard<XmlNode, XmlNodeComment>(node => node.type === 'comment');
+
+export function parseXml(xml: string): XmlNodeDocument {
+    return parseXmlLib(xml, { preserveComments: true });
+}
