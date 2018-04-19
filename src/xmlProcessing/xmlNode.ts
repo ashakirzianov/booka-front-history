@@ -1,3 +1,5 @@
+import { typeGuard } from "../utils";
+
 export type XmlAttributes = { [key: string]: string | undefined };
 export type XmlNodeBase<T extends string> = { type: T, parent: XmlNodeWithChildren };
 export type XmlNode = XmlNodeDocument | XmlNodeElement | XmlNodeText | XmlNodeCData | XmlNodeComment;
@@ -19,6 +21,5 @@ export function hasChildren(node: XmlNode): node is XmlNodeWithChildren {
     return (node.type === 'document' || node.type === 'element') && node.children !== undefined;
 }
 
-export function isElement(node: XmlNode): node is XmlNodeElement {
-    return node.type === 'element';
-}
+export const isElement = typeGuard<XmlNode, XmlNodeElement>(node => node.type === 'element');
+export const isComment = typeGuard<XmlNode, XmlNodeComment>(node => node.type === 'comment');

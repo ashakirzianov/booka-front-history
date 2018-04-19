@@ -1,43 +1,40 @@
-import { nodeFunc, anyNode, between, children, nodeName, nodeType } from "./xml2json";
-import { anyNumberOf } from "pegts";
-import { choice } from "./pegtsExtensions";
+import { firstNode, translate, nodeAny, choice, some, children, nodeName, nodeType, seq, between, nodeComment } from "./xml2json";
 
 const startMarker = 'Собственно произведение'; // spellchecker:disable-line
 const stopMarker = '';
 
-function commentMarkerParser(marker: string) {
-    return nodeFunc(node =>
-        node.type === 'comment' && node.content === startMarker
-            ? node
-            : null
-    );
-}
+const bookStartParser = nodeComment(startMarker);
+const bookEndParser = nodeComment(stopMarker);
 
-const bookStartParser = commentMarkerParser(startMarker);
-const bookEndParser = commentMarkerParser(stopMarker);
-
-const textParser = nodeFunc(node =>
+const textParser = firstNode(node =>
     node.type === 'text'
         ? node.text
         : null
 );
 
-const skipParser = anyNode().map(node => null);
+const skipParser = translate(nodeAny, n => null);
 
-const nodeParser = choice(textParser, skipParser);
+const bookNodeParser = choice(textParser, skipParser);
 
-const primitiveBookParser = anyNumberOf(nodeParser)
-    .map(nodes => ({
+const primitiveBookParser = translate(
+    some(bookNodeParser),
+    nodes => ({
         kind: 'book',
         title: 'Test',
         content: nodes.filter(node => node !== null) as string[],
     })
 );
 
+const bodyParser = between(bookStartParser, bookEndParser, primitiveBookParser);
+
 export const azLibRuParser = children(
-    nodeType('text')
-        .followedBy(nodeName('head'))
-        .followedBy(nodeType('text'))
-        .followedBy(children(between(bookStartParser, bookEndParser, primitiveBookParser)))
-        .map((t1, head, t2, book) => book)
+    translate(
+        seq(
+            nodeType('text'),
+            nodeName('head'),
+            nodeType('text'),
+            children(bodyParser),
+        ),
+        ([t1, head, t2, book]) => book,
+    )
 );

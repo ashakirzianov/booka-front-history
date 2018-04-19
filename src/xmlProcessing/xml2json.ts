@@ -1,125 +1,171 @@
-import { Input, Parser, Success, Fail, anyNumberOf, ifNotStarts, builder } from "pegts";
-import { XmlNode, XmlNodeType, hasChildren } from "./xmlNode";
-import { fparser } from "./pegtsExtensions";
+import { XmlNode, hasChildren, XmlNodeType, isElement, isComment } from "./xmlNode";
 
-export type XmlInput = Input<XmlNode[]>;
-export type XmlTreeParser<T = XmlNode> = Parser<XmlNode[], T>;
+type Input = XmlNode[];
+export type Parser<T = XmlNode> = (input: Input) => Result<T>;
+export type Success<Out> = {
+    value: Out,
+    next: Input,
+    success: true,
+};
+export type Fail = {
+    success: false,
+};
+export type Result<Out> = Success<Out> | Fail;
 
-class XmlInputImpl implements Input<XmlNode[]> {
-    constructor(readonly stream: XmlNode[]) { }
+export function fail(): Fail {
+    return { success: false };
+}
 
-    bite(n: number) {
-        return n > this.stream.length
-            ? new XmlInputImpl([])
-            : new XmlInputImpl(this.stream.slice(n))
+export function success<T>(value: T, next: Input): Success<T> {
+    return { value, next, success: true };
+}
+
+export function split<T>(arr: T[]) {
+    return {
+        head: arr.length > 0 ? arr[0] : undefined,
+        tail: arr.length > 1 ? arr.slice(1) : [],
+    };
+}
+
+export function firstNode<T>(f: (n: XmlNode) => T | null): Parser<T> {
+    return input => {
+        const list = split(input);
+        const result = list.head && f(list.head) || null;
+        return result === null
+            ? fail()
+            : success(result, list.tail)
             ;
-    }
+    };
 }
 
-export function xmlInput(nodes: XmlNode[]) {
-    return new XmlInputImpl(nodes);
+export const firstNodePredicate = (p: (n: XmlNode) => boolean) => firstNode(n => p(n) ? n : null);
+
+export const nodeAny = firstNode(x => x);
+export const nodeType = (type: XmlNodeType) => firstNodePredicate(n => n.type === type);
+export const nodeName = (name: string) => firstNodePredicate(n => isElement(n) && n.name === name);
+export const nodeComment = (content: string) => firstNodePredicate(n => isComment(n) && n.content === content);
+
+export function children<T>(parser: Parser<T>): Parser<T> {
+    return input => {
+        const list = split(input);
+        if (list.head && hasChildren(list.head)) {
+            const result = parser(list.head.children);
+            if (result.success) {
+                return success(result.value, list.tail);
+            }
+        }
+        return fail();
+    };
 }
 
-function firstNode(nodes: XmlNode[]): XmlNode | undefined {
-    return nodes.length > 0
-        ? nodes[0]
-        : undefined
-        ;
+export function not(parser: Parser<any>): Parser {
+    return input => {
+        const list = split(input);
+        if (list.head) {
+            const result = parser(input);
+            if (!result.success) {
+                return success(list.head, list.tail);
+            }
+        }
+        return fail();
+    };
 }
 
-abstract class XmlNodeParser implements XmlTreeParser {
-    parse(input: XmlInput) {
-        const node = firstNode(input.stream);
-        return node && this.match(node)
-            ? new Success(node, input.bite(1), 1)
-            : new Fail(1)
+export function and<T1, T2>(p1: Parser<T1>, p2: Parser<T2>): Parser<[T1, T2]>;
+export function and<T1, T2, T3>(p1: Parser<T1>, p2: Parser<T2>, p3: Parser<T3>): Parser<[T1, T2, T3]>;
+export function and<T1, T2, T3, T4>(p1: Parser<T1>, p2: Parser<T2>, p3: Parser<T3>, p4: Parser<T4>): Parser<[T1, T2, T3, T4]>;
+export function and(...ps: Array<Parser<any>>): Parser<any[]> {
+    return input => {
+        const results = [];
+        let lastInput = input;
+        for (let i = 0; i < ps.length; i++) {
+            const result = ps[i](input);
+            if (!result.success) {
+                return result;
+            }
+            results.push(result.value);
+            lastInput = result.next;
+        }
+
+        return success(results, lastInput);
+    };
+}
+
+export function seq<T1, T2>(p1: Parser<T1>, p2: Parser<T2>): Parser<[T1, T2]>;
+export function seq<T1, T2, T3>(p1: Parser<T1>, p2: Parser<T2>, p3: Parser<T3>): Parser<[T1, T2, T3]>;
+export function seq<T1, T2, T3, T4>(p1: Parser<T1>, p2: Parser<T2>, p3: Parser<T3>, p4: Parser<T4>): Parser<[T1, T2, T3, T4]>;
+export function seq(...ps: Array<Parser<any>>): Parser<any[]> {
+    return input => {
+        let currentInput = input;
+        const results = [];
+        for (let i = 0; i < ps.length; i++) {
+            const result = ps[i](currentInput);
+            if (!result.success) {
+                return result;
+            }
+            results.push(result.value);
+            currentInput = result.next;
+        }
+
+        return success(results, currentInput);
+    };
+}
+
+export function choice<T1, T2>(p1: Parser<T1>, p2: Parser<T2>): Parser<T1 | T2>;
+export function choice<T1, T2, T3>(p1: Parser<T1>, p2: Parser<T2>, p3: Parser<T3>): Parser<T1 | T2 | T3>;
+export function choice<T1, T2, T3, T4>(p1: Parser<T1>, p2: Parser<T2>, p3: Parser<T3>, p4: Parser<T4>): Parser<T1 | T2 | T3 | T4>;
+export function choice(...ps: Array<Parser<any>>): Parser<any[]> {
+    return input => {
+        for (let i = 0; i < ps.length; i++) {
+            const result = ps[i](input);
+            if (result.success) {
+                return result;
+            }
+        }
+
+        return fail();
+    };
+}
+
+export function some<T>(parser: Parser<T>): Parser<T[]> {
+    return input => {
+        const results: T[] = [];
+        let currentInput = input;
+        let currentResult: Result<T>;
+        do {
+            currentResult = parser(currentInput);
+            if (currentResult.success) {
+                results.push(currentResult.value);
+                currentInput = currentResult.next;
+            }
+        } while (currentResult.success);
+
+        return success(results, currentInput);
+    };
+}
+
+export function translate<From, To>(parser: Parser<From>, f: (from: From) => To): Parser<To> {
+    return input => {
+        const from = parser(input);
+        return from.success
+            ? success(f(from.value), from.next)
+            : from
             ;
-    }
-
-    abstract match(node: XmlNode): boolean;
+    };
 }
 
-class XmlNodeTypeParser extends XmlNodeParser {
-    constructor(readonly type: XmlNodeType) { super(); }
+export function between<T>(left: Parser<any>, right: Parser<any>, inside: Parser<T>): Parser<T> {
+    return input => {
+        const result = seq(
+            some(not(left)),
+            left,
+            some(not(right)),
+            right,
+        )(input);
 
-    match(node: XmlNode) {
-        return node.type === this.type;
-    }
-}
-
-export function nodeType(type: XmlNodeType) {
-    return builder(new XmlNodeTypeParser(type));
-}
-
-class XmlNodeNameParser extends XmlNodeParser {
-    constructor(readonly name: string) { super(); }
-
-    match(node: XmlNode) {
-        return node.type === 'element' && node.name === this.name;
-    }
-}
-
-export function nodeName(name: string) {
-    return builder(new XmlNodeNameParser(name));
-}
-
-class XmlChildrenParser<T> implements XmlTreeParser<T> {
-    constructor(readonly childrenParser: XmlTreeParser<T>) { }
-
-    parse(input: XmlInput) {
-        const node = firstNode(input.stream);
-        return node && hasChildren(node)
-            ? this.childrenParser.parse(xmlInput(node.children))
-            : new Fail(1)
+        return result.success
+            ? inside(result.value[2])
+            : fail()
             ;
-    }
-}
-
-export function children<T>(childrenParser: XmlTreeParser<T>) {
-    return builder(new XmlChildrenParser(childrenParser));
-}
-
-class XmlNodeAnyParser extends XmlNodeParser {
-    match(node: XmlNode) {
-        return true;
-    }
-}
-
-export function anyNode() {
-    return builder(new XmlNodeAnyParser());
-}
-
-class XmlNodeFuncParser<T> implements XmlTreeParser<T> {
-    constructor(readonly f: (node: XmlNode) => T | null) {}
-
-    parse(input: XmlInput) {
-        const node = firstNode(input.stream);
-        const result = node ? this.f(node) : null;
-        return result !== null
-            ? new Success(result, input.bite(1), 1)
-            : new Fail(1)
-            ;
-    }
-}
-
-export function nodeFunc<T>(f: (node: XmlNode) => T | null) {
-    return builder(new XmlNodeFuncParser(f));
-}
-
-export function notNode(parser: XmlTreeParser) {
-    return ifNotStarts(parser).followedBy(anyNode()).map((ignore, actual) => actual);
-}
-
-export function between<T>(left: XmlTreeParser, right: XmlTreeParser, inside: XmlTreeParser<T>): XmlTreeParser<T> {
-    return builder(fparser<XmlNode[], T>(input => {
-        const result = anyNumberOf(notNode(left))
-            .followedBy(left)
-            .followedBy(anyNumberOf(notNode(right)))
-            .followedBy(right)
-            .map((pre, l, i, r) => {
-                return inside.parse(xmlInput(i));
-            }).parse(input);
-
-        return result.success ? result.value : result;
-    }));
+    };
 }
