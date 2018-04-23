@@ -1,5 +1,5 @@
 import { combineFs, throwExp } from '../utils';
-import { parseXml } from './xmlNode';
+import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
 import { firstNode, translate, nodeAny, choice, some, between, nodeComment, parsePath } from "./xml2json";
 
@@ -49,7 +49,7 @@ export const tree2book = parsePath(['html', 'body'], bodyParser);
 
 export function string2book(html: string) {
     const xmlString = html2xml(html);
-    const xmlTree = parseXml(xmlString);
+    const xmlTree = string2tree(xmlString);
     const bookResult = tree2book([xmlTree]);
 
     return bookResult.success

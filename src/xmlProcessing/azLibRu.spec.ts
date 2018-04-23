@@ -1,11 +1,11 @@
 import { text } from '../samples/warAndPeace';
 import { throwExp } from '../utils';
 import { tree2book, html2xml } from './azLibRu';
-import { parseXml } from './xmlNode';
+import { string2tree } from './xmlNode';
 
 it('War and Peace parsing', () => {
     const xmlString = html2xml(text);
-    const xmlTree = parseXml(xmlString);
+    const xmlTree = string2tree(xmlString);
     expect(xmlTree).toBeDefined();
     expect(xmlTree.type).toBe('document');
 
