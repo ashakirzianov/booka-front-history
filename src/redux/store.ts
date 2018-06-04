@@ -3,7 +3,7 @@ import { applyMiddleware, createStore } from "redux";
 import { throttle } from "lodash";
 import { reducer } from "./reducers";
 import { Store, storeState, restoreState } from "./storage";
-import { text } from "../samples/warAndPeace";
+import { text } from "../samples/warAndPeaceShort";
 import { string2book } from "../xmlProcessing/azLibRu";
 
 const middleware = applyMiddleware(
