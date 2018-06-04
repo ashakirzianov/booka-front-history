@@ -42,8 +42,13 @@ export const firstNodePredicate = (p: (n: XmlNode) => boolean) => firstNode(n =>
 
 export const nodeAny = firstNode(x => x);
 export const nodeType = (type: XmlNodeType) => firstNodePredicate(n => n.type === type);
-export const nodeName = <T>(name: string) => firstNodePredicate(n => isElement(n) && n.name === name);
+export const nodeName = (name: string) => firstNodePredicate(n => isElement(n) && n.name === name);
 export const nodeComment = (content: string) => firstNodePredicate(n => isComment(n) && n.content === content);
+
+export const elementChildren = <T>(name: string, parser: Parser<T>) => translate(
+    and(nodeName(name), children(parser)),
+    results => results[1]
+);
 
 export function children<T>(parser: Parser<T>): Parser<T> {
     return input => {

@@ -1,7 +1,10 @@
 import { combineFs, throwExp } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
-import { firstNode, translate, nodeAny, choice, some, between, nodeComment, parsePath, nodeName, children, and } from "./xml2json";
+import {
+    firstNode, translate, nodeAny, choice, some, between, nodeComment, parsePath,
+    elementChildren,
+} from "./xml2json";
 
 function fixSpecialCaseAzLibRu(html: string) {
     return html
@@ -30,10 +33,7 @@ const textNode = firstNode(node =>
         : null
 );
 
-const italicText = translate(
-    and(nodeName('I'), children(textNode)),
-    results => results[1]
-);
+const italicText = elementChildren('I', textNode);
 
 const skipParser = translate(nodeAny, n => null);
 
