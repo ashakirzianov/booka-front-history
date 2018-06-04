@@ -7,7 +7,7 @@ export function multiRun(f: (s: string) => string) {
         do {
             current = next;
             next = f(current);
-        } while (current.length !== next.length && current !== next);
+        } while (current.length !== next.length && current.localeCompare(next) !== 0);
         return next;
     };
 }
@@ -55,6 +55,12 @@ export function fixCharEntity(html: string) {
     )(html);
 }
 
+export function fixNonbreakingSpace(html: string) {
+    return multiRun(input => input
+        .replace('&nbsp;', '&#0160;')
+    )(html);
+}
+
 export function optimized(input: string) {
     return multiRun(html => html
         .replace(/(<[a-z]+\s+)(([a-z]+=(['"])[^4]*\4\s+)*)(([a-z]+)=([^'">\s]+))/gi, '$1$2$6="$7"')
@@ -72,7 +78,8 @@ export const html2xmlFixes = combineFs(
     fixSingleTag('input'),
     fixSingleTag('dd'),
     fixSingleTag('pre'),
-    fixUnescapedAmpersand,
+    // fixUnescapedAmpersand, // TODO: consider remove
+    fixNonbreakingSpace,
     fixAllUnquotedAttributes,
     fixBooleanAttributes,
     fixInvalidComments,
