@@ -1,6 +1,6 @@
 import { combineFs, throwExp } from '../utils';
 import { string2tree } from './xmlNode';
-import { html2xmlFixes } from './html2xml';
+import { html2xmlFixes, multiRun } from './html2xml';
 import {
     firstNode, translate, nodeAny, choice, some, between, nodeComment, parsePath,
     elementChildren,
@@ -16,8 +16,15 @@ function fixSpecialCaseAzLibRu(html: string) {
         ;
 }
 
+export function fixRemoveNbsp(html: string) {
+    return multiRun(input => input
+        .replace('&nbsp;', '')
+    )(html);
+}
+
 export const html2xml = combineFs(
     html2xmlFixes,
+    fixRemoveNbsp,
     fixSpecialCaseAzLibRu,
 );
 
