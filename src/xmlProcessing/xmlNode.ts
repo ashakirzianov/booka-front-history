@@ -29,7 +29,7 @@ export function string2tree(xml: string): XmlNodeDocument {
     return parseXmlLib(xml, { preserveComments: true });
 }
 
-export function makeTextNode(text: string, parent?: XmlNodeWithChildren): XmlNodeText {
+export function xmlText(text: string, parent?: XmlNodeWithChildren): XmlNodeText {
     return {
         type: 'text',
         text,
@@ -37,7 +37,7 @@ export function makeTextNode(text: string, parent?: XmlNodeWithChildren): XmlNod
     };
 }
 
-export function makeElementNode(
+export function xmlElement(
     name: string,
     children?: XmlNode[],
     attrs?: XmlAttributes,

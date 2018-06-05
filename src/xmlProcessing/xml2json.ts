@@ -155,6 +155,12 @@ export function choice(...ps: Array<Parser<any>>): Parser<any[]> {
     };
 }
 
+export function projectLast<T1, T2>(parser: Parser<[T1, T2]>): Parser<T2>;
+export function projectLast<T1, T2, T3>(parser: Parser<[T1, T2, T3]>): Parser<T3>;
+export function projectLast(parser: Parser<any>): Parser<any> {
+    return translate(parser, result => result[result.length - 1] as any);
+}
+
 export function some<T>(parser: Parser<T>): Parser<T[]> {
     return input => {
         const results: T[] = [];
@@ -199,21 +205,16 @@ export function between<T>(left: Parser<any>, right: Parser<any>, inside: Parser
 }
 
 export function skipToNode<T>(node: Parser<T>): Parser<T> {
-    return translate(
-        seq(
+    return projectLast(seq(
             some(not(node)),
             node,
-        ),
-        ([pre, result]) => result,
-    );
+    ));
 }
 
 export function parsePath<T>(path: string[], then: Parser<T>): Parser<T> {
     const parser = path.reduceRight((acc, pc) =>
         children(skipToNode(
-            translate(
-                and(elementName(pc), acc),
-                r => r[1]))),
+            projectLast(and(elementName(pc), acc)))),
         then as any);
 
     return parser;

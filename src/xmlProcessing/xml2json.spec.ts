@@ -1,17 +1,17 @@
 import { success, Input, skipToNode, elementName, parsePath, children, and } from "./xml2json";
-import { makeElementNode } from "./xmlNode";
+import { xmlElement } from "./xmlNode";
 
 export const trueParser = <T>(result: T) => (input: Input) => success(result, input);
 export const falseParser = (input: Input) => fail();
 
 it('skipToNode', () => {
     const input = [
-        makeElementNode('a'),
-        makeElementNode('b'),
-        makeElementNode('c', [
-            makeElementNode('ca'),
+        xmlElement('a'),
+        xmlElement('b'),
+        xmlElement('c', [
+            xmlElement('ca'),
         ]),
-        makeElementNode('b'),
+        xmlElement('b'),
     ];
 
     const parser = skipToNode(and(elementName('c'), children(elementName('ca'))));
@@ -22,13 +22,13 @@ it('skipToNode', () => {
 });
 
 it('pathParser', () => {
-    const input = [makeElementNode('root', [
-        makeElementNode('a'),
-        makeElementNode('b'),
-        makeElementNode('c', [
-            makeElementNode('ca'),
-            makeElementNode('cb', [
-                makeElementNode('cba'),
+    const input = [xmlElement('root', [
+        xmlElement('a'),
+        xmlElement('b'),
+        xmlElement('c', [
+            xmlElement('ca'),
+            xmlElement('cb', [
+                xmlElement('cba'),
             ]),
         ]),
     ])];

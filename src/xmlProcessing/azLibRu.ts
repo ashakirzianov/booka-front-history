@@ -2,7 +2,7 @@ import { combineFs, throwExp } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
 import {
-    translate, nodeAny, choice, some, between, nodeComment, parsePath,
+    translate, nodeAny, choice, some, nodeComment, parsePath,
     elementChildren,
     textNode,
     seq,
@@ -11,6 +11,9 @@ import {
     and,
     children,
     elementAttributes,
+    skipToNode,
+    projectLast,
+    not,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
 
@@ -52,8 +55,8 @@ export function textProcessing(text: string) {
 const startMarker = 'Собственно произведение'; // spellchecker:disable-line
 const stopMarker = '';
 
-const bookStartParser = nodeComment(startMarker);
-const bookEndParser = nodeComment(stopMarker);
+export const bookStartParser = nodeComment(startMarker);
+export const bookEndParser = nodeComment(stopMarker);
 
 // ------ Paragraph
 const anyText = textNode(t => t);
@@ -86,15 +89,17 @@ export const paragraph = translate(
 export function headlineParser(level: number): Parser<string> {
     return translate(and(
         elementName('ul'),
-        children(and(
-            elementName('a'),
-            elementAttributes({ name: level.toString() }),
-            children(and(
+        children(seq(
+            and(
+                elementName('a'),
+                elementAttributes({ name: level.toString() }),
+            ),
+            and(
                 elementName('h2'),
                 children(anyText),
-            )),
-        )),
-    ), r => r[1][2][1]);
+            ),
+        ))),
+        ([ul, [a, [h2, text]]]) => text);
 }
 
 // ------
@@ -103,7 +108,7 @@ const skipParser = translate(nodeAny, n => null);
 
 const bookNodeParser = choice(paragraph, skipParser);
 
-const primitiveBookParser = translate(
+export const primitiveBookParser = translate(
     some(bookNodeParser),
     nodes => ({
         kind: 'book' as 'book',
@@ -112,7 +117,28 @@ const primitiveBookParser = translate(
     })
 );
 
-const bodyParser = between(bookStartParser, bookEndParser, primitiveBookParser);
+export const title = headlineParser(0);
+// export const bookParser = skipToNode(
+//     translate(
+//         seq(title, some(projectLast(and(not(bookEndParser), bookNodeParser)))),
+//         ([titleText, nodes]) => ({
+//             kind: 'book' as 'book',
+//             title: titleText,
+//             content: nodes.filter(node => node !== null) as string[],
+//         }),
+//     ),
+// );
+
+export const bookParser = translate(
+    skipToNode(seq(title, some(projectLast(and(not(bookEndParser), bookNodeParser))))),
+    ([titleText, nodes]) => ({
+        kind: 'book' as 'book',
+        title: titleText,
+        content: nodes.filter(node => node !== null) as string[],
+    }),
+);
+
+export const bodyParser = bookParser;
 
 export const tree2book = parsePath(['html', 'body'], children(bodyParser));
 
