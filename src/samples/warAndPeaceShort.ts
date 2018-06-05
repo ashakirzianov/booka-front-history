@@ -12,20 +12,12 @@ export const text: string = `
 <h2><a href=/t/tolstoj_lew_nikolaewich/>Толстой Лев Николаевич</a><br>
 Война и мир. Том 1</h2>
 <!----------- Собственно произведение --------------->
-
-
-<dd>&nbsp;&nbsp;
-<dd>&nbsp;&nbsp;<pre>
 <dd>&nbsp;&nbsp;<ul><a name=0></a><h2>Лев Николаевич Толстой. Война и мир. Том 1</h2></ul>
-<dd>&nbsp;&nbsp;
 <dd>&nbsp;&nbsp;---------------------------------------------------------------
 <dd>&nbsp;&nbsp;     <a href=http://www.magister.msk.ru/library/library.htm>OCR: Олег Колесников, http://www.magister.msk.ru</a>
 <dd>&nbsp;&nbsp;---------------------------------------------------------------
-<dd>&nbsp;&nbsp;
 <dd>&nbsp;&nbsp;<ul><a name=1></a><h2> * ЧАСТЬ ПЕРВАЯ. * </h2></ul>
-<dd>&nbsp;&nbsp;
 <dd>&nbsp;&nbsp;<ul><a name=2></a><h2>I.</h2></ul>
-<dd>&nbsp;&nbsp;
 <dd>&nbsp;&nbsp;     -- Еh bien, mon prince. G&#234;nes et Lucques ne sont plus que des apanages,
 <dd>&nbsp;&nbsp;des поместья, de la famille Buonaparte.  Non, je  vous pr&#233;viens, que si vous
 <dd>&nbsp;&nbsp;ne  me dites pas, que nous avons la guerre, si vous vous permettez encore de

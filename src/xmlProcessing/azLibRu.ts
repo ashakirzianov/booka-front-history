@@ -1,9 +1,12 @@
-import { combineFs, throwExp } from '../utils';
+import { combineFs, throwExp, trim } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes, multiRun } from './html2xml';
 import {
-    firstNode, translate, nodeAny, choice, some, between, nodeComment, parsePath,
+    translate, nodeAny, choice, some, between, nodeComment, parsePath,
     elementChildren,
+    textNode,
+    seq,
+    nodeName,
 } from "./xml2json";
 
 function fixSpecialCaseAzLibRu(html: string) {
@@ -34,17 +37,29 @@ const stopMarker = '';
 const bookStartParser = nodeComment(startMarker);
 const bookEndParser = nodeComment(stopMarker);
 
-const textNode = firstNode(node =>
-    node.type === 'text'
-        ? node.text
-        : null
+const anyText = textNode(t => t);
+
+const italicText = elementChildren('I', anyText);
+
+export const paragraphSpaces = '    ';
+export const nonParagraphStart = choice(
+    textNode(t => t.startsWith(paragraphSpaces) ? null : t),
+    italicText,
+    translate(nodeName('dd'), node => ''),
 );
 
-const italicText = elementChildren('I', textNode);
+function trimNewLines(line: string) {
+    return trim(line, '\n');
+}
+
+export const paragraph = translate(
+    seq(anyText, some(nonParagraphStart)),
+    ([first, rest]) => rest.reduce((acc, cur) => acc + trimNewLines(cur), trimNewLines(first)),
+);
 
 const skipParser = translate(nodeAny, n => null);
 
-const bookNodeParser = choice(textNode, italicText, skipParser);
+const bookNodeParser = choice(paragraph, skipParser);
 
 const primitiveBookParser = translate(
     some(bookNodeParser),

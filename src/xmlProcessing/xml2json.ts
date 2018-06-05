@@ -1,6 +1,6 @@
 import { XmlNode, hasChildren, XmlNodeType, isElement, isComment } from "./xmlNode";
 
-type Input = XmlNode[];
+export type Input = XmlNode[];
 export type Parser<T = XmlNode> = (input: Input) => Result<T>;
 export type Success<Out> = {
     value: Out,
@@ -48,6 +48,12 @@ export const nodeComment = (content: string) => firstNodePredicate(n => isCommen
 export const elementChildren = <T>(name: string, parser: Parser<T>) => translate(
     and(nodeName(name), children(parser)),
     results => results[1]
+);
+
+export const textNode = <T>(f: (text: string) => T | null) => firstNode(node =>
+    node.type === 'text'
+        ? f(node.text)
+        : null
 );
 
 export function children<T>(parser: Parser<T>): Parser<T> {

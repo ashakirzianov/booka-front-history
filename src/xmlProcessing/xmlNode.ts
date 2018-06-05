@@ -28,3 +28,26 @@ export const isComment = typeGuard<XmlNode, XmlNodeComment>(node => node.type ==
 export function string2tree(xml: string): XmlNodeDocument {
     return parseXmlLib(xml, { preserveComments: true });
 }
+
+export function makeTextNode(text: string, parent?: XmlNodeWithChildren): XmlNodeText {
+    return {
+        type: 'text',
+        text,
+        parent: parent!,
+    };
+}
+
+export function makeElementNode(
+    name: string,
+    children?: XmlNode[],
+    attrs?: XmlAttributes,
+    parent?: XmlNodeWithChildren,
+): XmlNodeElement {
+    return {
+        type: 'element',
+        name: name,
+        children: children || [],
+        attributes: attrs || {},
+        parent: parent!,
+    };
+}
