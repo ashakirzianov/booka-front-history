@@ -1,4 +1,4 @@
-import { XmlNode, hasChildren, XmlNodeType, isElement, isComment } from "./xmlNode";
+import { XmlNode, hasChildren, XmlNodeType, isElement, isComment, XmlAttributes } from "./xmlNode";
 import { caseInsensitiveEq } from "./xmlUtils";
 
 export type Input = XmlNode[];
@@ -43,11 +43,14 @@ export const firstNodePredicate = (p: (n: XmlNode) => boolean) => firstNode(n =>
 
 export const nodeAny = firstNode(x => x);
 export const nodeType = (type: XmlNodeType) => firstNodePredicate(n => n.type === type);
-export const nodeName = (name: string) => firstNodePredicate(n => isElement(n) && caseInsensitiveEq(n.name, name));
 export const nodeComment = (content: string) => firstNodePredicate(n => isComment(n) && n.content === content);
 
+export const elementName = (name: string) => firstNodePredicate(n =>
+    isElement(n) && caseInsensitiveEq(n.name, name));
+export const elementAttributes = (attrs: XmlAttributes) => firstNodePredicate(n =>
+    isElement(n) && Object.keys(attrs).every(k => attrs[k] === n.attributes[k]));
 export const elementChildren = <T>(name: string, parser: Parser<T>) => translate(
-    and(nodeName(name), children(parser)),
+    and(elementName(name), children(parser)),
     results => results[1]
 );
 
@@ -193,5 +196,7 @@ export function skipToNode<T>(node: Parser<any>, then: Parser<T>): Parser<T> {
 }
 
 export function parsePath<T>(path: string[], then: Parser<T>): Parser<T> {
-    return children(path.reduceRight((res, p) => skipToNode(nodeName(p), children(res)), then));
+    return path.reduceRight((res, p) =>
+        skipToNode(elementName(p), children(res)), then
+    );
 }

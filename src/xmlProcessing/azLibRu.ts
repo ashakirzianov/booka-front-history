@@ -6,9 +6,15 @@ import {
     elementChildren,
     textNode,
     seq,
-    nodeName,
+    elementName,
+    Parser,
+    and,
+    children,
+    elementAttributes,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
+
+// ---------- html2xml
 
 function fixSpecialCaseAzLibRu(html: string) {
     return html
@@ -32,6 +38,8 @@ export const html2xml = combineFs(
     fixSpecialCaseAzLibRu,
 );
 
+// ---------- tree2json
+
 export function textProcessing(text: string) {
     return text === ''
         ? ''
@@ -47,10 +55,11 @@ const stopMarker = '';
 const bookStartParser = nodeComment(startMarker);
 const bookEndParser = nodeComment(stopMarker);
 
+// ------ Paragraph
 const anyText = textNode(t => t);
 
 const italicText = elementChildren('i', anyText); // TODO: support italic
-const supText = translate(nodeName('sup'), node => ''); // TODO: process properly
+const supText = translate(elementName('sup'), node => ''); // TODO: process properly
 
 export const paragraphSpaces = '    ';
 export const nonParagraphStart = textNode(t =>
@@ -61,7 +70,7 @@ const paragraphStart = anyText;
 const withinParagraph = choice(
     italicText,
     supText,
-    translate(nodeName('dd'), node => ''),
+    translate(elementName('dd'), node => ''),
 );
 
 export const paragraph = translate(
@@ -71,6 +80,24 @@ export const paragraph = translate(
     ),
     ([first, rest]) => rest.reduce((acc, cur) => acc + textProcessing(cur), textProcessing(first)),
 );
+
+// ------ Structure
+
+export function headlineParser(level: number): Parser<string> {
+    return translate(and(
+        elementName('ul'),
+        children(and(
+            elementName('a'),
+            elementAttributes({ name: level.toString() }),
+            children(and(
+                elementName('h2'),
+                children(anyText),
+            )),
+        )),
+    ), r => r[1][2][1]);
+}
+
+// ------
 
 const skipParser = translate(nodeAny, n => null);
 
@@ -87,7 +114,9 @@ const primitiveBookParser = translate(
 
 const bodyParser = between(bookStartParser, bookEndParser, primitiveBookParser);
 
-export const tree2book = parsePath(['html', 'body'], bodyParser);
+export const tree2book = children(parsePath(['html', 'body'], bodyParser));
+
+// ---------- string2book
 
 export function string2book(html: string) {
     const xmlString = html2xml(html);

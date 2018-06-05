@@ -36,5 +36,5 @@ it('paragraph', () => {
     ]);
     expect(p.success).toBeTruthy();
     expect(p.success && p.value)
-        .toBe('     One Two  Three   Four');
+        .toBe('One Two Three Four ');
 });
