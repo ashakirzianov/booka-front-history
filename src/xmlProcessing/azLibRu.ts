@@ -41,16 +41,25 @@ const bookEndParser = nodeComment(stopMarker);
 const anyText = textNode(t => t);
 
 const italicText = elementChildren('I', anyText);
+const supText = translate(nodeName('SUP'), node => '');
 
 export const paragraphSpaces = '    ';
-export const nonParagraphStart = choice(
-    textNode(t => t.startsWith(paragraphSpaces) ? null : t),
+export const nonParagraphStart = textNode(t =>
+    t.startsWith(paragraphSpaces) ? null : t
+);
+const paragraphStart = anyText;
+
+const withinParagraph = choice(
     italicText,
+    supText,
     translate(nodeName('dd'), node => ''),
 );
 
 export const paragraph = translate(
-    seq(anyText, some(nonParagraphStart)),
+    seq(
+        choice(paragraphStart, withinParagraph),
+        some(choice(nonParagraphStart, withinParagraph)),
+    ),
     ([first, rest]) => rest.reduce((acc, cur) => acc + trimNewLines(cur), trimNewLines(first)),
 );
 
