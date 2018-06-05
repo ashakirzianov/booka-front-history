@@ -1,16 +1,5 @@
 import { combineFs } from "../utils";
-
-export function multiRun(f: (s: string) => string) {
-    return (input: string) => {
-        let next = input;
-        let current;
-        do {
-            current = next;
-            next = f(current);
-        } while (current.length !== next.length && current.localeCompare(next) !== 0);
-        return next;
-    };
-}
+import { multiRun } from "./xmlUtils";
 
 export function fixAllUnquotedAttributes(html: string) {
     return multiRun(s => s

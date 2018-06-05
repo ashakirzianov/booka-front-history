@@ -1,6 +1,6 @@
 import { combineFs, throwExp } from '../utils';
 import { string2tree } from './xmlNode';
-import { html2xmlFixes, multiRun } from './html2xml';
+import { html2xmlFixes } from './html2xml';
 import {
     translate, nodeAny, choice, some, between, nodeComment, parsePath,
     elementChildren,
@@ -8,7 +8,7 @@ import {
     seq,
     nodeName,
 } from "./xml2json";
-import { trimNewLines } from './xmlUtils';
+import { multiRun } from './xmlUtils';
 
 function fixSpecialCaseAzLibRu(html: string) {
     return html
@@ -32,6 +32,15 @@ export const html2xml = combineFs(
     fixSpecialCaseAzLibRu,
 );
 
+export function textProcessing(text: string) {
+    return text === ''
+        ? ''
+        : multiRun(input => input
+            .replace('--', '—')
+            .replace('  ', ' ')
+        )(text.trim()) + ' ';
+}
+
 const startMarker = 'Собственно произведение'; // spellchecker:disable-line
 const stopMarker = '';
 
@@ -40,7 +49,7 @@ const bookEndParser = nodeComment(stopMarker);
 
 const anyText = textNode(t => t);
 
-const italicText = elementChildren('i', anyText);
+const italicText = elementChildren('i', anyText); // TODO: support italic
 const supText = translate(nodeName('sup'), node => ''); // TODO: process properly
 
 export const paragraphSpaces = '    ';
@@ -60,7 +69,7 @@ export const paragraph = translate(
         choice(paragraphStart, withinParagraph),
         some(choice(nonParagraphStart, withinParagraph)),
     ),
-    ([first, rest]) => rest.reduce((acc, cur) => acc + trimNewLines(cur), trimNewLines(first)),
+    ([first, rest]) => rest.reduce((acc, cur) => acc + textProcessing(cur), textProcessing(first)),
 );
 
 const skipParser = translate(nodeAny, n => null);

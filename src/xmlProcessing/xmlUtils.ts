@@ -18,3 +18,19 @@ export function trimNewLines(line: string) {
 export function caseInsensitiveEq(left: string, right: string) {
     return left.localeCompare(right, undefined, { sensitivity: 'base' }) === 0;
 }
+
+export function caseSensitiveEq(left: string, right: string) {
+    return left.localeCompare(right) === 0;
+}
+
+export function multiRun(f: (s: string) => string) {
+    return (input: string) => {
+        let next = input;
+        let current;
+        do {
+            current = next;
+            next = f(current);
+        } while (!caseSensitiveEq(current, next));
+        return next;
+    };
+}
