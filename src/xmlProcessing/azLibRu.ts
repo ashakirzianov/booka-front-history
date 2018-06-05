@@ -1,4 +1,4 @@
-import { combineFs, throwExp, trim } from '../utils';
+import { combineFs, throwExp } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes, multiRun } from './html2xml';
 import {
@@ -8,6 +8,7 @@ import {
     seq,
     nodeName,
 } from "./xml2json";
+import { trimNewLines } from './xmlUtils';
 
 function fixSpecialCaseAzLibRu(html: string) {
     return html
@@ -47,10 +48,6 @@ export const nonParagraphStart = choice(
     italicText,
     translate(nodeName('dd'), node => ''),
 );
-
-function trimNewLines(line: string) {
-    return trim(line, '\n');
-}
 
 export const paragraph = translate(
     seq(anyText, some(nonParagraphStart)),

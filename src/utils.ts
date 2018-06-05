@@ -130,16 +130,3 @@ export function typeGuard<TIn, TOut extends TIn>(predicate: (obj: TIn) => boolea
 }
 
 export type TypeGuard<TIn, TOut extends TIn> = (guarded: TIn) => guarded is TOut;
-
-export function trimStart(input: string, trimSet: string) {
-    return input.replace(new RegExp(`([${trimSet}]*)(.*)`), '$2');
-}
-
-export function trimEnd(input: string, trimSet: string) {
-    return trimStart(input.split('').reverse().join(''), trimSet)
-        .split('').reverse().join('');
-}
-
-export function trim(input: string, trimSet: string) {
-    return trimEnd(trimStart(input, trimSet), trimSet);
-}
