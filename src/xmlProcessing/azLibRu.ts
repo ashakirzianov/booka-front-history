@@ -114,7 +114,7 @@ const primitiveBookParser = translate(
 
 const bodyParser = between(bookStartParser, bookEndParser, primitiveBookParser);
 
-export const tree2book = children(parsePath(['html', 'body'], bodyParser));
+export const tree2book = parsePath(['html', 'body'], children(bodyParser));
 
 // ---------- string2book
 

@@ -73,6 +73,19 @@ export function children<T>(parser: Parser<T>): Parser<T> {
     };
 }
 
+export function parent<T>(parser: Parser<T>): Parser<T> {
+    return input => {
+        const list = split(input);
+        if (list.head && list.head.parent) {
+            const result = parser([list.head.parent]);
+            if (result.success) {
+                return success(result.value, list.tail);
+            }
+        }
+        return fail();
+    };
+}
+
 export function not(parser: Parser<any>): Parser {
     return input => {
         const list = split(input);
@@ -185,18 +198,23 @@ export function between<T>(left: Parser<any>, right: Parser<any>, inside: Parser
     };
 }
 
-export function skipToNode<T>(node: Parser<any>, then: Parser<T>): Parser<T> {
+export function skipToNode<T>(node: Parser<T>): Parser<T> {
     return translate(
         seq(
             some(not(node)),
-            and(node, then),
+            node,
         ),
-        ([pre, [n, result]]) => result,
+        ([pre, result]) => result,
     );
 }
 
 export function parsePath<T>(path: string[], then: Parser<T>): Parser<T> {
-    return path.reduceRight((res, p) =>
-        skipToNode(elementName(p), children(res)), then
-    );
+    const parser = path.reduceRight((acc, pc) =>
+        children(skipToNode(
+            translate(
+                and(elementName(pc), acc),
+                r => r[1]))),
+        then as any);
+
+    return parser;
 }
