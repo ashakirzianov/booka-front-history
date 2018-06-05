@@ -14,3 +14,7 @@ export function trim(input: string, trimSet: string) {
 export function trimNewLines(line: string) {
     return trim(line, '\n');
 }
+
+export function caseInsensitiveEq(left: string, right: string) {
+    return left.localeCompare(right, undefined, { sensitivity: 'base' }) === 0;
+}

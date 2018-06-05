@@ -40,8 +40,8 @@ const bookEndParser = nodeComment(stopMarker);
 
 const anyText = textNode(t => t);
 
-const italicText = elementChildren('I', anyText);
-const supText = translate(nodeName('SUP'), node => '');
+const italicText = elementChildren('i', anyText);
+const supText = translate(nodeName('sup'), node => ''); // TODO: process properly
 
 export const paragraphSpaces = '    ';
 export const nonParagraphStart = textNode(t =>
