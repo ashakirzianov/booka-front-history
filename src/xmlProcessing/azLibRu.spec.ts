@@ -14,7 +14,8 @@ it('War and Peace short parsing', () => {
     const bookResult = tree2book([xmlTree]);
     expect(bookResult.success).toBeTruthy();
     const book = bookResult.success ? bookResult.value : throwExp(new Error("Failed to parse book"));
-    expect(book.title).toBe('Лев Николаевич Толстой. Война и мир. Том 1');
+    expect(book.title).toBe('Война и мир. Том 1');
+    expect(book.author).toBe('Лев Николаевич Толстой');
     expect(book.content.every(n => n !== undefined));
 });
 
@@ -53,14 +54,14 @@ it('paragraph', () => {
         .toBe('One Two Three Four ');
 });
 
-it('title', () => {
+it('bookInfo', () => {
     const input = [
         xmlElement('a'),
         xmlElement('b'),
         xmlElement('ul', [
             xmlElement('a', [], { name: '0' }),
             xmlElement('h2', [
-                xmlText('Hello'),
+                xmlText('John Smith. Hello'),
             ]),
         ]),
     ];
@@ -68,5 +69,5 @@ it('title', () => {
     const result = skipToNode(bookInfo)(input);
 
     expect(result.success).toBeTruthy();
-    expect(result.success && result.value).toBe('Hello');
+    expect(result.success && result.value).toEqual({ title: 'Hello', author: 'John Smith' });
 });

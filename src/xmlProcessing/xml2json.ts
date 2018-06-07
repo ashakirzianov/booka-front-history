@@ -1,5 +1,6 @@
 import { XmlNode, hasChildren, XmlNodeType, isElement, isComment, XmlAttributes } from "./xmlNode";
 import { caseInsensitiveEq } from "./xmlUtils";
+import { letExp } from "../utils";
 
 export type Input = XmlNode[];
 export type Parser<T = XmlNode> = (input: Input) => Result<T>;
@@ -43,12 +44,19 @@ export const firstNodePredicate = (p: (n: XmlNode) => boolean) => firstNode(n =>
 
 export const nodeAny = firstNode(x => x);
 export const nodeType = (type: XmlNodeType) => firstNodePredicate(n => n.type === type);
-export const nodeComment = (content: string) => firstNodePredicate(n => isComment(n) && n.content === content);
+export const nodeComment = (content: string) => firstNode(n =>
+    isComment(n) && n.content === content
+        ? n : null
+    );
 
-export const elementName = (name: string) => firstNodePredicate(n =>
-    isElement(n) && caseInsensitiveEq(n.name, name));
-export const elementAttributes = (attrs: XmlAttributes) => firstNodePredicate(n =>
-    isElement(n) && Object.keys(attrs).every(k => attrs[k] === n.attributes[k]));
+export const elementName = (name: string) => firstNode(n =>
+    isElement(n) && caseInsensitiveEq(n.name, name)
+        ? n : null
+    );
+export const elementAttributes = (attrs: XmlAttributes) => firstNode(n =>
+    isElement(n) && Object.keys(attrs).every(k => attrs[k] === n.attributes[k] || !attrs[k])
+        ? n : null
+    );
 export const elementChildren = <T>(name: string, parser: Parser<T>) => translate(
     and(elementName(name), children(parser)),
     results => results[1]
@@ -178,11 +186,11 @@ export function some<T>(parser: Parser<T>): Parser<T[]> {
     };
 }
 
-export function translate<From, To>(parser: Parser<From>, f: (from: From) => To): Parser<To> {
+export function translate<From, To>(parser: Parser<From>, f: (from: From) => To | null): Parser<To> {
     return input => {
         const from = parser(input);
         return from.success
-            ? success(f(from.value), from.next)
+            ? letExp(f(from.value), val => val === null ? fail() : success(val, from.next))
             : from
             ;
     };

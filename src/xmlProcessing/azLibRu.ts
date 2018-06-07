@@ -7,7 +7,6 @@ import {
     textNode,
     seq,
     elementName,
-    Parser,
     and,
     children,
     elementAttributes,
@@ -86,25 +85,33 @@ export const paragraph = translate(
 
 // ------ Structure
 
-export function headlineParser(level: number): Parser<string> {
-    return translate(and(
-        elementName('ul'),
-        children(seq(
-            and(
-                elementName('a'),
-                elementAttributes({ name: level.toString() }),
-            ),
-            and(
-                elementName('h2'),
-                children(anyText),
-            ),
-        ))),
-        ([ul, [a, [h2, text]]]) => text);
+export const headline = translate(and(
+    elementName('ul'),
+    children(seq(
+        and(
+            elementName('a'),
+            elementAttributes({ name: undefined }),
+        ),
+        and(
+            elementName('h2'),
+            children(anyText),
+        ),
+    ))),
+    ([ul, [[a, attr], [h2, text]]]) => ({
+        text,
+        level: parseInt(a.attributes.name || '-1', 10),
+    }));
+
+export function headlineLevel(level: number) {
+    return translate(
+        headline,
+        hl => hl.level === level ? hl.text : null,
+    );
 }
 
 // ------
 
-const skipParser = translate(nodeAny, n => null);
+const skipParser = translate(nodeAny, n => undefined);
 
 const bookNodeParser = choice(paragraph, skipParser);
 
@@ -113,13 +120,13 @@ export const primitiveBookParser = translate(
     nodes => ({
         kind: 'book' as 'book',
         title: 'Test',
-        content: nodes.filter(node => node !== null) as string[],
+        content: nodes.filter(node => node) as string[],
     })
 );
 
 const authorSeparator = '. ';
 export const bookInfo = translate(
-    headlineParser(0),
+    headlineLevel(0),
     text => letExp(text.indexOf(authorSeparator), dotPos => dotPos > 0
         ? { author: text.substring(0, dotPos), title: text.substring(dotPos + authorSeparator.length) }
         : { author: undefined, title: text }
@@ -139,7 +146,7 @@ export const bookParser = translate(
         kind: 'book' as 'book',
         title: bi.title,
         author: bi.author,
-        content: nodes.filter(node => node !== null) as string[],
+        content: nodes.filter(node => node) as string[],
     }),
 );
 
