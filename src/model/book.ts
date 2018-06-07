@@ -27,5 +27,6 @@ export type SubChapterNode = Subpart | Paragraph;
 export type Book = {
     kind: "book",
     title: string,
+    author?: string,
     content: BookNode[],
 };

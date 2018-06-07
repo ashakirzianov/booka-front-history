@@ -1,4 +1,4 @@
-import { combineFs, throwExp } from '../utils';
+import { combineFs, throwExp, letExp } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
 import {
@@ -117,23 +117,20 @@ export const primitiveBookParser = translate(
     })
 );
 
-export const title = headlineParser(0);
-// export const bookParser = skipToNode(
-//     translate(
-//         seq(title, some(projectLast(and(not(bookEndParser), bookNodeParser)))),
-//         ([titleText, nodes]) => ({
-//             kind: 'book' as 'book',
-//             title: titleText,
-//             content: nodes.filter(node => node !== null) as string[],
-//         }),
-//     ),
-// );
+const authorSeparator = '. ';
+export const bookInfo = translate(
+    headlineParser(0),
+    text => letExp(text.indexOf(authorSeparator), dotPos => dotPos > 0
+        ? { author: text.substring(0, dotPos), title: text.substring(dotPos + authorSeparator.length) }
+        : { author: undefined, title: text }
+    ));
 
 export const bookParser = translate(
-    skipToNode(seq(title, some(projectLast(and(not(bookEndParser), bookNodeParser))))),
-    ([titleText, nodes]) => ({
+    skipToNode(seq(bookInfo, some(projectLast(and(not(bookEndParser), bookNodeParser))))),
+    ([bi, nodes]) => ({
         kind: 'book' as 'book',
-        title: titleText,
+        title: bi.title,
+        author: bi.author,
         content: nodes.filter(node => node !== null) as string[],
     }),
 );

@@ -1,6 +1,6 @@
 import { text as shortText } from '../samples/warAndPeaceShort';
 import { throwExp } from '../utils';
-import { tree2book, html2xml, nonParagraphStart, paragraph, title } from './azLibRu';
+import { tree2book, html2xml, nonParagraphStart, paragraph, bookInfo } from './azLibRu';
 import { string2tree, xmlText, xmlElement } from './xmlNode';
 import { skipToNode } from './xml2json';
 
@@ -52,7 +52,7 @@ it('title', () => {
         ]),
     ];
 
-    const result = skipToNode(title)(input);
+    const result = skipToNode(bookInfo)(input);
 
     expect(result.success).toBeTruthy();
     expect(result.success && result.value).toBe('Hello');
