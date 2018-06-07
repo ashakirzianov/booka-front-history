@@ -1,8 +1,9 @@
 import { text as shortText } from '../samples/warAndPeaceShort';
 import { throwExp } from '../utils';
-import { tree2book, html2xml, nonParagraphStart, paragraph, bookInfo } from './azLibRu';
+import { tree2book, html2xml, nonParagraphStart, paragraph, bookInfo, junkAtTheBeginning } from './azLibRu';
 import { string2tree, xmlText, xmlElement } from './xmlNode';
 import { skipToNode } from './xml2json';
+import { htmlFragmentToNodes } from './xmlUtils';
 
 it('War and Peace short parsing', () => {
     const xmlString = html2xml(shortText);
@@ -24,6 +25,18 @@ it('nonParagraphStart', () => {
 
     const start = nonParagraphStart([xmlText('    Paragraph start')]);
     expect(start.success).toBeFalsy();
+});
+
+it('junkAtTheBeginning', () => {
+    const junkStr = `
+    <dd>&nbsp;&nbsp;---------------------------------------------------------------
+    <dd>&nbsp;&nbsp;     <a href=http://www.magister.msk.ru/library/library.htm>OCR: Олег Колесников, http://www.magister.msk.ru</a>
+    <dd>&nbsp;&nbsp;---------------------------------------------------------------
+    `;
+    const junkXml = htmlFragmentToNodes(junkStr, html2xml);
+
+    const result = junkAtTheBeginning(junkXml);
+    expect(result.success);
 });
 
 it('paragraph', () => {

@@ -125,9 +125,17 @@ export const bookInfo = translate(
         : { author: undefined, title: text }
     ));
 
+export const junkAtTheBeginning = some(
+    choice(elementName('dd'),
+    elementName('a'),
+    textNode(t => /^[ \n-]*$/.test(t) ? t : null),
+));
+
+export const bookContent = some(projectLast(and(not(bookEndParser), bookNodeParser)));
+
 export const bookParser = translate(
-    skipToNode(seq(bookInfo, some(projectLast(and(not(bookEndParser), bookNodeParser))))),
-    ([bi, nodes]) => ({
+    skipToNode(seq(bookInfo, junkAtTheBeginning, bookContent)),
+    ([bi, junk, nodes]) => ({
         kind: 'book' as 'book',
         title: bi.title,
         author: bi.author,

@@ -1,3 +1,6 @@
+import { XmlNode, string2tree, hasChildren } from "./xmlNode";
+import { throwExp } from "../utils";
+
 export function trimStart(input: string, trimSet: string) {
     return input.replace(new RegExp(`([${trimSet}]*)(.*)`), '$2');
 }
@@ -33,4 +36,12 @@ export function multiRun(f: (s: string) => string) {
         } while (!caseSensitiveEq(current, next));
         return next;
     };
+}
+
+export function htmlFragmentToNodes(html: string, html2xml: (h: string) => string): XmlNode[] {
+    const xml = html2xml(`<html>${html}</html>`);
+    const document = string2tree(xml);
+    const root = document.children[0];
+
+    return root && hasChildren(root) ? root.children : throwExp("Can't parse html: " + html);
 }
