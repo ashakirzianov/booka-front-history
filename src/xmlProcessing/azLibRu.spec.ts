@@ -31,7 +31,7 @@ it('nonParagraphStart', () => {
 it('junkAtTheBeginning', () => {
     const junkStr = `
     <dd>&nbsp;&nbsp;---------------------------------------------------------------
-    <dd>&nbsp;&nbsp;     <a href=http://www.magister.msk.ru/library/library.htm>OCR: Олег Колесников, http://www.magister.msk.ru</a>
+    <dd>&nbsp;&nbsp;     <a href=http://www.magister.msk.ru/library/library.htm>OCR:, http://www.magister.msk.ru</a>
     <dd>&nbsp;&nbsp;---------------------------------------------------------------
     `;
     const junkXml = htmlFragmentToNodes(junkStr, html2xml);

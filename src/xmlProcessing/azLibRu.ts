@@ -15,6 +15,7 @@ import {
     not,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
+import { BookNode } from '../model/book';
 
 // ---------- html2xml
 
@@ -56,6 +57,7 @@ const stopMarker = '';
 
 export const bookStartParser = nodeComment(startMarker);
 export const bookEndParser = nodeComment(stopMarker);
+export const skipParser = translate(nodeAny, n => undefined);
 
 // ------ Paragraph
 const anyText = textNode(t => t);
@@ -108,21 +110,24 @@ export function headlineLevel(level: number) {
         hl => hl.level === level ? hl.text : null,
     );
 }
+// ------ Part
+
+export const partInfo = translate(
+    headlineLevel(1),
+    text => text.replace(/\* ([^\*]*) \*/, '$1'),
+);
+export const part = translate(
+    seq(partInfo, some(projectLast(and(not(headline), choice(paragraph, skipParser))))),
+    ([head, nodes]) => ({
+        kind: 'part',
+        title: head,
+        content: nodes as BookNode[],
+    }),
+);
 
 // ------
 
-const skipParser = translate(nodeAny, n => undefined);
-
-const bookNodeParser = choice(paragraph, skipParser);
-
-export const primitiveBookParser = translate(
-    some(bookNodeParser),
-    nodes => ({
-        kind: 'book' as 'book',
-        title: 'Test',
-        content: nodes.filter(node => node) as string[],
-    })
-);
+const bookNodeParser = choice(part, paragraph, skipParser);
 
 const authorSeparator = '. ';
 export const bookInfo = translate(
@@ -134,9 +139,9 @@ export const bookInfo = translate(
 
 export const junkAtTheBeginning = some(
     choice(elementName('dd'),
-    elementName('a'),
-    textNode(t => /^[ \n-]*$/.test(t) ? t : null),
-));
+        elementName('a'),
+        textNode(t => /^[ \n-]*$/.test(t) ? t : null),
+    ));
 
 export const bookContent = some(projectLast(and(not(bookEndParser), bookNodeParser)));
 
