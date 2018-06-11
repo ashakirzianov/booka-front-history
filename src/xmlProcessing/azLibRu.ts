@@ -13,9 +13,11 @@ import {
     skipToNode,
     projectLast,
     not,
+    oneOrMore,
+    Parser,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
-import { BookNode } from '../model/book';
+import { Chapter, SubChapterNode, Part } from '../model/book';
 
 // ---------- html2xml
 
@@ -58,32 +60,13 @@ const stopMarker = '';
 export const bookStartParser = nodeComment(startMarker);
 export const bookEndParser = nodeComment(stopMarker);
 export const skipParser = translate(nodeAny, n => undefined);
+export const anyText = textNode(t => t);
 
-// ------ Paragraph
-const anyText = textNode(t => t);
-
-const italicText = elementChildren('i', anyText); // TODO: support italic
-const supText = translate(elementName('sup'), node => ''); // TODO: process properly
-
-export const paragraphSpaces = '    ';
-export const nonParagraphStart = textNode(t =>
-    t.startsWith(paragraphSpaces) ? null : t
-);
-const paragraphStart = anyText;
-
-const withinParagraph = choice(
-    italicText,
-    supText,
-    translate(elementName('dd'), node => ''),
-);
-
-export const paragraph = translate(
-    seq(
-        choice(paragraphStart, withinParagraph),
-        some(choice(nonParagraphStart, withinParagraph)),
-    ),
-    ([first, rest]) => rest.reduce((acc, cur) => acc + textProcessing(cur), textProcessing(first)),
-);
+export const junkAtTheBeginning = some(
+    choice(elementName('dd'),
+        elementName('a'),
+        textNode(t => /^[ \n-]*$/.test(t) ? t : null),
+    ));
 
 // ------ Structure
 
@@ -110,24 +93,61 @@ export function headlineLevel(level: number) {
         hl => hl.level === level ? hl.text : null,
     );
 }
+
+// ------ Paragraph
+
+const italicText = elementChildren('i', anyText); // TODO: support italic
+const supText = translate(elementName('sup'), node => ''); // TODO: process properly
+
+export const paragraphSpaces = '    ';
+export const nonParagraphStart = textNode(t =>
+    t.startsWith(paragraphSpaces) ? null : t
+);
+const paragraphStart = anyText;
+
+const withinParagraph = choice(
+    italicText,
+    supText,
+    translate(elementName('dd'), node => ''),
+);
+
+export const paragraph = translate(
+    seq(
+        choice(paragraphStart, withinParagraph),
+        some(choice(nonParagraphStart, withinParagraph)),
+    ),
+    ([first, rest]) => rest.reduce((acc, cur) => acc + textProcessing(cur), textProcessing(first)),
+);
+
+// ------ Chapter
+
+export const chapter: Parser<Chapter> = translate(
+    seq(headline, junkAtTheBeginning, oneOrMore(projectLast(and(not(headline), choice(paragraph, skipParser))))),
+    ([head, junk, pars]) => ({
+        kind: 'chapter' as 'chapter',
+        title: head.text,
+        content: pars.filter(n => n) as SubChapterNode[],
+    }),
+);
+
 // ------ Part
 
 export const partInfo = translate(
     headlineLevel(1),
     text => text.replace(/\* ([^\*]*) \*/, '$1'),
 );
-export const part = translate(
-    seq(partInfo, some(projectLast(and(not(headline), choice(paragraph, skipParser))))),
-    ([head, nodes]) => ({
-        kind: 'part',
+export const part: Parser<Part> = translate(
+    seq(partInfo, junkAtTheBeginning, oneOrMore(chapter)),
+    ([head, junk, chapters]) => ({
+        kind: 'part' as 'part',
         title: head,
-        content: nodes as BookNode[],
+        content: chapters,
     }),
 );
 
 // ------
 
-const bookNodeParser = choice(part, paragraph, skipParser);
+const bookNodeParser = part;
 
 const authorSeparator = '. ';
 export const bookInfo = translate(
@@ -135,12 +155,6 @@ export const bookInfo = translate(
     text => letExp(text.indexOf(authorSeparator), dotPos => dotPos > 0
         ? { author: text.substring(0, dotPos), title: text.substring(dotPos + authorSeparator.length) }
         : { author: undefined, title: text }
-    ));
-
-export const junkAtTheBeginning = some(
-    choice(elementName('dd'),
-        elementName('a'),
-        textNode(t => /^[ \n-]*$/.test(t) ? t : null),
     ));
 
 export const bookContent = some(projectLast(and(not(bookEndParser), bookNodeParser)));
@@ -151,7 +165,7 @@ export const bookParser = translate(
         kind: 'book' as 'book',
         title: bi.title,
         author: bi.author,
-        content: nodes.filter(node => node) as string[],
+        content: nodes.filter(node => node),
     }),
 );
 

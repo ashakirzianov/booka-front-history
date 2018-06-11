@@ -186,6 +186,10 @@ export function some<T>(parser: Parser<T>): Parser<T[]> {
     };
 }
 
+export function oneOrMore<T>(parser: Parser<T>): Parser<T[]> {
+    return translate(some(parser), nodes => nodes.length > 0 ? nodes : null);
+}
+
 export function translate<From, To>(parser: Parser<From>, f: (from: From) => To | null): Parser<To> {
     return input => {
         const from = parser(input);
