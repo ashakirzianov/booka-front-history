@@ -1,16 +1,5 @@
 import { combineFs } from "../utils";
-
-export function multiRun(f: (s: string) => string) {
-    return (input: string) => {
-        let next = input;
-        let current;
-        do {
-            current = next;
-            next = f(current);
-        } while (current.length !== next.length && current !== next);
-        return next;
-    };
-}
+import { multiRun } from "./xmlUtils";
 
 export function fixAllUnquotedAttributes(html: string) {
     return multiRun(s => s
@@ -32,7 +21,7 @@ export function fixBooleanAttributes(html: string) {
 
 export function fixUnescapedAmpersand(html: string) {
     return multiRun(s => s
-        .replace(/&([^a]|a[^m]|am[^p]|amp[^;])/gi, "&amp;$1")
+        .replace(/&([^a#]|a[^m]|am[^p]|amp[^;])/gi, "&amp;$1")
     )(html);
 }
 
@@ -55,6 +44,12 @@ export function fixCharEntity(html: string) {
     )(html);
 }
 
+export function fixNonbreakingSpace(html: string) {
+    return multiRun(input => input
+        .replace('&nbsp;', '&#0160;')
+    )(html);
+}
+
 export function optimized(input: string) {
     return multiRun(html => html
         .replace(/(<[a-z]+\s+)(([a-z]+=(['"])[^4]*\4\s+)*)(([a-z]+)=([^'">\s]+))/gi, '$1$2$6="$7"')
@@ -72,7 +67,8 @@ export const html2xmlFixes = combineFs(
     fixSingleTag('input'),
     fixSingleTag('dd'),
     fixSingleTag('pre'),
-    fixUnescapedAmpersand,
+    fixUnescapedAmpersand, // TODO: consider remove
+    fixNonbreakingSpace,
     fixAllUnquotedAttributes,
     fixBooleanAttributes,
     fixInvalidComments,

@@ -73,12 +73,16 @@ export function letExp<T, U>(x: T, f: (x: T) => U) {
     return f(x);
 }
 
+export function throwExp<T>(error: T): never {
+    throw error;
+}
+
 export function exp<T>(f: () => T): T {
     return f();
 }
 
-export function assertNever(arg: never): never {
-    throw new Error(`Should have not happen: ${arg}`);
+export function assertNever(arg: never, message?: string): never {
+    throw new Error(`Should have not happen: ${message} (object: ${arg})`);
 }
 
 export function itemAtIndex<T>(arr: T[], idx: number | undefined): T | undefined {

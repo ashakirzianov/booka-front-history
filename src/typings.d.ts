@@ -12,7 +12,10 @@ declare module 'store' {
 }
 
 declare module '@rgrove/parse-xml' {
-    const parseXml: (xml: string) => any;
+    type ParsingOptions = {
+        preserveComments?: boolean,
+    };
+    const parseXml: (xml: string, options?: ParsingOptions) => any;
     export = parseXml;
 }
 

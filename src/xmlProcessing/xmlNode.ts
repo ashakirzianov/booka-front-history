@@ -1,3 +1,6 @@
+import { typeGuard } from "../utils";
+import * as parseXmlLib from '@rgrove/parse-xml';
+
 export type XmlAttributes = { [key: string]: string | undefined };
 export type XmlNodeBase<T extends string> = { type: T, parent: XmlNodeWithChildren };
 export type XmlNode = XmlNodeDocument | XmlNodeElement | XmlNodeText | XmlNodeCData | XmlNodeComment;
@@ -12,11 +15,39 @@ export type XmlNodeText = XmlNodeBase<'text'> & { text: string };
 export type XmlNodeCData = XmlNodeBase<'cdata'> & { text: string };
 export type XmlNodeComment = XmlNodeBase<'comment'> & { content: string };
 
+export type XmlNodeType = XmlNode['type'];
+
 export type XmlNodeWithChildren = XmlNodeDocument | XmlNodeElement;
 export function hasChildren(node: XmlNode): node is XmlNodeWithChildren {
     return (node.type === 'document' || node.type === 'element') && node.children !== undefined;
 }
 
-export function isElement(node: XmlNode): node is XmlNodeElement {
-    return node.type === 'element';
+export const isElement = typeGuard<XmlNode, XmlNodeElement>(node => node.type === 'element');
+export const isComment = typeGuard<XmlNode, XmlNodeComment>(node => node.type === 'comment');
+
+export function string2tree(xml: string): XmlNodeDocument {
+    return parseXmlLib(xml, { preserveComments: true });
+}
+
+export function xmlText(text: string, parent?: XmlNodeWithChildren): XmlNodeText {
+    return {
+        type: 'text',
+        text,
+        parent: parent!,
+    };
+}
+
+export function xmlElement(
+    name: string,
+    children?: XmlNode[],
+    attrs?: XmlAttributes,
+    parent?: XmlNodeWithChildren,
+): XmlNodeElement {
+    return {
+        type: 'element',
+        name: name,
+        children: children || [],
+        attributes: attrs || {},
+        parent: parent!,
+    };
 }

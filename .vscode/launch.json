@@ -15,7 +15,25 @@
             }
         },
         {
-            "name": "Jest Tests",
+            "type": "node",
+            "request": "launch",
+            "name": "Mac Jest Tests",
+            "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+            "args": [
+                "--config",
+                "jest.json",
+                "--runInBand"
+            ],
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "console": "internalConsole",
+            "env": {
+                "NODE_ENV": "test"
+            }
+        },
+        {
+            "name": "Win Jest Tests",
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/react-scripts-ts",
