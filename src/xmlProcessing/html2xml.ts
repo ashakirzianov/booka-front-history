@@ -21,7 +21,7 @@ export function fixBooleanAttributes(html: string) {
 
 export function fixUnescapedAmpersand(html: string) {
     return multiRun(s => s
-        .replace(/&([^a]|a[^m]|am[^p]|amp[^;])/gi, "&amp;$1")
+        .replace(/&([^a#]|a[^m]|am[^p]|amp[^;])/gi, "&amp;$1")
     )(html);
 }
 
@@ -67,7 +67,7 @@ export const html2xmlFixes = combineFs(
     fixSingleTag('input'),
     fixSingleTag('dd'),
     fixSingleTag('pre'),
-    // fixUnescapedAmpersand, // TODO: consider remove
+    fixUnescapedAmpersand, // TODO: consider remove
     fixNonbreakingSpace,
     fixAllUnquotedAttributes,
     fixBooleanAttributes,
