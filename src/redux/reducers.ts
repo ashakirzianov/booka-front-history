@@ -5,6 +5,9 @@ import { App } from "../model/app";
 import { Book } from "../model/book";
 
 const book = buildReducer<Book, ActionsTemplate>({
+    loadBook: {
+        fulfilled: (s, p) => ({ new: p }),
+    },
 });
 
 export const reducer = combineReducers<App, ActionsTemplate>({

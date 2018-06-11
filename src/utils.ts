@@ -121,6 +121,10 @@ export function defOpt<T>() {
     return def<T | undefined>();
 }
 
+export function defPromise<T>() {
+    return def<Promise<T>>();
+}
+
 export function buildMap<T>() {
     return <M extends Map<T>>(obj: M) => obj;
 }

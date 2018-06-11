@@ -9,7 +9,7 @@ export type ActionType<Type extends PropertyKey, Payload> = {
     payload: Payload,
 };
 export type ActionTypes<Templates> =
-    ({[k in keyof Templates]: ActionType<k, Templates[k]> })[keyof Templates];
+    ({ [k in keyof Templates]: ActionType<k, Templates[k]> })[keyof Templates];
 
 export type ActionCreator<Type extends PropertyKey, Payload> = (payload: Payload) => ActionType<Type, Payload>;
 export type ActionCreators<Template> = { [k in keyof Template]: ActionCreator<k, Template[k]> };
@@ -30,8 +30,16 @@ export function actionCreators<Template>(actionTemplate: Template): ActionCreato
 // Reducers:
 
 type Update<State extends NoNew<State>> = Partial<State> | { new: State };
-type SingleReducer<State extends NoNew<State>, Payload = {}> =
+type SimpleReducer<State extends NoNew<State>, Payload = {}> =
     (state: State, payload: Payload) => Update<State>;
+type PromiseReducer<State extends NoNew<State>, Payload = {}> = {
+    pending?: SimpleReducer<State, {}>,
+    rejected?: SimpleReducer<State, any>,
+    fulfilled?: SimpleReducer<State, Payload>,
+};
+type SingleReducer<State extends NoNew<State>, Payload = {}> = Payload extends Promise<infer Fulfilled>
+    ? PromiseReducer<State, Fulfilled>
+    : SimpleReducer<State, Payload>;
 export type ReducerTemplate<State extends NoNew<State>, Template> = {
     [k in keyof Template]: SingleReducer<State, Template[k]>;
 };
@@ -55,7 +63,7 @@ export function buildPartialReducer<State extends NoNew<State>, Template>(
             return initial === undefined ? null as any : initial; // ...need to return initial state or "null"
         }
 
-        const single = reducerTemplate[action.type];
+        const single = findReducer(reducerTemplate, action.type as string);
 
         if (single === undefined) {
             return state; // Always return current state if action type is not supported
@@ -63,13 +71,33 @@ export function buildPartialReducer<State extends NoNew<State>, Template>(
 
         const updates = single(state, action.payload);
         return updates === state ? state // no need to copy
-        : updates.new !== undefined ? updates.new // "new" means we returned whole new state
-        : { // returned updates -- copy them
-            // Need to cast due ts bug: https://github.com/Microsoft/TypeScript/issues/14409
-            ...(state as any),
-            ...(updates as any),
-        };
+            : updates.new !== undefined ? updates.new // "new" means we returned whole new state
+                : { // returned updates -- copy them
+                    // Need to cast due ts bug: https://github.com/Microsoft/TypeScript/issues/14409
+                    ...(state as any),
+                    ...(updates as any),
+                };
     };
+}
+
+function findReducer<State extends NoNew<State>, Template>(
+    reducerTemplate: Partial<ReducerTemplate<State, Template>>,
+    actionType: string,
+): SimpleReducer<State, ActionTypes<Template>['payload']> {
+    const promiseTemplate = reducerTemplate as { [k: string]: PromiseReducer<State, any> };
+    const simpleTemplate = reducerTemplate as { [k: string]: SimpleReducer<State, any> };
+    return stringEndCondition(actionType, '_PENDING', actual => promiseTemplate[actual].pending)
+        || stringEndCondition(actionType, '_REJECTED', actual => promiseTemplate[actual].rejected)
+        || stringEndCondition(actionType, '_FULFILLED', actual => promiseTemplate[actual].fulfilled)
+        || simpleTemplate[actionType]
+        ;
+}
+
+function stringEndCondition<T>(str: string, toTrim: string, f: (trimmed: string) => T): T | undefined {
+    return str.endsWith(toTrim)
+        ? f(str.substring(0, str.length - toTrim.length))
+        : undefined
+        ;
 }
 
 export function bugWorkaround<State, Template>(
