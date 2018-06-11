@@ -1,9 +1,9 @@
 export type Thunk<T> = () => T;
 
-export type StringDiff<T extends string, U extends string> =
+export type StringDiff<T extends PropertyKey, U extends PropertyKey> =
     ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
 
-export type StringIntersection<T extends string, U extends string> =
+export type StringIntersection<T extends PropertyKey, U extends PropertyKey> =
     StringDiff<T | U, StringDiff<T, U> | StringDiff<U, T>>;
 
 export type TypeDiff<T, U> = {
@@ -16,7 +16,7 @@ export type Partialize<T, U> = {
 
 export type Undefined<T> = { [t in keyof T]: undefined };
 
-export type KeyRestriction<T, U extends string> = {
+export type KeyRestriction<T, U extends PropertyKey> = {
     [k in StringIntersection<keyof T, U>]?: never
 } &  {
     [k in U]?: undefined

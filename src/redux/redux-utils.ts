@@ -1,22 +1,22 @@
 import { mapObject, KeyRestriction } from "../utils";
 
-type NoNew<State> = KeyRestriction<State, "new">;
+type NoNew<State> = KeyRestriction<State, 'new'>;
 
 // Actions:
 
-export type ActionType<Type extends string, Payload> = {
+export type ActionType<Type extends PropertyKey, Payload> = {
     type: Type,
     payload: Payload,
 };
 export type ActionTypes<Templates> =
     ({[k in keyof Templates]: ActionType<k, Templates[k]> })[keyof Templates];
 
-export type ActionCreator<Type extends string, Payload> = (payload: Payload) => ActionType<Type, Payload>;
+export type ActionCreator<Type extends PropertyKey, Payload> = (payload: Payload) => ActionType<Type, Payload>;
 export type ActionCreators<Template> = { [k in keyof Template]: ActionCreator<k, Template[k]> };
 export type ActionDispatcher<Payload> = (payload: Payload) => void;
 export type ActionDispatchers<Template> = { [k in keyof Template]: ActionDispatcher<Template[k]> };
 
-function actionCreator<T extends string>(type: T, payload?: any): ActionCreator<T, any> {
+function actionCreator<T extends PropertyKey>(type: T, payload?: any): ActionCreator<T, any> {
     return p => ({
         type: type,
         payload: p,
