@@ -83,7 +83,7 @@ export function buildPartialReducer<State extends NoNew<State>, Template>(
 function findReducer<State extends NoNew<State>, Template>(
     reducerTemplate: Partial<ReducerTemplate<State, Template>>,
     actionType: string,
-): SimpleReducer<State, ActionTypes<Template>['payload']> {
+): SimpleReducer<State, any> {
     const promiseTemplate = reducerTemplate as { [k: string]: PromiseReducer<State, any> };
     const simpleTemplate = reducerTemplate as { [k: string]: SimpleReducer<State, any> };
     return stringEndCondition(actionType, '_PENDING', actual => promiseTemplate[actual].pending)

@@ -1,4 +1,4 @@
-import { buildReducer } from "./redux-utils";
+import { buildReducer, buildPartialReducer } from "./redux-utils";
 import { ActionsTemplate } from "../model/actions";
 import { combineReducers } from "./react-redux-utils";
 import { App } from "../model/app";
@@ -10,6 +10,15 @@ const book = buildReducer<Book, ActionsTemplate>({
     },
 });
 
+const visual = buildPartialReducer<App['visual'], ActionsTemplate>({
+    loadBook: {
+        pending: s => ({ loading: true }),
+        fulfilled: s => ({ loading: false }),
+        rejected: s => ({ loading: false }),
+    },
+});
+
 export const reducer = combineReducers<App, ActionsTemplate>({
     book,
+    visual,
 });

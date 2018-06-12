@@ -1,7 +1,7 @@
 export type Thunk<T> = () => T;
 
 export type StringDiff<T extends PropertyKey, U extends PropertyKey> =
-    ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
+    ({ [P in T]: P } & { [P in U]: never } & { [x in T]: never })[T];
 
 export type StringIntersection<T extends PropertyKey, U extends PropertyKey> =
     StringDiff<T | U, StringDiff<T, U> | StringDiff<U, T>>;

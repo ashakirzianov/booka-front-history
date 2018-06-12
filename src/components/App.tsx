@@ -8,6 +8,9 @@ const AppComp: React.SFC<{
     store: App,
     callbacks: Callbacks<ActionsTemplate>,
 }> = props =>
-    <BookComp { ...props.store.book } />;
+    props.store.visual.loading
+        ? <div>Loading...</div>
+        : <BookComp { ...props.store.book } />
+        ;
 
 export { AppComp };

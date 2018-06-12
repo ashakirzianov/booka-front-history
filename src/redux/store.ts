@@ -17,6 +17,9 @@ function validateStore(restored: Store | undefined) {
 function createNewStore(): Store {
     return {
         book: string2book(text),
+        visual: {
+            loading: false,
+        },
     };
 }
 
