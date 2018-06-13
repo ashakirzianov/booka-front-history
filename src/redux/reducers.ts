@@ -2,9 +2,8 @@ import { buildReducer, buildPartialReducer } from "./redux-utils";
 import { ActionsTemplate } from "../model/actions";
 import { combineReducers } from "./react-redux-utils";
 import { App } from "../model/app";
-import { Book } from "../model/book";
 
-const book = buildReducer<Book, ActionsTemplate>({
+const book = buildReducer<App['book'], ActionsTemplate>({
     loadBook: {
         fulfilled: (s, p) => ({ new: p }),
     },
@@ -13,7 +12,7 @@ const book = buildReducer<Book, ActionsTemplate>({
 const visual = buildPartialReducer<App['visual'], ActionsTemplate>({
     loadBook: {
         pending: s => ({ loading: true }),
-        fulfilled: s => ({ loading: false }),
+        fulfilled: (s, p) => ({ loading: false }),
         rejected: s => ({ loading: false }),
     },
 });
