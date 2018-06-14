@@ -40,14 +40,13 @@ type PromiseReducer<State extends NoNew<State>, Payload = {}> = {
     rejected?: SimpleReducer<State, any>,
     fulfilled?: SimpleReducer<State, Payload>,
 };
-export type LoopReducerForm<
+type LoopReducerForm<
     State extends NoNew<State>,
     ActionsT,
     Key extends keyof ActionsT,
     Succ extends keyof ActionsT,
     Fail extends keyof ActionsT,
-    Args,
-    Check extends { [k in Fail]: {} }
+    Args
 > = {
     loop: {
         sync: SimpleReducer<State, ActionsT[Key]>,
@@ -57,8 +56,8 @@ export type LoopReducerForm<
         fail: Fail,
     },
 };
-export type LoopReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> =
-    LoopReducerForm<State, ActionsT, Key, keyof ActionsT, keyof ActionsT, any, any>;
+type LoopReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> =
+    LoopReducerForm<State, ActionsT, Key, keyof ActionsT, keyof ActionsT, any>;
 type SingleReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> = ActionsT[Key] extends Promise<infer Fulfilled>
     ? PromiseReducer<State, Fulfilled>
     : SimpleReducer<State, ActionsT[Key]>
