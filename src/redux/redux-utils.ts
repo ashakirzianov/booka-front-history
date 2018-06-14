@@ -29,6 +29,9 @@ export function actionCreators<Template>(actionTemplate: Template): ActionCreato
 
 // Reducers:
 
+export type SomeValue = string | number | boolean | undefined | null | object;
+export type SameKeys<T> = { [k in keyof T]: SomeValue };
+
 type Update<State extends NoNew<State>> = Partial<State> | { new: State };
 type SimpleReducer<State extends NoNew<State>, Payload = {}> =
     (state: State, payload: Payload) => Update<State>;
@@ -37,11 +40,32 @@ type PromiseReducer<State extends NoNew<State>, Payload = {}> = {
     rejected?: SimpleReducer<State, any>,
     fulfilled?: SimpleReducer<State, Payload>,
 };
-type SingleReducer<State extends NoNew<State>, Payload = {}> = Payload extends Promise<infer Fulfilled>
+export type LoopReducerForm<
+    State extends NoNew<State>,
+    ActionsT,
+    Key extends keyof ActionsT,
+    Succ extends keyof ActionsT,
+    Fail extends keyof ActionsT,
+    Args,
+    Check extends { [k in Fail]: {} }
+> = {
+    loop: {
+        sync: SimpleReducer<State, ActionsT[Key]>,
+        args: Args,
+        async: (x: Args) => Promise<ActionsT[Succ]>,
+        success: Succ,
+        fail: Fail,
+    },
+};
+export type LoopReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> =
+    LoopReducerForm<State, ActionsT, Key, keyof ActionsT, keyof ActionsT, any, any>;
+type SingleReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> = ActionsT[Key] extends Promise<infer Fulfilled>
     ? PromiseReducer<State, Fulfilled>
-    : SimpleReducer<State, Payload>;
-export type ReducerTemplate<State extends NoNew<State>, Template> = {
-    [k in keyof Template]: SingleReducer<State, Template[k]>;
+    : SimpleReducer<State, ActionsT[Key]>
+    | LoopReducer<State, ActionsT, Key>
+    ;
+export type ReducerTemplate<State extends NoNew<State>, ActionsT> = {
+    [k in keyof ActionsT]: SingleReducer<State, ActionsT, k>;
 };
 
 export type Reducer<State, Template> =

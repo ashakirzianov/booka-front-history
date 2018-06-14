@@ -1,3 +1,10 @@
+type Helper<T, S> = {
+    [k in keyof T]: T[k] extends S ? k : never;
+};
+
+export type KeysForValueType<T, Return> = Exclude<Helper<T, Return>[keyof Helper<T, Return>], never>;
+export type CheckValueTypes<T, Return> = KeysForValueType<T, Return> extends never ? T : never;
+
 export type Thunk<T> = () => T;
 
 export type StringDiff<T extends PropertyKey, U extends PropertyKey> =

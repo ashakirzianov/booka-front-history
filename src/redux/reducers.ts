@@ -1,11 +1,25 @@
-import { buildReducer, buildPartialReducer } from "./redux-utils";
+import { buildPartialReducer } from "./redux-utils";
 import { ActionsTemplate } from "../model/actions";
 import { combineReducers } from "./react-redux-utils";
 import { App } from "../model/app";
 
-const book = buildReducer<App['book'], ActionsTemplate>({
+export function loadBoolean(x: number): Promise<{ helloBaz: boolean}> {
+    return new Promise((res, rej) => res({ helloBaz: true }));
+}
+
+const book = buildPartialReducer<App['book'], ActionsTemplate>({
     loadBook: {
         fulfilled: (s, p) => ({ new: p }),
+    },
+    foo: (s, p) => s,
+    bar: {
+        loop: {
+            sync: null as any,
+            args: false,
+            async: loadBoolean,
+            success: 'foo',
+            fail: 'bar',
+        },
     },
 });
 
