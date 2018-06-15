@@ -14,7 +14,7 @@ const book = buildPartialReducer<App['book'], ActionsTemplate>({
     foo: (s, p) => s,
     bar: {
         loop: {
-            sync: null as any,
+            sync: (s, p) => s,
             args: false,
             async: loadBoolean,
             success: 'foo',

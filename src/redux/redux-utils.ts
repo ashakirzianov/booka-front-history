@@ -1,4 +1,6 @@
+// TODO: this file contains lots of crypto code. I'm sorry, future Anton, but you have to deal with it!
 import { mapObject, KeyRestriction } from "../utils";
+import { Cmd, loop } from 'redux-loop';
 
 type NoNew<State> = KeyRestriction<State, 'new'>;
 
@@ -47,15 +49,15 @@ type LoopReducerForm<
     Succ extends keyof ActionsT,
     Fail extends keyof ActionsT,
     Args
-> = {
-    loop: {
-        sync: SimpleReducer<State, ActionsT[Key]>,
-        args: Args,
-        async: (x: Args) => Promise<ActionsT[Succ]>,
-        success: Succ,
-        fail: Fail,
-    },
-};
+    > = {
+        loop: {
+            sync: SimpleReducer<State, ActionsT[Key]>,
+            args: Args,
+            async: (x: Args) => Promise<ActionsT[Succ]>,
+            success: Succ,
+            fail: Fail,
+        },
+    };
 type LoopReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> =
     LoopReducerForm<State, ActionsT, Key, keyof ActionsT, keyof ActionsT, any>;
 type SingleReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> = ActionsT[Key] extends Promise<infer Fulfilled>
@@ -86,34 +88,64 @@ export function buildPartialReducer<State extends NoNew<State>, Template>(
             return initial === undefined ? null as any : initial; // ...need to return initial state or "null"
         }
 
-        const single = findReducer(reducerTemplate, action.type as string);
+        const single = findReducer(reducerTemplate, action.type as Extract<keyof Template, string>);
 
         if (single === undefined) {
             return state; // Always return current state if action type is not supported
         }
 
         const updates = single(state, action.payload);
-        return updates === state ? state // no need to copy
-            : updates.new !== undefined ? updates.new // "new" means we returned whole new state
-                : { // returned updates -- copy them
-                    // Need to cast due ts bug: https://github.com/Microsoft/TypeScript/issues/14409
-                    ...(state as any),
-                    ...(updates as any),
-                };
+        return buildState(updates, state);
     };
 }
 
-function findReducer<State extends NoNew<State>, Template>(
+function buildState<State extends NoNew<State>>(updates: Update<State>, state: State): State {
+    return updates === state ? state // no need to copy
+        : updates.new !== undefined ? updates.new // "new" means we returned whole new state
+            : { // returned updates -- copy them
+                // Need to cast due ts bug: https://github.com/Microsoft/TypeScript/issues/14409
+                ...(state as any),
+                ...(updates as any),
+            };
+}
+
+function findReducer<State extends NoNew<State>, Template, Key extends keyof Template>(
     reducerTemplate: Partial<ReducerTemplate<State, Template>>,
-    actionType: string,
+    actionType: Extract<keyof Template, string>,
 ): SimpleReducer<State, any> {
     const promiseTemplate = reducerTemplate as { [k: string]: PromiseReducer<State, any> };
+    const loopTemplate = reducerTemplate as { [k: string]: LoopReducer<State, Template, any> };
     const simpleTemplate = reducerTemplate as { [k: string]: SimpleReducer<State, any> };
     return stringEndCondition(actionType, '_PENDING', actual => promiseTemplate[actual].pending)
         || stringEndCondition(actionType, '_REJECTED', actual => promiseTemplate[actual].rejected)
         || stringEndCondition(actionType, '_FULFILLED', actual => promiseTemplate[actual].fulfilled)
-        || simpleTemplate[actionType]
+        || (typeof reducerTemplate[actionType] === 'function' ? simpleTemplate[actionType] : undefined)
+        || buildLoopReducer<State, Template, Key>(loopTemplate[actionType])
         ;
+}
+
+export function buildLoopReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT>(
+    loopReducerTemplate: LoopReducer<State, ActionsT, Key>
+) {
+    return function loopReducer(s: State, payload: any) {
+        return {
+            new: loop(
+                buildState(loopReducerTemplate.loop.sync(s, payload), s),
+                Cmd.run(loopReducerTemplate.loop.async, {
+                    successActionCreator: makeActionCreator(loopReducerTemplate.loop.success),
+                    failActionCreator: makeActionCreator(loopReducerTemplate.loop.fail),
+                    args: [loopReducerTemplate.loop.args],
+                }),
+            ) as any,
+        };
+    };
+}
+
+function makeActionCreator(actionType: PropertyKey) {
+    return (p: any) => ({
+        type: actionType as string,
+        payload: p,
+    });
 }
 
 function stringEndCondition<T>(str: string, toTrim: string, f: (trimmed: string) => T): T | undefined {
