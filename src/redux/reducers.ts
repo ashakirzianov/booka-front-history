@@ -20,27 +20,20 @@ export function loadBook(): Promise<Book> {
 }
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
-    loadBook: {
-        fulfilled: (s, p) => ({ new: p }),
-    },
-    foo: (s, p) => s,
-    bar: {
-        loop: {
-            sync: (s, p) => s,
-            args: false,
-            async: loadBoolean,
-            success: 'foo',
-            fail: 'bar',
-        },
-    },
+    setBook: (s, p) => p,
 });
 
 const visual = buildPartialReducer<App['visual'], ActionsTemplate>({
     loadBook: {
-        pending: s => ({ loading: true }),
-        fulfilled: (s, p) => ({ loading: false }),
-        rejected: s => ({ loading: false }),
+        loop: {
+            sync: (s, p) => ({ loading: true }),
+            args: {},
+            async: loadBook,
+            success: 'setBook',
+            fail: 'bookLoadFail',
+        },
     },
+    bookLoadFail: (s, p) => ({ loading: false }),
 });
 
 export const reducer = combineReducers<App, ActionsTemplate>({

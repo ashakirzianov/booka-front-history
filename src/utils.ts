@@ -120,7 +120,7 @@ export function mapObject<T, U>(
         ({ ...acc, [key]: f(key, obj[key]) }), {} as any);
 }
 
-export function def<T = {}>() {
+export function def<T = undefined>() {
     return null as any as T;
 }
 
