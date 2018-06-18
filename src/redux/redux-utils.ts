@@ -116,7 +116,7 @@ function buildState<State extends NoNew<State>>(updates: Update<State>, state: S
 function findReducer<State extends NoNew<State>, Template, Key extends keyof Template>(
     reducerTemplate: Partial<ReducerTemplate<State, Template>>,
     actionType: Extract<keyof Template, string>,
-): SimpleReducer<State, any> | undefined { // TODO: rewrite this function in a sane way?
+): SimpleReducer<State, any> | undefined {
 
     const reducer = reducerTemplate[actionType] as any;
     if (reducer && typeof reducer === 'function') {

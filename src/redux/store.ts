@@ -21,10 +21,7 @@ function validateStore(restored: Store | undefined) {
 
 function createNewStore(): Store {
     return {
-        book: { kind: 'bookStub' },
-        visual: {
-            loading: false,
-        },
+        book: { kind: 'loadingStub' },
     };
 }
 

@@ -3,20 +3,14 @@ import { ActionsTemplate } from "../model/actions";
 import { combineReducers } from "./react-redux-utils";
 import { App } from "../model/app";
 import { string2book } from "../xmlProcessing/azLibRu";
-import { loadText } from "../samples/warAndPeace";
+import { loadText } from "../samples/warAndPeaceShort";
 import { loadBook } from "../loader/bookLoad";
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
-    setBook: (s, p) => {
-        return p;
-    },
-});
-
-const visual = buildPartialReducer<App['visual'], ActionsTemplate>({
     loadBook: {
         loop: {
             sync: (s, p) => {
-                return { loading: true };
+                return s;
             },
             args: {
                 loadString: loadText,
@@ -27,13 +21,11 @@ const visual = buildPartialReducer<App['visual'], ActionsTemplate>({
             fail: 'bookLoadFail',
         },
     },
-    setBook: (s, p) => ({ loading: false }),
-    bookLoadFail: (s, p) => {
-        return { loading: false };
+    setBook: (s, p) => {
+        return p;
     },
 });
 
 export const reducer = combineReducers<App, ActionsTemplate>({
     book,
-    visual,
 });

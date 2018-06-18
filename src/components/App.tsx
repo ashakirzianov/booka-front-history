@@ -14,13 +14,7 @@ class AppComp extends React.Component<{
 
     render() {
         const store = this.props.store;
-        if (store.visual.loading) {
-            return <div>Loading...</div>;
-        } else if (store.book.kind === 'bookStub') {
-            return <div>No book loaded</div>;
-        } else {
-            return <BookComp {...store.book} />;
-        }
+        return <BookComp {...store.book} />;
     }
 }
 

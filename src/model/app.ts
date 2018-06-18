@@ -1,8 +1,5 @@
-import { BookType } from "./book";
+import { Book } from "./book";
 
 export type App = {
-    book: BookType,
-    visual: {
-        loading: boolean,
-    },
+    book: Book,
 };

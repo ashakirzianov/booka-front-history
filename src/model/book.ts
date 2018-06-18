@@ -21,18 +21,16 @@ export type Subpart = {
     content: SubChapterNode[],
 };
 
-export type BookNode = Part | Chapter | Subpart | Paragraph;
-export type SubChapterNode = Subpart | Paragraph;
+export type BookNode = Part | Chapter | Subpart | Paragraph | LoadingStub;
+export type SubChapterNode = Subpart | Paragraph | LoadingStub;
 
 export type Book = {
     kind: "book",
     title: string,
     author?: string,
     content: BookNode[],
-};
+} | LoadingStub;
 
-export type BookStub = { // TODO: make universal stub
-    kind: 'bookStub',
+export type LoadingStub = {
+    kind: 'loadingStub',
 };
-
-export type BookType = Book | BookStub; // TODO: find better name
