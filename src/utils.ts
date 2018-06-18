@@ -141,3 +141,18 @@ export function typeGuard<TIn, TOut extends TIn>(predicate: (obj: TIn) => boolea
 }
 
 export type TypeGuard<TIn, TOut extends TIn> = (guarded: TIn) => guarded is TOut;
+
+export function timeouted<U>(f: () => U, timeout?: number): () => Promise<U>;
+export function timeouted<T, U>(f: (x: T) => U, timeout?: number): (x: T) => Promise<U>;
+export function timeouted<T, U>(f: (x: T) => U, timeout?: number): (x: T) => Promise<U> {
+    return (x: T) => new Promise((res, rej) => {
+        setTimeout(() => {
+            try {
+                const result = f(x);
+                res(result);
+            } catch (err) {
+                rej(err);
+            }
+        }, timeout);
+    });
+}
