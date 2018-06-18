@@ -32,7 +32,7 @@ export function connectRedux<Store, ActionsTemplate>(
 
     const connector = connect(mapStateToProps, mapDispatchToProps);
 
-    return connector(Comp as any); // TODO: remove cast
+    return connector(Comp);
 }
 
 export type ReducersMap<Store, ActionsTemplate> = {
