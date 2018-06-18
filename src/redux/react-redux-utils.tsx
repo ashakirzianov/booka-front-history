@@ -5,7 +5,7 @@ import { Dispatch, connect } from "react-redux";
 import { mapObject, KeyRestriction } from "../utils";
 import { ActionDispatchers, ActionCreators, Reducer, ReducerTemplate, buildPartialReducer } from "./redux-utils";
 
-export type TopComponent<Store, ActionsTemplate> = React.Component<{
+export type TopComponent<Store, ActionsTemplate> = React.ComponentType<{
     store: Store,
     callbacks: ActionDispatchers<ActionsTemplate>,
 }>;

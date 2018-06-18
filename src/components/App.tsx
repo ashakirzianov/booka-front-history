@@ -4,7 +4,7 @@ import { ActionsTemplate } from "../model/actions";
 import { Callbacks } from "./comp-utils";
 import { BookComp } from "./BookComp";
 
-class AppComp extends React.PureComponent<{
+class AppComp extends React.Component<{
     store: App,
     callbacks: Callbacks<ActionsTemplate>,
 }> {
