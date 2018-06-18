@@ -4,16 +4,7 @@ import { combineReducers } from "./react-redux-utils";
 import { App } from "../model/app";
 import { string2book } from "../xmlProcessing/azLibRu";
 import { loadText } from "../samples/warAndPeace";
-import { Book } from "../model/book";
-
-export function loadBook(): Promise<Book> {
-    return new Promise((res, rej) => {
-        setTimeout(() => {
-            const b = string2book(loadText());
-            res(b);
-        });
-    });
-}
+import { loadBook } from "../loader/bookLoad";
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
     setBook: (s, p) => {
@@ -27,7 +18,10 @@ const visual = buildPartialReducer<App['visual'], ActionsTemplate>({
             sync: (s, p) => {
                 return { loading: true };
             },
-            args: {},
+            args: {
+                loadString: loadText,
+                string2book: string2book,
+            },
             async: loadBook,
             success: 'setBook',
             fail: 'bookLoadFail',
