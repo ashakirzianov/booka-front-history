@@ -3,13 +3,13 @@ import { ActionsTemplate } from "../model/actions";
 import { combineReducers } from "./react-redux-utils";
 import { App } from "../model/app";
 import { string2book } from "../xmlProcessing/azLibRu";
-import { text } from "../samples/warAndPeaceShort";
+import { loadText } from "../samples/warAndPeace";
 import { Book } from "../model/book";
 
 export function loadBook(): Promise<Book> {
     return new Promise((res, rej) => {
         setTimeout(() => {
-            const b = string2book(text);
+            const b = string2book(loadText());
             res(b);
         });
     });
