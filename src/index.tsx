@@ -10,7 +10,7 @@ import { connectRedux } from './redux/react-redux-utils';
 import { Provider } from 'react-redux';
 
 const allActionCreators = actionCreators(actionsTemplate);
-export const App = connectRedux(AppComp, allActionCreators);
+export const App = connectRedux(AppComp as any, allActionCreators); // TODO: remove cast
 
 ReactDOM.render(
   <Provider store={store}><App /></Provider>,

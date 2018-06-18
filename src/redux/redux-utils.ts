@@ -100,19 +100,23 @@ export function buildPartialReducer<State extends NoNew<State>, Template>(
 }
 
 function buildState<State extends NoNew<State>>(updates: Update<State>, state: State): State {
-    return updates === state ? state // no need to copy
-        : updates.new !== undefined ? updates.new // "new" means we returned whole new state
-            : { // returned updates -- copy them
-                // Need to cast due ts bug: https://github.com/Microsoft/TypeScript/issues/14409
-                ...(state as any),
-                ...(updates as any),
-            };
+    if (updates === state) { // no need to copy
+        return state;
+    } else if (updates.new !== undefined) { // "new" means we returned whole new state
+        return updates.new;
+    } else {
+        return { // returned updates -- copy them
+            // Need to cast due ts bug: https://github.com/Microsoft/TypeScript/issues/14409
+            ...(state as any),
+            ...(updates as any),
+        };
+    }
 }
 
 function findReducer<State extends NoNew<State>, Template, Key extends keyof Template>(
     reducerTemplate: Partial<ReducerTemplate<State, Template>>,
     actionType: Extract<keyof Template, string>,
-): SimpleReducer<State, any> {
+): SimpleReducer<State, any> { // TODO: rewrite this function in a sane way?
     const promiseTemplate = reducerTemplate as { [k: string]: PromiseReducer<State, any> };
     const loopTemplate = reducerTemplate as { [k: string]: LoopReducer<State, Template, any> };
     const simpleTemplate = reducerTemplate as { [k: string]: SimpleReducer<State, any> };
@@ -120,7 +124,7 @@ function findReducer<State extends NoNew<State>, Template, Key extends keyof Tem
         || stringEndCondition(actionType, '_REJECTED', actual => promiseTemplate[actual].rejected)
         || stringEndCondition(actionType, '_FULFILLED', actual => promiseTemplate[actual].fulfilled)
         || (typeof reducerTemplate[actionType] === 'function' ? simpleTemplate[actionType] : undefined)
-        || buildLoopReducer<State, Template, Key>(loopTemplate[actionType])
+        || (loopTemplate[actionType] && loopTemplate[actionType].loop && buildLoopReducer(loopTemplate[actionType]))
         ;
 }
 
@@ -136,16 +140,18 @@ export function buildLoopReducer<State extends NoNew<State>, ActionsT, Key exten
                     failActionCreator: makeActionCreator(loopReducerTemplate.loop.fail),
                     args: [loopReducerTemplate.loop.args],
                 }),
-            ) as any,
+            ) as any, // TODO: remove cast?
         };
     };
 }
 
 function makeActionCreator(actionType: PropertyKey) {
-    return (p: any) => ({
-        type: actionType as string,
-        payload: p,
-    });
+    return (p: any) => {
+        return {
+            type: actionType as string,
+            payload: p,
+        };
+    };
 }
 
 function stringEndCondition<T>(str: string, toTrim: string, f: (trimmed: string) => T): T | undefined {

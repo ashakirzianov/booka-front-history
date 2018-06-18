@@ -4,13 +4,24 @@ import { ActionsTemplate } from "../model/actions";
 import { Callbacks } from "./comp-utils";
 import { BookComp } from "./BookComp";
 
-const AppComp: React.SFC<{
+class AppComp extends React.PureComponent<{
     store: App,
     callbacks: Callbacks<ActionsTemplate>,
-}> = props =>
-    props.store.visual.loading
-        ? <div>Loading...</div>
-        : <BookComp { ...props.store.book } />
-        ;
+}> {
+    componentWillMount() {
+        this.props.callbacks.loadBook(undefined);
+    }
+
+    render() {
+        const store = this.props.store;
+        if (store.visual.loading) {
+            return <div>Loading...</div>;
+        } else if (store.book.kind === 'bookStub') {
+            return <div>No book loaded</div>;
+        } else {
+            return <BookComp {...store.book} />;
+        }
+    }
+}
 
 export { AppComp };

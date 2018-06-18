@@ -30,3 +30,9 @@ export type Book = {
     author?: string,
     content: BookNode[],
 };
+
+export type BookStub = { // TODO: make universal stub
+    kind: 'bookStub',
+};
+
+export type BookType = Book | BookStub; // TODO: find better name

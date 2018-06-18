@@ -6,10 +6,6 @@ import { string2book } from "../xmlProcessing/azLibRu";
 import { text } from "../samples/warAndPeaceShort";
 import { Book } from "../model/book";
 
-export function loadBoolean(x: number): Promise<{ helloBaz: boolean}> {
-    return new Promise((res, rej) => res({ helloBaz: true }));
-}
-
 export function loadBook(): Promise<Book> {
     return new Promise((res, rej) => {
         setTimeout(() => {
@@ -20,20 +16,27 @@ export function loadBook(): Promise<Book> {
 }
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
-    setBook: (s, p) => p,
+    setBook: (s, p) => {
+        return p;
+    },
 });
 
 const visual = buildPartialReducer<App['visual'], ActionsTemplate>({
     loadBook: {
         loop: {
-            sync: (s, p) => ({ loading: true }),
+            sync: (s, p) => {
+                return { loading: true };
+            },
             args: {},
             async: loadBook,
             success: 'setBook',
             fail: 'bookLoadFail',
         },
     },
-    bookLoadFail: (s, p) => ({ loading: false }),
+    setBook: (s, p) => ({ loading: false }),
+    bookLoadFail: (s, p) => {
+        return { loading: false };
+    },
 });
 
 export const reducer = combineReducers<App, ActionsTemplate>({
