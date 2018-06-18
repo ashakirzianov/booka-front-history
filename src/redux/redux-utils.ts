@@ -1,4 +1,4 @@
-// TODO: this file contains lots of crypto code. I'm sorry, future Anton, but you have to deal with it!
+// NOTE: this file contains lots of crypto code. I'm sorry, future Anton, but you have to deal with it!
 import { mapObject, KeyRestriction } from "../utils";
 import { Cmd, loop } from 'redux-loop';
 
@@ -116,16 +116,27 @@ function buildState<State extends NoNew<State>>(updates: Update<State>, state: S
 function findReducer<State extends NoNew<State>, Template, Key extends keyof Template>(
     reducerTemplate: Partial<ReducerTemplate<State, Template>>,
     actionType: Extract<keyof Template, string>,
-): SimpleReducer<State, any> { // TODO: rewrite this function in a sane way?
+): SimpleReducer<State, any> | undefined { // TODO: rewrite this function in a sane way?
+
+    const reducer = reducerTemplate[actionType] as any;
+    if (reducer && typeof reducer === 'function') {
+        return reducer as SimpleReducer<State, any>;
+    }
+
+    if (reducer && reducer.loop) {
+        return buildLoopReducer(reducer);
+    }
+
     const promiseTemplate = reducerTemplate as { [k: string]: PromiseReducer<State, any> };
-    const loopTemplate = reducerTemplate as { [k: string]: LoopReducer<State, Template, any> };
-    const simpleTemplate = reducerTemplate as { [k: string]: SimpleReducer<State, any> };
-    return stringEndCondition(actionType, '_PENDING', actual => promiseTemplate[actual].pending)
+    const promiseReducer = stringEndCondition(actionType, '_PENDING', actual => promiseTemplate[actual].pending)
         || stringEndCondition(actionType, '_REJECTED', actual => promiseTemplate[actual].rejected)
-        || stringEndCondition(actionType, '_FULFILLED', actual => promiseTemplate[actual].fulfilled)
-        || (typeof reducerTemplate[actionType] === 'function' ? simpleTemplate[actionType] : undefined)
-        || (loopTemplate[actionType] && loopTemplate[actionType].loop && buildLoopReducer(loopTemplate[actionType]))
-        ;
+        || stringEndCondition(actionType, '_FULFILLED', actual => promiseTemplate[actual].fulfilled);
+
+    if (promiseReducer) {
+        return promiseReducer;
+    }
+
+    return undefined;
 }
 
 export function buildLoopReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT>(
@@ -140,7 +151,7 @@ export function buildLoopReducer<State extends NoNew<State>, ActionsT, Key exten
                     failActionCreator: makeActionCreator(loopReducerTemplate.loop.fail),
                     args: [loopReducerTemplate.loop.args],
                 }),
-            ) as any, // TODO: remove cast?
+            ) as any, // loop function returns special Loop thing. Proper typing does not worth an effort in this case.
         };
     };
 }
