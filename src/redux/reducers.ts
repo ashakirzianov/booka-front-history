@@ -3,9 +3,10 @@ import { ActionsTemplate } from "../model/actions";
 import { combineReducers } from "./react-redux-utils";
 import { App } from "../model/app";
 import { string2book } from "../xmlProcessing/azLibRu";
-import { loadText } from "../samples/warAndPeaceShort";
 import { loadBook } from "../loader/bookLoad";
 import { timeouted } from "../utils";
+import { loadHtml } from "../loader/htmlLoad";
+import { url } from "../samples/warAndPeace";
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
     loadBook: {
@@ -14,7 +15,7 @@ const book = buildPartialReducer<App['book'], ActionsTemplate>({
                 return s;
             },
             async: () => loadBook({
-                loadString: timeouted(loadText),
+                loadString: () => loadHtml(url),
                 string2book: timeouted(string2book),
             }),
             success: 'setBook',

@@ -5,6 +5,8 @@ export function loadText() {
     return text;
 }
 
+export const url = 'http://az.lib.ru/t/tolstoj_lew_nikolaewich/text_0040.shtml';
+
 const text: string = `
 <html>
 <head>
