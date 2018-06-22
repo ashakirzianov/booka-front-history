@@ -6,10 +6,7 @@ export type BookLoadDesc = {
 };
 
 export function loadBook(loadDesc: BookLoadDesc): Promise<Book> {
-    return new Promise((res, rej) => {
-        loadDesc.loadString()
-            .then(text => loadDesc.string2book(text))
-            .then(b => res(b))
-            .catch(err => rej(err));
-    });
+    return loadDesc
+        .loadString()
+        .then(text => loadDesc.string2book(text));
 }
