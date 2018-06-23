@@ -1,4 +1,4 @@
-import { text as shortText } from '../samples/warAndPeaceShort';
+import { loadText as shortTextLoad } from '../samples/warAndPeaceShort';
 import { throwExp } from '../utils';
 import { tree2book, html2xml, nonParagraphStart, paragraph, bookInfo, junkAtTheBeginning } from './azLibRu';
 import { string2tree, xmlText, xmlElement } from './xmlNode';
@@ -6,7 +6,7 @@ import { skipToNode } from './xml2json';
 import { htmlFragmentToNodes } from './xmlUtils';
 
 it('War and Peace short parsing', () => {
-    const xmlString = html2xml(shortText);
+    const xmlString = html2xml(shortTextLoad());
     const xmlTree = string2tree(xmlString);
     expect(xmlTree).toBeDefined();
     expect(xmlTree.type).toBe('document');

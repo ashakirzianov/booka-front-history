@@ -1,7 +1,13 @@
 /* tslint:disable */
 /* spellchecker:disable */
 
-export const text: string = `
+export function loadText() {
+    return text;
+}
+
+export const url = 'http://az.lib.ru/t/tolstoj_lew_nikolaewich/text_0040.shtml';
+
+const text: string = `
 <html>
 <head>
 <title>Lib.ru/Классика: Толстой Лев Николаевич. Война и мир. Том 1</title>

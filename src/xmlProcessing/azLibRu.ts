@@ -182,6 +182,6 @@ export function string2book(html: string) {
 
     return bookResult.success
         ? bookResult.value
-        : throwExp(new Error("Couldn't parser the book"))
+        : throwExp(new Error("Couldn't parse the book"))
         ;
 }

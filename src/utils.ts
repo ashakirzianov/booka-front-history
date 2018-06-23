@@ -1,9 +1,16 @@
+type Helper<T, S> = {
+    [k in keyof T]: T[k] extends S ? k : never;
+};
+
+export type KeysForValueType<T, Return> = Exclude<Helper<T, Return>[keyof Helper<T, Return>], never>;
+export type CheckValueTypes<T, Return> = KeysForValueType<T, Return> extends never ? T : never;
+
 export type Thunk<T> = () => T;
 
-export type StringDiff<T extends string, U extends string> =
-    ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
+export type StringDiff<T extends PropertyKey, U extends PropertyKey> =
+    ({ [P in T]: P } & { [P in U]: never } & { [x in T]: never })[T];
 
-export type StringIntersection<T extends string, U extends string> =
+export type StringIntersection<T extends PropertyKey, U extends PropertyKey> =
     StringDiff<T | U, StringDiff<T, U> | StringDiff<U, T>>;
 
 export type TypeDiff<T, U> = {
@@ -16,7 +23,7 @@ export type Partialize<T, U> = {
 
 export type Undefined<T> = { [t in keyof T]: undefined };
 
-export type KeyRestriction<T, U extends string> = {
+export type KeyRestriction<T, U extends PropertyKey> = {
     [k in StringIntersection<keyof T, U>]?: never
 } &  {
     [k in U]?: undefined
@@ -113,12 +120,16 @@ export function mapObject<T, U>(
         ({ ...acc, [key]: f(key, obj[key]) }), {} as any);
 }
 
-export function def<T = {}>() {
+export function def<T = undefined>() {
     return null as any as T;
 }
 
 export function defOpt<T>() {
     return def<T | undefined>();
+}
+
+export function defPromise<T>() {
+    return def<Promise<T>>();
 }
 
 export function buildMap<T>() {
@@ -130,3 +141,18 @@ export function typeGuard<TIn, TOut extends TIn>(predicate: (obj: TIn) => boolea
 }
 
 export type TypeGuard<TIn, TOut extends TIn> = (guarded: TIn) => guarded is TOut;
+
+export function timeouted<U>(f: () => U, timeout?: number): () => Promise<U>;
+export function timeouted<T, U>(f: (x: T) => U, timeout?: number): (x: T) => Promise<U>;
+export function timeouted<T, U>(f: (x: T) => U, timeout?: number): (x: T) => Promise<U> {
+    return (x: T) => new Promise((res, rej) => {
+        setTimeout(() => {
+            try {
+                const result = f(x);
+                res(result);
+            } catch (err) {
+                rej(err);
+            }
+        }, timeout);
+    });
+}

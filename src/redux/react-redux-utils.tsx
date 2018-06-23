@@ -1,10 +1,11 @@
 import * as React from "react";
-import { AnyAction, combineReducers as combineReducersRedux } from "redux";
+import { AnyAction, Reducer as ReducerRedux } from "redux";
+import { combineReducers as combineReducersRedux } from 'redux-loop';
 import { Dispatch, connect } from "react-redux";
 import { mapObject, KeyRestriction } from "../utils";
 import { ActionDispatchers, ActionCreators, Reducer, ReducerTemplate, buildPartialReducer } from "./redux-utils";
 
-export type TopComponent<Store, ActionsTemplate> = React.SFC<{
+export type TopComponent<Store, ActionsTemplate> = React.ComponentType<{
     store: Store,
     callbacks: ActionDispatchers<ActionsTemplate>,
 }>;
@@ -37,9 +38,9 @@ export function connectRedux<Store, ActionsTemplate>(
 export type ReducersMap<Store, ActionsTemplate> = {
     [k in keyof Store]: Reducer<Store[k], ActionsTemplate>;
 };
-export function combineReducers<Store, ActionsTemplate>(map: ReducersMap<Store, ActionsTemplate>) {
+export function combineReducers<Store, ActionsTemplate>(map: ReducersMap<Store, ActionsTemplate>): ReducerRedux<Store> {
     // This is workaround for issue in redux: https://github.com/reactjs/redux/issues/2709
-    return combineReducersRedux<Store>(map as any);
+    return combineReducersRedux<Store>(map as any) as any;
 }
 
 type NoNew<State> = KeyRestriction<State, "new">;
