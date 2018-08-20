@@ -5,8 +5,8 @@ import { App } from "../model/app";
 import { string2book } from "../xmlProcessing/azLibRu";
 import { loadBook } from "../loader/bookLoad";
 import { timeouted } from "../utils";
-import { loadHtml } from "../loader/htmlLoad";
-import { url } from "../samples/warAndPeace";
+import { loadStaticString } from "../loader/htmlLoad";
+// import { url } from "../samples/warAndPeace";
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
     loadBook: {
@@ -15,7 +15,7 @@ const book = buildPartialReducer<App['book'], ActionsTemplate>({
                 return s;
             },
             async: () => loadBook({
-                loadString: () => loadHtml(url),
+                loadString: () => loadStaticString('warAndPeace.html'),
                 string2book: timeouted(string2book),
             }),
             success: 'setBook',

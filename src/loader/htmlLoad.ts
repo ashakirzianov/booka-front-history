@@ -8,3 +8,10 @@ export function loadHtml(url: string): Promise<string> {
             return response.data;
         });
 }
+
+export function loadStaticString(fileName: string): Promise<string> {
+    return fetch(fileName)
+        .then(response => {
+            return response.text();
+        });
+}
