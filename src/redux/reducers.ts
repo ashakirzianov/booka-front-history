@@ -6,7 +6,15 @@ import { string2book } from "../xmlProcessing/azLibRu";
 import { loadBook } from "../loader/bookLoad";
 import { timeouted } from "../utils";
 import { loadStaticString } from "../loader/htmlLoad";
+import { loadStaticEpub } from '../loader/epubLoad';
 // import { url } from "../samples/warAndPeace";
+
+export function testLoader(): Promise<string> {
+    return loadStaticEpub('wap.epub')
+        .then(epub => {
+            return loadStaticString('warAndPeace.html');
+        });
+}
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
     loadBook: {
@@ -15,7 +23,7 @@ const book = buildPartialReducer<App['book'], ActionsTemplate>({
                 return s;
             },
             async: () => loadBook({
-                loadString: () => loadStaticString('warAndPeace.html'),
+                loadString: testLoader,
                 string2book: timeouted(string2book),
             }),
             success: 'setBook',
