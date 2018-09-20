@@ -1,15 +1,14 @@
 import axios from 'axios';
-import epubParser from '@gxl/epub-parser';
+import { convertEpubArrayBuffer } from '../epub/epubConverter';
+import { Book } from '../model/book';
 
-export function loadStaticEpub(fileName: string): Promise<any> {
+export function loadStaticEpub(fileName: string): Promise<Book> {
     return axios
         .get(fileName, {
             responseType: 'arraybuffer',
         })
         .then(response => {
-            const buffer = new Buffer(response.data);
-            const epub = epubParser(buffer);
-            return epub;
+            return convertEpubArrayBuffer(response.data);
         })
         ;
 }
