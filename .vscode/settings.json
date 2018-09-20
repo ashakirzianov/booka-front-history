@@ -2,9 +2,11 @@
     "jest.pathToJest": "node_modules/jest/bin/jest.js",
     "jest.pathToConfig": "jest.json",
     "cSpell.words": [
+        "Epub",
         "Nonbreaking",
         "Partialize",
         "Truthy",
+        "arraybuffer",
         "cellspacing",
         "devtool",
         "ello",

@@ -10,8 +10,7 @@ export function loadHtml(url: string): Promise<string> {
 }
 
 export function loadStaticString(fileName: string): Promise<string> {
-    return fetch(fileName)
-        .then(response => {
-            return response.text();
-        });
+    return axios
+        .get(fileName)
+        .then(response => response.data);
 }

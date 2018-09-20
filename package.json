@@ -9,6 +9,7 @@
     "eject": "react-scripts-ts eject"
   },
   "dependencies": {
+    "@gxl/epub-parser": "^1.0.6",
     "@rgrove/parse-xml": "^1.1.1",
     "@types/axios": "^0.14.0",
     "@types/redux-promise-middleware": "0.0.10",
