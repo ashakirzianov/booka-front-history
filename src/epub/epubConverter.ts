@@ -1,16 +1,27 @@
 import epubParser from '@gxl/epub-parser';
 import { Book } from '../model/book';
+import { defaultEpubConverter } from './defaultConverter';
+import { Epub } from './epubParser';
 
-export function convertEpubArrayBuffer(arrayBuffer: ArrayBuffer): Promise<Book> {
+export function arrayBuffer2epub(arrayBuffer: ArrayBuffer): Promise<Epub> {
+    const buffer = new Buffer(arrayBuffer);
+    return epubParser(buffer);
+}
+
+export function arrayBuffer2book(arrayBuffer: ArrayBuffer): Promise<Book> {
     const buffer = new Buffer(arrayBuffer);
     return epubParser(buffer)
-        .then(epub => {
-            return {
-                kind: 'book' as 'book',
-                title: epub.info.title,
-                author: epub.info.author,
-                content: epub.sections.slice(0, 10).map(section =>
-                    (section.toMarkdown ? section.toMarkdown() : "NOPE")),
-            };
-        });
+        .then(epub2book);
+}
+
+// TODO: make promise ?
+export function epub2book(epub: Epub): Promise<Book> {
+    const converter = resolveEpubConverter(epub);
+    const book = converter(epub);
+
+    return book;
+}
+
+export function resolveEpubConverter(epub: Epub): (epub: Epub) => Promise<Book> {
+    return defaultEpubConverter;
 }

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { convertEpubArrayBuffer } from '../epub/epubConverter';
+import { arrayBuffer2book } from '../epub/epubConverter';
 import { Book } from '../model/book';
 
 export function loadStaticEpub(fileName: string): Promise<Book> {
@@ -8,7 +8,7 @@ export function loadStaticEpub(fileName: string): Promise<Book> {
             responseType: 'arraybuffer',
         })
         .then(response => {
-            return convertEpubArrayBuffer(response.data);
+            return arrayBuffer2book(response.data);
         })
         ;
 }
