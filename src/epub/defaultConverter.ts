@@ -1,7 +1,7 @@
-import { Book, BookNode } from "../model/book";
+import { Book, BookNode, SubChapterNode } from "../model/book";
 import { Epub, Section } from "./epubParser";
 import { string2tree, XmlNodeDocument, XmlNode } from "../xmlProcessing/xmlNode";
-import { translate, textNode, choice, children, Result, some } from "../xmlProcessing/xml2json";
+import { translate, textNode, choice, children, Result, some, parsePath } from "../xmlProcessing/xml2json";
 
 export function defaultEpubConverter(epub: Epub): Promise<Book> {
     return Promise.resolve({
@@ -19,15 +19,19 @@ function convertSections(sections: Section[]): BookNode[] {
 function convertSingleSection(section: Section): BookNode {
     const tree = string2tree(section.htmlString);
     const node = tree2node(tree);
-    return node;
+    return {
+        kind: 'chapter' as 'chapter',
+        title: '',
+        content: node,
+    };
 }
 
-function tree2node(tree: XmlNodeDocument): BookNode {
+function tree2node(tree: XmlNodeDocument): SubChapterNode[] {
     const result = extractText(tree.children);
-    return result.success ? result.value : "CAN NOT PARSE";
+    return result.success ? result.value : ["CAN NOT PARSE"];
 }
 
-export const anyText = textNode(t => t);
+export const anyText = textNode(t => [t]);
 export const childrenText = children(extractText);
 
 const extractTextParser = translate(
@@ -35,8 +39,9 @@ const extractTextParser = translate(
         anyText,
         childrenText
     )),
-    texts => texts.reduce((acc, text) => acc + '\n' + text, ''),
+    arrays => arrays.reduce((result, arr) => result.concat(arr), []),
 );
-export function extractText(tree: XmlNode[]): Result<string> {
+
+export function extractText(tree: XmlNode[]): Result<string[]> {
     return extractTextParser(tree);
 }
