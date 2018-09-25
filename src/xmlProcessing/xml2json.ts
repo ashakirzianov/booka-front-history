@@ -47,19 +47,44 @@ export const nodeType = (type: XmlNodeType) => firstNodePredicate(n => n.type ==
 export const nodeComment = (content: string) => firstNode(n =>
     isComment(n) && n.content === content
         ? n : null
+);
+
+function nameCompare(n1: string, n2: string) {
+    return caseInsensitiveEq(n1, n2);
+}
+
+function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
+    return Object.keys(attrs1).every(k =>
+        (attrs1[k] === attrs2[k])
+        || (!attrs1[k]) // TODO: consider implementing 'negative' comparison
     );
+}
 
 export const elementName = (name: string) => firstNode(n =>
-    isElement(n) && caseInsensitiveEq(n.name, name)
+    isElement(n) && nameCompare(n.name, name)
         ? n : null
-    );
+);
 export const elementAttributes = (attrs: XmlAttributes) => firstNode(n =>
-    isElement(n) && Object.keys(attrs).every(k => attrs[k] === n.attributes[k] || !attrs[k])
+    isElement(n) && attrsCompare(attrs, n.attributes)
         ? n : null
-    );
+);
 export const elementChildren = <T>(name: string, parser: Parser<T>) => translate(
     and(elementName(name), children(parser)),
     results => results[1]
+);
+
+export const element = <T = null>(arg: {
+    name?: string,
+    attrs?: XmlAttributes,
+    children?: Parser<T>,
+}) => and(
+    firstNode(n =>
+        isElement(n)
+            && (!arg.name || caseInsensitiveEq(n.name, arg.name))
+            && (!arg.attrs || attrsCompare(arg.attrs, n.attributes))
+            ? n : null
+    ),
+    arg.children ? children(arg.children) : x => success(null as any as T, []),
 );
 
 export const textNode = <T>(f: (text: string) => T | null) => firstNode(node =>
@@ -218,8 +243,8 @@ export function between<T>(left: Parser<any>, right: Parser<any>, inside: Parser
 
 export function skipToNode<T>(node: Parser<T>): Parser<T> {
     return projectLast(seq(
-            some(not(node)),
-            node,
+        some(not(node)),
+        node,
     ));
 }
 
