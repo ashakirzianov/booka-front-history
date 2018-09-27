@@ -116,7 +116,7 @@ function headerToLevel(h: number) {
     return translate(
         header(h),
         title => ({
-            kind: 'separator',
+            kind: 'separator' as 'separator',
             title: title,
             level: (h - 4),
         }),
