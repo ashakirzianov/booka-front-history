@@ -112,9 +112,34 @@ const titlePageP = parsePath(['html', 'body', 'div'], translate(
 
 // ---- Separator parser
 
+function headerToLevel(h: number) {
+    return translate(
+        header(h),
+        title => ({
+            kind: 'separator',
+            title: title,
+            level: (h - 4),
+        }),
+    );
+}
+const separatorHeaderP = choice(
+    headerToLevel(2),
+    headerToLevel(3),
+    headerToLevel(4),
+    headerToLevel(5),
+);
+
+const separatorP = translate(
+    and(
+        elementName('div'),
+        separatorHeaderP,
+    ),
+    ([_, sep]) => sep,
+);
+
 // ---- Section parser
 
-const contentP = some(titleDivP);
+const contentP = some(separatorP);
 const sectionP = choice(
     titlePageP,
     parsePath(['html', 'body', 'div'], contentP),
