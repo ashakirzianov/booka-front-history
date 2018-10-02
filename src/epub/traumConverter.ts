@@ -1,6 +1,6 @@
 import {
     Parser, elementName, and, translate, children,
-    textNode, oneOrMore, parsePath, element, choice, elementTranslate,
+    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -124,7 +124,7 @@ function headerToLevel(tag: string): number | null {
     return null;
 }
 
-const separatorP = translate(
+const separatorHeaderP = translate(
     and(
         elementTranslate(el => headerToLevel(el.name)),
         children(textNode(t => t)),
@@ -136,17 +136,49 @@ const separatorP = translate(
     }),
 );
 
-const separatorDivP = translate(
+const separatorP = translate(
     and(
         elementName('div'),
-        separatorP,
+        separatorHeaderP,
     ),
     ([_, sep]) => sep,
 );
 
+// ---- Paragraph
+
+const textP = textNode(t => t);
+const spanP = translate(
+    and(
+        elementName('span'),
+        children(textP),
+    ),
+    ([_, t]) => t,
+);
+// TODO: implement links
+const linkP = translate(
+    elementName('a'),
+    _ => '',
+);
+
+const paragraphContentP = translate(
+    some(choice(textP, spanP, linkP)),
+    texts => texts.reduce((acc, t) => acc + t, ''),
+);
+
+const paragraphP = translate(
+    and(
+        elementName('p'),
+        children(paragraphContentP),
+    ),
+    ([_, text]) => ({
+        kind: 'paragraph' as 'paragraph',
+        text: text,
+    }),
+);
+
 // ---- Normal page
 
-const pageContentP = separatorDivP;
+const pageContentP = choice(paragraphP, separatorP);
 
 const normalPageP = parsePath(['html', 'body'], translate(
     and(
