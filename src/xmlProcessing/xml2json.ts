@@ -193,17 +193,17 @@ export function choice<TI>(...ps: Array<Parser<TI, any>>): Parser<TI, any[]> {
     };
 }
 
-export function projectLast<T1, T2>(parser: XmlParser<[T1, T2]>): XmlParser<T2>;
-export function projectLast<T1, T2, T3>(parser: XmlParser<[T1, T2, T3]>): XmlParser<T3>;
-export function projectLast(parser: XmlParser<any>): XmlParser<any> {
+export function projectLast<TI, T1, T2>(parser: Parser<TI, [T1, T2]>): Parser<TI, T2>;
+export function projectLast<TI, T1, T2, T3>(parser: Parser<TI, [T1, T2, T3]>): Parser<TI, T3>;
+export function projectLast<TI>(parser: Parser<TI, any>): Parser<TI, any> {
     return translate(parser, result => result[result.length - 1] as any);
 }
 
-export function some<T>(parser: XmlParser<T>): XmlParser<T[]> {
+export function some<TI, T>(parser: Parser<TI, T>): Parser<TI, T[]> {
     return input => {
         const results: T[] = [];
         let currentInput = input;
-        let currentResult: Result<XmlNode, T>;
+        let currentResult: Result<TI, T>;
         do {
             currentResult = parser(currentInput);
             if (currentResult.success) {
@@ -216,11 +216,11 @@ export function some<T>(parser: XmlParser<T>): XmlParser<T[]> {
     };
 }
 
-export function oneOrMore<T>(parser: XmlParser<T>): XmlParser<T[]> {
+export function oneOrMore<TI, T>(parser: Parser<TI, T>): Parser<TI, T[]> {
     return translate(some(parser), nodes => nodes.length > 0 ? nodes : null);
 }
 
-export function translate<From, To>(parser: XmlParser<From>, f: (from: From) => To | null): XmlParser<To> {
+export function translate<TI, From, To>(parser: Parser<TI, From>, f: (from: From) => To | null): Parser<TI, To> {
     return input => {
         const from = parser(input);
         return from.success
