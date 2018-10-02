@@ -29,7 +29,7 @@ export function split<T>(arr: T[]) {
     };
 }
 
-export function firstNode<T>(f: (n: XmlNode) => T | null): XmlParser<T> {
+export function firstNode<TIn = XmlNode, TOut = XmlNode>(f: (n: TIn) => TOut | null): Parser<TIn, TOut> {
     return input => {
         const list = split(input);
         const result = list.head && f(list.head) || null;
@@ -40,11 +40,11 @@ export function firstNode<T>(f: (n: XmlNode) => T | null): XmlParser<T> {
     };
 }
 
-export const firstNodePredicate = (p: (n: XmlNode) => boolean) => firstNode(n => p(n) ? n : null);
+export const firstNodePredicate = <TIn>(p: (n: TIn) => boolean) => firstNode<TIn, TIn>(n => p(n) ? n : null);
 
 export const nodeAny = firstNode(x => x);
-export const nodeType = (type: XmlNodeType) => firstNodePredicate(n => n.type === type);
-export const nodeComment = (content: string) => firstNode(n =>
+export const nodeType = (type: XmlNodeType) => firstNodePredicate<XmlNode>(n => n.type === type);
+export const nodeComment = (content: string) => firstNode<XmlNode, XmlNode>(n =>
     isComment(n) && n.content === content
         ? n : null
 );
