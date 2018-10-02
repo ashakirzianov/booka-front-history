@@ -175,10 +175,12 @@ export function seq<TI>(...ps: Array<Parser<TI, any>>): Parser<TI, any[]> {
     };
 }
 
-export function choice<T1, T2>(p1: XmlParser<T1>, p2: XmlParser<T2>): XmlParser<T1 | T2>;
-export function choice<T1, T2, T3>(p1: XmlParser<T1>, p2: XmlParser<T2>, p3: XmlParser<T3>): XmlParser<T1 | T2 | T3>;
-export function choice<T1, T2, T3, T4>(p1: XmlParser<T1>, p2: XmlParser<T2>, p3: XmlParser<T3>, p4: XmlParser<T4>): XmlParser<T1 | T2 | T3 | T4>;
-export function choice(...ps: Array<XmlParser<any>>): XmlParser<any[]> {
+export function choice<TI, T1, T2>(p1: Parser<TI, T1>, p2: Parser<TI, T2>): Parser<TI, T1 | T2>;
+export function choice<TI, T1, T2, T3>(p1: Parser<TI, T1>, p2: Parser<TI, T2>, p3: Parser<TI, T3>): Parser<TI, T1 | T2 | T3>;
+export function choice<TI, T1, T2, T3, T4>(
+    p1: Parser<TI, T1>, p2: Parser<TI, T2>, p3: Parser<TI, T3>, p4: Parser<TI, T4>
+): Parser<TI, T1 | T2 | T3 | T4>;
+export function choice<TI>(...ps: Array<Parser<TI, any>>): Parser<TI, any[]> {
     return input => {
         for (let i = 0; i < ps.length; i++) {
             const result = ps[i](input);
