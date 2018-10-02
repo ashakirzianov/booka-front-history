@@ -1,5 +1,5 @@
 import {
-    Parser, elementName, and, translate, children,
+    XmlParser, elementName, and, translate, children,
     textNode, oneOrMore, parsePath, element, choice, elementTranslate, some,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
@@ -71,7 +71,7 @@ type StructureElement = Separator | Paragraph | TitlePage;
 
 // ---- Helpers
 
-function header(level: number): Parser<string> {
+function header(level: number): XmlParser<string> {
     return translate(
         and(
             elementName('h' + level.toString()),

@@ -42,6 +42,6 @@ const extractTextParser = translate(
     arrays => arrays.reduce((result, arr) => result.concat(arr), []),
 );
 
-export function extractText(tree: XmlNode[]): Result<string[]> {
+export function extractText(tree: XmlNode[]): Result<XmlNode, string[]> {
     return extractTextParser(tree);
 }
