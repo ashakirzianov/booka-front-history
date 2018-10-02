@@ -1,8 +1,8 @@
-import { success, Input, skipToNode, elementName, parsePath, children, and } from "./xml2json";
-import { xmlElement } from "./xmlNode";
+import { success, skipToNode, elementName, parsePath, children, and } from "./xml2json";
+import { xmlElement, XmlNode } from "./xmlNode";
 
-export const trueParser = <T>(result: T) => (input: Input) => success(result, input);
-export const falseParser = (input: Input) => fail();
+export const trueParser = <T>(result: T) => (input: XmlNode[]) => success(result, input);
+export const falseParser = (input: XmlNode[]) => fail();
 
 it('skipToNode', () => {
     const input = [
