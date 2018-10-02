@@ -2,8 +2,8 @@ import { XmlNode, hasChildren, XmlNodeType, isElement, isComment, XmlAttributes,
 import { caseInsensitiveEq } from "./xmlUtils";
 import { letExp } from "../utils";
 
-export type Parser<TOut, TIn = XmlNode> = (input: TIn[]) => Result<TIn, TOut>;
-export type XmlParser<TIn = XmlNode> = Parser<TIn, XmlNode>;
+export type Parser<TIn, TOut> = (input: TIn[]) => Result<TIn, TOut>;
+export type XmlParser<TOut = XmlNode> = Parser<XmlNode, TOut>;
 export type Success<In, Out> = {
     value: Out,
     next: In[],
@@ -122,7 +122,7 @@ export function parent<T>(parser: XmlParser<T>): XmlParser<T> {
     };
 }
 
-export function not(parser: XmlParser<any>): XmlParser<XmlNode> {
+export function not<T>(parser: Parser<T, any>): Parser<T, T> {
     return input => {
         const list = split(input);
         if (list.head) {
@@ -135,10 +135,10 @@ export function not(parser: XmlParser<any>): XmlParser<XmlNode> {
     };
 }
 
-export function and<T1, T2>(p1: XmlParser<T1>, p2: XmlParser<T2>): XmlParser<[T1, T2]>;
-export function and<T1, T2, T3>(p1: XmlParser<T1>, p2: XmlParser<T2>, p3: XmlParser<T3>): XmlParser<[T1, T2, T3]>;
-export function and<T1, T2, T3, T4>(p1: XmlParser<T1>, p2: XmlParser<T2>, p3: XmlParser<T3>, p4: XmlParser<T4>): XmlParser<[T1, T2, T3, T4]>;
-export function and(...ps: Array<XmlParser<any>>): XmlParser<any[]> {
+export function and<TI, T1, T2>(p1: Parser<TI, T1>, p2: Parser<TI, T2>): Parser<TI, [T1, T2]>;
+export function and<TI, T1, T2, T3>(p1: Parser<TI, T1>, p2: Parser<TI, T2>, p3: Parser<TI, T3>): Parser<TI, [T1, T2, T3]>;
+export function and<TI, T1, T2, T3, T4>(p1: Parser<TI, T1>, p2: Parser<TI, T2>, p3: Parser<TI, T3>, p4: Parser<TI, T4>): Parser<TI, [T1, T2, T3, T4]>;
+export function and<T>(...ps: Array<Parser<T, any>>): Parser<T, any[]> {
     return input => {
         const results = [];
         let lastInput = input;
