@@ -1,4 +1,4 @@
-import { XmlNode, hasChildren, XmlNodeType, isElement, isComment, XmlAttributes } from "./xmlNode";
+import { XmlNode, hasChildren, XmlNodeType, isElement, isComment, XmlAttributes, XmlNodeElement } from "./xmlNode";
 import { caseInsensitiveEq } from "./xmlUtils";
 import { letExp } from "../utils";
 
@@ -71,6 +71,9 @@ export const elementAttributes = (attrs: XmlAttributes) => firstNode(n =>
 export const elementChildren = <T>(name: string, parser: Parser<T>) => translate(
     and(elementName(name), children(parser)),
     results => results[1]
+);
+export const elementTranslate = <T>(f: (e: XmlNodeElement) => T | null) => firstNode(n =>
+    isElement(n) ? f(n) : null
 );
 
 export const element = <T = null>(arg: {

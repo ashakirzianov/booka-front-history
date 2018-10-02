@@ -1,6 +1,6 @@
 import {
     Parser, elementName, and, translate, children,
-    textNode, oneOrMore, parsePath, some, element, choice,
+    textNode, oneOrMore, parsePath, element, choice, elementTranslate,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -101,46 +101,64 @@ const titleDivP = translate(
         },
 );
 
-const titlePageP = parsePath(['html', 'body', 'div'], translate(
-    element({
-        name: 'div',
-        attrs: { class: undefined },
-        children: titleDivP,
-    }),
-    ([_, titlePage]) => [titlePage],
+const titlePageP = parsePath(['html', 'body'], translate(
+    and(
+        elementTranslate(el => el.attributes.class === undefined ? el : null),
+        element({
+            name: 'div',
+            attrs: { class: undefined },
+            children: titleDivP,
+        })
+    ),
+    ([_, [__, titlePage]]) => [titlePage],
 ));
 
 // ---- Separator parser
 
-function headerToLevel(h: number) {
-    return translate(
-        header(h),
-        title => ({
-            kind: 'separator' as 'separator',
-            title: title,
-            level: (h - 4),
-        }),
-    );
+function headerToLevel(tag: string): number | null {
+    if (tag.startsWith('h')) {
+        const levelString = tag.substr(1);
+        const level = Number(levelString);
+        return isNaN(level) ? null : level;
+    }
+    return null;
 }
-const separatorHeaderP = choice(
-    headerToLevel(2),
-    headerToLevel(3),
-    headerToLevel(4),
-    headerToLevel(5),
-);
 
 const separatorP = translate(
     and(
+        elementTranslate(el => headerToLevel(el.name)),
+        children(textNode(t => t)),
+    ),
+    ([level, title]) => ({
+        kind: 'separator' as 'separator',
+        title: title,
+        level: 4 - level,
+    }),
+);
+
+const separatorDivP = translate(
+    and(
         elementName('div'),
-        separatorHeaderP,
+        separatorP,
     ),
     ([_, sep]) => sep,
 );
 
+// ---- Normal page
+
+const pageContentP = separatorDivP;
+
+const normalPageP = parsePath(['html', 'body'], translate(
+    and(
+        elementTranslate(el => el.attributes.class !== undefined ? el : null),
+        pageContentP,
+    ),
+    ([_, page]) => [page],
+));
+
 // ---- Section parser
 
-const contentP = some(separatorP);
 const sectionP = choice(
+    normalPageP,
     titlePageP,
-    parsePath(['html', 'body', 'div'], contentP),
 );
