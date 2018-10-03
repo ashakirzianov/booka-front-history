@@ -29,8 +29,8 @@ export function split<T>(arr: T[]) {
     };
 }
 
-export function firstNode<TIn = XmlNode, TOut = XmlNode>(f: (n: TIn) => TOut | null): Parser<TIn, TOut> {
-    return input => {
+export function firstNodeGeneric<TIn = XmlNode>() {
+    return <TOut>(f: (n: TIn) => TOut | null) => (input: TIn[]) => {
         const list = split(input);
         const result = list.head && f(list.head) || null;
         return result === null
@@ -40,11 +40,13 @@ export function firstNode<TIn = XmlNode, TOut = XmlNode>(f: (n: TIn) => TOut | n
     };
 }
 
-export const firstNodePredicate = <TIn>(p: (n: TIn) => boolean) => firstNode<TIn, TIn>(n => p(n) ? n : null);
+const firstNodeXml = firstNodeGeneric<XmlNode>();
 
-export const nodeAny = firstNode(x => x);
+export const firstNodePredicate = <TIn>(p: (n: TIn) => boolean) => firstNodeGeneric<TIn>()(n => p(n) ? n : null);
+
+export const nodeAny = firstNodeXml(x => x);
 export const nodeType = (type: XmlNodeType) => firstNodePredicate<XmlNode>(n => n.type === type);
-export const nodeComment = (content: string) => firstNode<XmlNode, XmlNode>(n =>
+export const nodeComment = (content: string) => firstNodeXml(n =>
     isComment(n) && n.content === content
         ? n : null
 );
@@ -60,11 +62,11 @@ function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
     );
 }
 
-export const elementName = (name: string) => firstNode(n =>
+export const elementName = (name: string) => firstNodeXml(n =>
     isElement(n) && nameCompare(n.name, name)
         ? n : null
 );
-export const elementAttributes = (attrs: XmlAttributes) => firstNode(n =>
+export const elementAttributes = (attrs: XmlAttributes) => firstNodeXml(n =>
     isElement(n) && attrsCompare(attrs, n.attributes)
         ? n : null
 );
@@ -72,7 +74,7 @@ export const elementChildren = <T>(name: string, parser: XmlParser<T>) => transl
     and(elementName(name), children(parser)),
     results => results[1]
 );
-export const elementTranslate = <T>(f: (e: XmlNodeElement) => T | null) => firstNode(n =>
+export const elementTranslate = <T>(f: (e: XmlNodeElement) => T | null) => firstNodeXml(n =>
     isElement(n) ? f(n) : null
 );
 
@@ -81,7 +83,7 @@ export const element = <T = null>(arg: {
     attrs?: XmlAttributes,
     children?: XmlParser<T>,
 }) => and(
-    firstNode(n =>
+    firstNodeXml(n =>
         isElement(n)
             && (!arg.name || caseInsensitiveEq(n.name, arg.name))
             && (!arg.attrs || attrsCompare(arg.attrs, n.attributes))
@@ -90,7 +92,7 @@ export const element = <T = null>(arg: {
     arg.children ? children(arg.children) : x => success(null as any as T, []),
 );
 
-export const textNode = <T>(f: (text: string) => T | null) => firstNode(node =>
+export const textNode = <T>(f: (text: string) => T | null) => firstNodeXml(node =>
     node.type === 'text'
         ? f(node.text)
         : null

@@ -1,6 +1,6 @@
 import {
     XmlParser, elementName, and, translate, children,
-    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some,
+    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -44,8 +44,39 @@ function findTitlePage(structures: StructureElement[]): TitlePage | undefined {
     return structures.find(s => s.kind === 'title') as TitlePage;
 }
 
+const first = firstNodeGeneric<StructureElement>();
+
+function subpartParser<T extends BookNode>(level: number, content: Parser<StructureElement, T>) {
+    return choice(
+        translate(
+            seq(
+                first(se => se.kind === 'separator' && se.level === level ? se : null),
+                some(content),
+            ),
+            ([h, ps]) => ({
+                kind: 'subpart' as 'subpart',
+                title: h.title,
+                content: ps,
+            }),
+        ),
+        content,
+    );
+}
+
+const paragraphS = first(
+    se => se.kind === 'paragraph' ? se.text : null,
+);
+
+const h6S = subpartParser(-2, paragraphS);
+const h5S = subpartParser(-1, h6S);
+const h4S = subpartParser(0, h5S);
+
+const bookContentS = h4S;
+const book = some(bookContentS);
+
 function buildContent(structures: StructureElement[]): BookNode[] {
-    return [];
+    const result = book(structures);
+    return result.success ? result.value : [];
 }
 
 // ---- TypeDefs
