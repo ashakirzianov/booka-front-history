@@ -298,25 +298,21 @@ export function skipToNode<T>(node: XmlParser<T>): XmlParser<T> {
 }
 
 function parsePathHelper<T>(paths: string[], then: XmlParser<T>, input: XmlNode[]): Result<XmlNode, T> {
-    if (paths.length === 0) {
-        return then(input);
-    }
     const path = paths[0];
-    const head = input[0];
-    if (!head) {
-        return fail(`parse path: ${path}: empty input`);
-    }
-    if (!hasChildren(head)) {
-        return fail(`parse path: ${path}: no children`);
-    }
 
-    const child = head.children.find(ch =>
+    const child = input.find(ch =>
         ch.type === 'element' && nameCompare(ch.name, path));
     if (!child) {
         return fail(`parse path: ${path}: can't find child`);
     }
 
-    return parsePathHelper(paths.slice(1), then, [child]);
+    if (paths.length < 2) {
+        return report('parse path: then', then)([child]);
+    }
+
+    const nextInput = hasChildren(child) ? child.children : [];
+
+    return parsePathHelper(paths.slice(1), then, nextInput);
 }
 
 export function parsePath<T>(paths: string[], then: XmlParser<T>): XmlParser<T> {

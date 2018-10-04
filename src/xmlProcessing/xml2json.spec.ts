@@ -1,6 +1,7 @@
 import { success, skipToNode, elementName, parsePath, children, and, element } from "./xml2json";
 import { xmlElement, XmlNode } from "./xmlNode";
 import { htmlFragmentToNodes } from "./xmlUtils";
+import { expectSuccess } from "../testUtils";
 
 export const trueParser = <T>(result: T) => (input: XmlNode[]) => success(result, input);
 export const falseParser = (input: XmlNode[]) => fail();
@@ -34,11 +35,11 @@ it('pathParser', () => {
         ]),
     ])];
 
-    const parser = parsePath(['c', 'cb', 'cba'], elementName('cba'));
+    const parser = parsePath(['root', 'c', 'cb', 'cba'], elementName('cba'));
 
     const result = parser(input);
 
-    expect(result.success).toBeTruthy();
+    expectSuccess(result);
 });
 
 it('element', () => {

@@ -180,7 +180,7 @@ export const tree2book = parsePath(['html', 'body'], children(bodyParser));
 export function string2book(html: string) {
     const xmlString = html2xml(html);
     const xmlTree = string2tree(xmlString);
-    const bookResult = tree2book([xmlTree]);
+    const bookResult = tree2book(xmlTree.children);
 
     return bookResult.success
         ? bookResult.value
