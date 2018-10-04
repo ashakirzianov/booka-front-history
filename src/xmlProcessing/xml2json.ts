@@ -40,7 +40,7 @@ export function firstNodeGeneric<TIn = XmlNode>() {
     };
 }
 
-const firstNodeXml = firstNodeGeneric<XmlNode>();
+export const firstNodeXml = firstNodeGeneric<XmlNode>();
 
 export const firstNodePredicate = <TIn>(p: (n: TIn) => boolean) => firstNodeGeneric<TIn>()(n => p(n) ? n : null);
 

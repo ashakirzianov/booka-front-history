@@ -1,10 +1,11 @@
 import {
     XmlParser, elementName, and, translate, children,
-    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser,
+    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser, firstNodeXml,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
 import { string2tree, XmlNodeDocument } from "../xmlProcessing/xmlNode";
+import { filterUndefined } from "../utils";
 
 // ---- Converter
 
@@ -46,7 +47,7 @@ function findTitlePage(structures: StructureElement[]): TitlePage | undefined {
 
 const first = firstNodeGeneric<StructureElement>();
 
-function subpartParser<T extends BookNode>(level: number, content: Parser<StructureElement, T>) {
+function chapterParser<T extends BookNode>(level: number, content: Parser<StructureElement, T>): Parser<StructureElement, BookNode> {
     return choice(
         translate(
             seq(
@@ -68,12 +69,19 @@ const paragraphS = first(
     se => se.kind === 'paragraph' ? se.text : null,
 );
 
-const h6S = subpartParser(-2, paragraphS);
-const h5S = subpartParser(-1, h6S);
-const h4S = subpartParser(0, h5S);
+const h6S = chapterParser(-2, paragraphS);
+const h5S = chapterParser(-1, h6S);
+const h4S = chapterParser(0, h5S);
+const h3S = chapterParser(1, h4S);
+const h2S = chapterParser(2, h3S);
+const h1S = chapterParser(3, h2S);
 
-const bookContentS = h4S;
-const book = some(bookContentS);
+const bookContentS = h1S;
+const skipOne = first(n => undefined);
+const book = translate(
+    some(choice(bookContentS, skipOne)),
+    nodes => filterUndefined(nodes),
+);
 
 function buildContent(structures: StructureElement[]): BookNode[] {
     const result = book(structures);
@@ -210,14 +218,16 @@ const paragraphP = translate(
 
 // ---- Normal page
 
-const pageContentP = choice(paragraphP, separatorP);
+const skipOneP = firstNodeXml(n => undefined);
+
+const pageContentP = some(choice(paragraphP, separatorP, skipOneP));
 
 const normalPageP = parsePath(['html', 'body'], translate(
     and(
         elementTranslate(el => el.attributes.class !== undefined ? el : null),
-        pageContentP,
+        children(pageContentP),
     ),
-    ([_, page]) => [page],
+    ([_, content]) => filterUndefined(content),
 ));
 
 // ---- Section parser
