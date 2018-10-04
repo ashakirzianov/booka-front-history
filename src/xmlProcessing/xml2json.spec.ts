@@ -1,5 +1,6 @@
-import { success, skipToNode, elementName, parsePath, children, and } from "./xml2json";
+import { success, skipToNode, elementName, parsePath, children, and, element } from "./xml2json";
 import { xmlElement, XmlNode } from "./xmlNode";
+import { htmlFragmentToNodes } from "./xmlUtils";
 
 export const trueParser = <T>(result: T) => (input: XmlNode[]) => success(result, input);
 export const falseParser = (input: XmlNode[]) => fail();
@@ -35,6 +36,22 @@ it('pathParser', () => {
 
     const parser = parsePath(['c', 'cb', 'cba'], elementName('cba'));
 
+    const result = parser(input);
+
+    expect(result.success).toBeTruthy();
+});
+
+it('element', () => {
+    const xml = `<div class="title2">
+    <h2>Author</h2>
+    <h2>Line 2</h2>
+    <h2>Book Title</h2>
+  </div>`;
+    const input = htmlFragmentToNodes(xml);
+    const parser = element({
+        name: 'div',
+        attrs: { class: 'title2' },
+    });
     const result = parser(input);
 
     expect(result.success).toBeTruthy();

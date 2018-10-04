@@ -1,5 +1,5 @@
 import { XmlNode, hasChildren, XmlNodeType, isElement, isComment, XmlAttributes, XmlNodeElement } from "./xmlNode";
-import { caseInsensitiveEq } from "./xmlUtils";
+import { caseInsensitiveEq, isWhitespaces } from "./xmlUtils";
 import { letExp } from "../utils";
 
 export type Parser<TIn, TOut> = (input: TIn[]) => Result<TIn, TOut>;
@@ -41,6 +41,11 @@ export function firstNodeGeneric<TIn = XmlNode>() {
 }
 
 export const firstNodeXml = firstNodeGeneric<XmlNode>();
+
+export function ignoreWhitespaces<T>(parser: XmlParser<T>): XmlParser<T> {
+    return input => parser(input.filter(node =>
+        node.type !== 'text' || !isWhitespaces(node.text)));
+}
 
 export const firstNodePredicate = <TIn>(p: (n: TIn) => boolean) => firstNodeGeneric<TIn>()(n => p(n) ? n : null);
 

@@ -1,6 +1,6 @@
 import {
     XmlParser, elementName, and, translate, children,
-    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser, firstNodeXml,
+    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser, firstNodeXml, ignoreWhitespaces,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -123,8 +123,8 @@ function header(level: number): XmlParser<string> {
 
 // ---- Title page
 
-const titleLinesP = oneOrMore(header(2));
-const titleDivP = translate(
+const titleLinesP = ignoreWhitespaces(oneOrMore(header(2)));
+export const titleDivP = translate(
     element({
         name: 'div',
         attrs: { class: 'title2' },
@@ -141,17 +141,17 @@ const titleDivP = translate(
         },
 );
 
-const titlePageP = parsePath(['html', 'body'], translate(
+export const titlePageP = parsePath(['html', 'body'], ignoreWhitespaces(translate(
     and(
         elementTranslate(el => el.attributes.class === undefined ? el : null),
         element({
             name: 'div',
             attrs: { class: undefined },
-            children: titleDivP,
+            children: ignoreWhitespaces(titleDivP),
         })
     ),
     ([_, [__, titlePage]]) => [titlePage],
-));
+)));
 
 // ---- Separator parser
 
@@ -222,7 +222,7 @@ const skipOneP = firstNodeXml(n => undefined);
 
 const pageContentP = some(choice(paragraphP, separatorP, skipOneP));
 
-const normalPageP = parsePath(['html', 'body'], translate(
+export const normalPageP = parsePath(['html', 'body'], translate(
     and(
         elementTranslate(el => el.attributes.class !== undefined ? el : null),
         children(pageContentP),
@@ -232,7 +232,7 @@ const normalPageP = parsePath(['html', 'body'], translate(
 
 // ---- Section parser
 
-const sectionP = choice(
+export const sectionP = choice(
     normalPageP,
     titlePageP,
 );
