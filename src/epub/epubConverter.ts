@@ -2,6 +2,7 @@ import epubParser from '@gxl/epub-parser';
 import { Book } from '../model/book';
 import { defaultEpubConverter } from './defaultConverter';
 import { Epub } from './epubParser';
+import { traumEpubConverter } from './traumConverter';
 
 export function arrayBuffer2epub(arrayBuffer: ArrayBuffer): Promise<Epub> {
     const buffer = new Buffer(arrayBuffer);
@@ -23,5 +24,5 @@ export function epub2book(epub: Epub): Promise<Book> {
 }
 
 export function resolveEpubConverter(epub: Epub): (epub: Epub) => Promise<Book> {
-    return defaultEpubConverter;
+    return traumEpubConverter || defaultEpubConverter;
 }

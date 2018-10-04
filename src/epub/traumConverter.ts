@@ -9,7 +9,7 @@ import { filterUndefined } from "../utils";
 
 // ---- Converter
 
-export function defaultEpubConverter(epub: Epub): Promise<Book> {
+export function traumEpubConverter(epub: Epub): Promise<Book> {
     return Promise.resolve(buildBook(epub));
 }
 
