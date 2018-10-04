@@ -1,5 +1,4 @@
 import * as React from 'react';
-// import * as Atoms from './Atoms';
 import { Text, View } from './Atoms';
 import { Comp } from './comp-utils';
 
