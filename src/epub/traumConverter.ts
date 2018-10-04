@@ -141,16 +141,18 @@ export const titleDivP = translate(
         },
 );
 
-export const titlePageP = report('In', parsePath(['html', 'body'], report('FOO', translate(
-    report('and', and(
-        report('et', elementTranslate(el => el.attributes.class === undefined ? el : null)),
+export const titlePageP = parsePath(['html', 'body', 'div'], translate(
+    and(
+        report('et', elementTranslate(el => {
+            return el.attributes.class === undefined ? el : null;
+        })),
         report('div', element({
             name: 'div',
             children: report('titleDivP', ignoreWhitespaces(titleDivP)),
         })),
-    )),
+    ),
     ([_, [__, titlePage]]) => [titlePage],
-))));
+));
 
 // ---- Separator parser
 
