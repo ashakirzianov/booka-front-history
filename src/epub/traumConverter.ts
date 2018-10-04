@@ -54,7 +54,8 @@ function subpartParser<T extends BookNode>(level: number, content: Parser<Struct
                 some(content),
             ),
             ([h, ps]) => ({
-                kind: 'subpart' as 'subpart',
+                kind: 'chapter' as 'chapter',
+                level: level,
                 title: h.title,
                 content: ps,
             }),

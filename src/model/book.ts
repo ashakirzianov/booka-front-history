@@ -5,24 +5,12 @@ export const isParagraph = typeGuard<BookNode, Paragraph>(bn => typeof bn === 's
 
 export type Chapter = {
     kind: "chapter",
-    title?: string,
-    content: SubChapterNode[],
-};
-
-export type Part = {
-    kind: "part",
+    level: number,
     title?: string,
     content: BookNode[],
 };
 
-export type Subpart = {
-    kind: "subpart",
-    title?: string,
-    content: SubChapterNode[],
-};
-
-export type BookNode = Part | Chapter | Subpart | Paragraph | LoadingStub;
-export type SubChapterNode = Subpart | Paragraph | LoadingStub;
+export type BookNode = Chapter | Paragraph | LoadingStub;
 
 export type Book = {
     kind: "book",

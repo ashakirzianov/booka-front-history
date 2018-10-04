@@ -17,7 +17,7 @@ import {
     XmlParser,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
-import { Chapter, SubChapterNode, Part } from '../model/book';
+import { Chapter, BookNode } from '../model/book';
 
 // ---------- html2xml
 
@@ -125,8 +125,9 @@ export const chapter: XmlParser<Chapter> = translate(
     seq(headline, junkAtTheBeginning, oneOrMore(projectLast(and(not(headline), choice(paragraph, skipParser))))),
     ([head, junk, pars]) => ({
         kind: 'chapter' as 'chapter',
+        level: 0,
         title: head.text,
-        content: pars.filter(n => n) as SubChapterNode[],
+        content: pars.filter(n => n) as BookNode[],
     }),
 );
 
@@ -136,10 +137,11 @@ export const partInfo = translate(
     headlineLevel(1),
     text => text.replace(/\* ([^\*]*) \*/, '$1'),
 );
-export const part: XmlParser<Part> = translate(
+export const part: XmlParser<Chapter> = translate(
     seq(partInfo, junkAtTheBeginning, oneOrMore(chapter)),
     ([head, junk, chapters]) => ({
-        kind: 'part' as 'part',
+        kind: 'chapter' as 'chapter',
+        level: 1,
         title: head,
         content: chapters,
     }),

@@ -1,4 +1,4 @@
-import { Book, BookNode, SubChapterNode } from "../model/book";
+import { Book, BookNode } from "../model/book";
 import { Epub, Section } from "./epubParser";
 import { string2tree, XmlNodeDocument, XmlNode } from "../xmlProcessing/xmlNode";
 import { translate, textNode, choice, children, Result, some } from "../xmlProcessing/xml2json";
@@ -21,12 +21,13 @@ function convertSingleSection(section: Section): BookNode {
     const node = tree2node(tree);
     return {
         kind: 'chapter' as 'chapter',
+        level: 0,
         title: '',
         content: node,
     };
 }
 
-function tree2node(tree: XmlNodeDocument): SubChapterNode[] {
+function tree2node(tree: XmlNodeDocument): BookNode[] {
     const result = extractText(tree.children);
     return result.success ? result.value : ["CAN NOT PARSE"];
 }
