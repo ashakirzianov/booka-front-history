@@ -264,7 +264,7 @@ export function translate<TI, From, To>(parser: Parser<TI, From>, f: (from: From
     };
 }
 
-export function report<TIn, TOut>(parser: Parser<TIn, TOut>, tag: string): Parser<TIn, TOut> {
+export function report<TIn, TOut>(tag: string, parser: Parser<TIn, TOut>): Parser<TIn, TOut> {
     return (input: TIn[]) => {
         const result = parser(input);
         return result.success ? result : fail({
@@ -297,11 +297,28 @@ export function skipToNode<T>(node: XmlParser<T>): XmlParser<T> {
     ));
 }
 
-export function parsePath<T>(path: string[], then: XmlParser<T>): XmlParser<T> {
-    const parser = path.reduceRight((acc, pc) =>
-        children(skipToNode(
-            projectLast(and(elementName(pc), acc)))),
-        then as any);
+function parsePathHelper<T>(paths: string[], then: XmlParser<T>, input: XmlNode[]): Result<XmlNode, T> {
+    if (paths.length === 0) {
+        return then(input);
+    }
+    const path = paths[0];
+    const head = input[0];
+    if (!head) {
+        return fail(`parse path: ${path}: empty input`);
+    }
+    if (!hasChildren(head)) {
+        return fail(`parse path: ${path}: no children`);
+    }
 
-    return parser;
+    const child = head.children.find(ch =>
+        ch.type === 'element' && nameCompare(ch.name, path));
+    if (!child) {
+        return fail(`parse path: ${path}: can't find child`);
+    }
+
+    return parsePathHelper(paths.slice(1), then, [child]);
+}
+
+export function parsePath<T>(paths: string[], then: XmlParser<T>): XmlParser<T> {
+    return (input: XmlNode[]) => parsePathHelper(paths, then, input);
 }

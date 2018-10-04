@@ -1,6 +1,6 @@
 import {
     XmlParser, elementName, and, translate, children,
-    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser, firstNodeXml, ignoreWhitespaces,
+    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser, firstNodeXml, ignoreWhitespaces, report,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -141,17 +141,16 @@ export const titleDivP = translate(
         },
 );
 
-export const titlePageP = parsePath(['html', 'body'], ignoreWhitespaces(translate(
-    and(
-        elementTranslate(el => el.attributes.class === undefined ? el : null),
-        element({
+export const titlePageP = report('In', parsePath(['html', 'body'], report('FOO', translate(
+    report('and', and(
+        report('et', elementTranslate(el => el.attributes.class === undefined ? el : null)),
+        report('div', element({
             name: 'div',
-            attrs: { class: undefined },
-            children: ignoreWhitespaces(titleDivP),
-        })
-    ),
+            children: report('titleDivP', ignoreWhitespaces(titleDivP)),
+        })),
+    )),
     ([_, [__, titlePage]]) => [titlePage],
-)));
+))));
 
 // ---- Separator parser
 

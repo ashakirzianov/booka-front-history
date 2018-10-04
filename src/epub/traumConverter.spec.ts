@@ -1,6 +1,6 @@
 import { string2tree } from "../xmlProcessing/xmlNode";
 import { sectionP, titlePageP, titleDivP } from "./traumConverter";
-import { XmlParser } from "../xmlProcessing/xml2json";
+import { XmlParser, Result, Fail } from "../xmlProcessing/xml2json";
 
 /* spellchecker:disable */
 export const titlePageHtml = `<?xml version="1.0" encoding="utf-8"?>
@@ -37,15 +37,20 @@ function stringParser<T>(xmlNodeParser: XmlParser<T>) {
     };
 }
 
+function expectSuccess<TIn, TOut>(result: Result<TIn, TOut>) {
+    const failReason = (result as Fail).reason;
+    expect(failReason).toBeUndefined();
+}
+
 describe('Example parsing', () => {
     it('Section parse title', () => {
         const result = stringParser(sectionP)(titlePageHtml);
-        expect(result.success).toBeTruthy();
+        expectSuccess(result);
     });
 
     it('Title parse title', () => {
         const result = stringParser(titlePageP)(titlePageHtml);
-        expect(result.success).toBeTruthy();
+        expectSuccess(result);
     });
 
     it('Title div parser', () => {
