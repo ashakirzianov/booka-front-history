@@ -9,13 +9,18 @@ export type Success<In, Out> = {
     next: In[],
     success: true,
 };
+export type FailReasonSingle = string;
+export type FailReasonCompound = { reasons: FailReason[] };
+export type FailReasonTagged = { tag: string, reason: FailReason };
+export type FailReason = FailReasonSingle | FailReasonCompound | FailReasonTagged;
 export type Fail = {
     success: false,
+    reason: FailReason,
 };
 export type Result<In, Out> = Success<In, Out> | Fail;
 
-export function fail(): Fail {
-    return { success: false };
+export function fail(reason: FailReason): Fail {
+    return { success: false, reason: reason };
 }
 
 export function success<TIn, TOut>(value: TOut, next: TIn[]): Success<TIn, TOut> {
@@ -32,9 +37,12 @@ export function split<T>(arr: T[]) {
 export function firstNodeGeneric<TIn = XmlNode>() {
     return <TOut>(f: (n: TIn) => TOut | null) => (input: TIn[]) => {
         const list = split(input);
-        const result = list.head && f(list.head) || null;
+        if (!list.head) {
+            return fail('first node: empty input');
+        }
+        const result = f(list.head);
         return result === null
-            ? fail()
+            ? fail('first node: func returned null')
             : success(result, list.tail)
             ;
     };
@@ -106,39 +114,52 @@ export const textNode = <T>(f: (text: string) => T | null) => firstNodeXml(node 
 export function children<T>(parser: XmlParser<T>): XmlParser<T> {
     return input => {
         const list = split(input);
-        if (list.head && hasChildren(list.head)) {
-            const result = parser(list.head.children);
-            if (result.success) {
-                return success(result.value, list.tail);
-            }
+        if (!list.head) {
+            return fail('children: empty input');
         }
-        return fail();
+        if (!hasChildren(list.head)) {
+            return fail('children: no children');
+        }
+
+        const result = parser(list.head.children);
+        if (result.success) {
+            return success(result.value, list.tail);
+        } else {
+            return result;
+        }
     };
 }
 
 export function parent<T>(parser: XmlParser<T>): XmlParser<T> {
     return input => {
         const list = split(input);
-        if (list.head && list.head.parent) {
-            const result = parser([list.head.parent]);
-            if (result.success) {
-                return success(result.value, list.tail);
-            }
+        if (!list.head) {
+            return fail('parent: empty input');
         }
-        return fail();
+        if (!list.head.parent) {
+            return fail('parent: no parent');
+        }
+
+        const result = parser([list.head.parent]);
+        if (result.success) {
+            return success(result.value, list.tail);
+        } else {
+            return result;
+        }
     };
 }
 
 export function not<T>(parser: Parser<T, any>): Parser<T, T> {
     return input => {
         const list = split(input);
-        if (list.head) {
-            const result = parser(input);
-            if (!result.success) {
-                return success(list.head, list.tail);
-            }
+        if (!list.head) {
+            return fail('not: empty input');
         }
-        return fail();
+
+        const result = parser(input);
+        return !result.success
+            ? success(list.head, list.tail)
+            : fail('not: parser succeed');
     };
 }
 
@@ -189,14 +210,16 @@ export function choice<TI, T1, T2, T3, T4>(
 ): Parser<TI, T1 | T2 | T3 | T4>;
 export function choice<TI>(...ps: Array<Parser<TI, any>>): Parser<TI, any[]> {
     return input => {
+        const failReasons = [];
         for (let i = 0; i < ps.length; i++) {
             const result = ps[i](input);
             if (result.success) {
                 return result;
             }
+            failReasons.push(result.reason);
         }
 
-        return fail();
+        return fail({ reasons: failReasons });
     };
 }
 
@@ -223,6 +246,7 @@ export function some<TI, T>(parser: Parser<TI, T>): Parser<TI, T[]> {
     };
 }
 
+// TODO: implement proper reason reporting
 export function oneOrMore<TI, T>(parser: Parser<TI, T>): Parser<TI, T[]> {
     return translate(some(parser), nodes => nodes.length > 0 ? nodes : null);
 }
@@ -231,9 +255,22 @@ export function translate<TI, From, To>(parser: Parser<TI, From>, f: (from: From
     return input => {
         const from = parser(input);
         return from.success
-            ? letExp(f(from.value), val => val === null ? fail() : success(val, from.next))
+            ? letExp(f(from.value), val =>
+                val === null
+                ? fail('translate: result rejected by transform function')
+                : success(val, from.next))
             : from
             ;
+    };
+}
+
+export function report<TIn, TOut>(parser: Parser<TIn, TOut>, tag: string): Parser<TIn, TOut> {
+    return (input: TIn[]) => {
+        const result = parser(input);
+        return result.success ? result : fail({
+            tag: tag,
+            reason: result.reason,
+        });
     };
 }
 
@@ -248,7 +285,7 @@ export function between<T>(left: XmlParser<any>, right: XmlParser<any>, inside: 
 
         return result.success
             ? inside(result.value[2])
-            : fail()
+            : result
             ;
     };
 }
