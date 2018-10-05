@@ -224,10 +224,10 @@ const skipOneP = firstNodeXml(n => undefined);
 const pageContentP = some(choice(paragraphP, separatorP, skipOneP));
 
 export const normalPageP = parsePath(['html', 'body'], translate(
-    and(
+    children(and(
         elementTranslate(el => el.attributes.class !== undefined ? el : null),
         children(pageContentP),
-    ),
+    )),
     ([_, content]) => filterUndefined(content),
 ));
 
