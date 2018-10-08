@@ -11,7 +11,7 @@ it('War and Peace short parsing', () => {
     expect(xmlTree).toBeDefined();
     expect(xmlTree.type).toBe('document');
 
-    const bookResult = tree2book([xmlTree]);
+    const bookResult = tree2book(xmlTree.children);
     expect(bookResult.success).toBeTruthy();
     const book = bookResult.success ? bookResult.value : throwExp(new Error("Failed to parse book"));
     expect(book.title).toBe('Война и мир. Том 1');

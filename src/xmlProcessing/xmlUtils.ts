@@ -1,6 +1,10 @@
 import { XmlNode, string2tree, hasChildren } from "./xmlNode";
 import { throwExp } from "../utils";
 
+export function isWhitespaces(input: string): boolean {
+    return input.match(/^\s*$/) ? true : false;
+}
+
 export function trimStart(input: string, trimSet: string) {
     return input.replace(new RegExp(`([${trimSet}]*)(.*)`), '$2');
 }
@@ -38,8 +42,9 @@ export function multiRun(f: (s: string) => string) {
     };
 }
 
-export function htmlFragmentToNodes(html: string, html2xml: (h: string) => string): XmlNode[] {
-    const xml = html2xml(`<html>${html}</html>`);
+export function htmlFragmentToNodes(html: string, html2xml?: (h: string) => string): XmlNode[] {
+    const properHtml = `<html>${html}</html>`;
+    const xml = html2xml ? html2xml(`<html>${html}</html>`) : properHtml;
     const document = string2tree(xml);
     const root = document.children[0];
 

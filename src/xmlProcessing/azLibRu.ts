@@ -2,22 +2,14 @@ import { combineFs, throwExp, letExp } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
 import {
-    translate, nodeAny, choice, some, nodeComment, parsePath,
-    elementChildren,
-    textNode,
-    seq,
-    elementName,
-    and,
-    children,
-    elementAttributes,
-    skipToNode,
-    projectLast,
-    not,
-    oneOrMore,
-    Parser,
+    nodeAny, nodeComment, parsePath, elementChildren, textNode, elementName,
+    children, elementAttributes, skipToNode, XmlParser,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
-import { Chapter, SubChapterNode, Part } from '../model/book';
+import { Chapter, BookNode } from '../model/book';
+import {
+    translate, some, choice, and, seq, oneOrMore, projectLast, not,
+} from './parserCombinators';
 
 // ---------- html2xml
 
@@ -121,12 +113,13 @@ export const paragraph = translate(
 
 // ------ Chapter
 
-export const chapter: Parser<Chapter> = translate(
+export const chapter: XmlParser<Chapter> = translate(
     seq(headline, junkAtTheBeginning, oneOrMore(projectLast(and(not(headline), choice(paragraph, skipParser))))),
     ([head, junk, pars]) => ({
         kind: 'chapter' as 'chapter',
+        level: 0,
         title: head.text,
-        content: pars.filter(n => n) as SubChapterNode[],
+        content: pars.filter(n => n) as BookNode[],
     }),
 );
 
@@ -136,10 +129,11 @@ export const partInfo = translate(
     headlineLevel(1),
     text => text.replace(/\* ([^\*]*) \*/, '$1'),
 );
-export const part: Parser<Part> = translate(
+export const part: XmlParser<Chapter> = translate(
     seq(partInfo, junkAtTheBeginning, oneOrMore(chapter)),
     ([head, junk, chapters]) => ({
-        kind: 'part' as 'part',
+        kind: 'chapter' as 'chapter',
+        level: 1,
         title: head,
         content: chapters,
     }),
@@ -178,7 +172,7 @@ export const tree2book = parsePath(['html', 'body'], children(bodyParser));
 export function string2book(html: string) {
     const xmlString = html2xml(html);
     const xmlTree = string2tree(xmlString);
-    const bookResult = tree2book([xmlTree]);
+    const bookResult = tree2book(xmlTree.children);
 
     return bookResult.success
         ? bookResult.value

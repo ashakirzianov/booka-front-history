@@ -156,3 +156,7 @@ export function timeouted<T, U>(f: (x: T) => U, timeout?: number): (x: T) => Pro
         }, timeout);
     });
 }
+
+export function filterUndefined<T>(arr: Array<T | undefined>): T[] {
+    return arr.filter(e => e !== undefined) as T[];
+}
