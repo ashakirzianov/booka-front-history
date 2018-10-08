@@ -1,7 +1,8 @@
 import { Book, BookNode } from "../model/book";
 import { Epub, Section } from "./epubParser";
 import { string2tree, XmlNodeDocument, XmlNode } from "../xmlProcessing/xmlNode";
-import { translate, textNode, choice, children, Result, some } from "../xmlProcessing/xml2json";
+import { textNode, children } from "../xmlProcessing/xml2json";
+import { translate, choice, some, Result } from "../xmlProcessing/parserCombinators";
 
 export function defaultEpubConverter(epub: Epub): Promise<Book> {
     return Promise.resolve({
