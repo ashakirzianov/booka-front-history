@@ -2,22 +2,14 @@ import { combineFs, throwExp, letExp } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
 import {
-    translate, nodeAny, choice, some, nodeComment, parsePath,
-    elementChildren,
-    textNode,
-    seq,
-    elementName,
-    and,
-    children,
-    elementAttributes,
-    skipToNode,
-    projectLast,
-    not,
-    oneOrMore,
-    XmlParser,
+    nodeAny, nodeComment, parsePath, elementChildren, textNode, elementName,
+    children, elementAttributes, skipToNode, XmlParser,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
 import { Chapter, BookNode } from '../model/book';
+import {
+    translate, some, choice, and, seq, oneOrMore, projectLast, not,
+} from './parserCombinators';
 
 // ---------- html2xml
 

@@ -1,13 +1,14 @@
 import {
-    XmlParser, elementName, and, translate, children,
-    textNode, oneOrMore, parsePath, element, choice,
-    elementTranslate, some, firstNodeGeneric, seq, Parser,
-    firstNodeXml, ignoreWhitespaces, report, afterWhitespaces,
+    XmlParser, elementName, children, textNode, ignoreWhitespaces, element, parsePath, elementTranslate, afterWhitespaces, firstNodeXml,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
 import { string2tree, XmlNodeDocument } from "../xmlProcessing/xmlNode";
 import { filterUndefined } from "../utils";
+import {
+    firstNodeGeneric, Parser, choice, translate,
+    seq, and, oneOrMore, report, some,
+} from "../xmlProcessing/parserCombinators";
 
 // ---- Converter
 

@@ -1,7 +1,8 @@
-import { success, skipToNode, elementName, parsePath, children, and, element } from "./xml2json";
+import { skipToNode, elementName, parsePath, children, element } from "./xml2json";
 import { xmlElement, XmlNode } from "./xmlNode";
 import { htmlFragmentToNodes } from "./xmlUtils";
 import { expectSuccess } from "../testUtils";
+import { success, and } from "./parserCombinators";
 
 export const trueParser = <T>(result: T) => (input: XmlNode[]) => success(result, input);
 export const falseParser = (input: XmlNode[]) => fail();
