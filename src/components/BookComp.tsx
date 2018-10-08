@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Comp } from './comp-utils';
 import { Book, BookNode, Chapter, Paragraph, isParagraph, LoadingStub } from '../model/book';
-import { TextBlock, Column, BookTitle, ChapterTitle } from './Elements';
+import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle } from './Elements';
 import { assertNever } from '../utils';
 
 const ParagraphComp: Comp<{ p: Paragraph }> = props =>
@@ -9,7 +9,11 @@ const ParagraphComp: Comp<{ p: Paragraph }> = props =>
 
 const ChapterComp: Comp<Chapter> = props =>
     <Column>
-        <ChapterTitle text={props.title || ''} />
+        {
+            props.level === 0 ? <ChapterTitle text={props.title} />
+                : props.level > 0 ? <PartTitle text={props.title} />
+                    : <SubpartTitle text={props.title} />
+        }
         {buildNodes(props.content)}
     </Column>;
 
