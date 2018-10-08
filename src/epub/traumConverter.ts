@@ -1,6 +1,8 @@
 import {
     XmlParser, elementName, and, translate, children,
-    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser, firstNodeXml, ignoreWhitespaces, report, afterWhitespaces,
+    textNode, oneOrMore, parsePath, element, choice,
+    elementTranslate, some, firstNodeGeneric, seq, Parser,
+    firstNodeXml, ignoreWhitespaces, report, afterWhitespaces,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
