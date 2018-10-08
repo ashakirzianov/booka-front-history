@@ -1,5 +1,5 @@
 import {
-    XmlParser, elementName, children, textNode, element, parsePath, elementTranslate, afterWhitespaces, firstNodeXml,
+    elementName, children, textNode, element, parsePath, elementTranslate, afterWhitespaces, firstNodeXml,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -10,90 +10,9 @@ import {
     seq, and, oneOrMore, report, some,
 } from "../xmlProcessing/parserCombinators";
 
-// ---- Converter
-
-export function traumEpubConverter(epub: Epub): Promise<Book> {
-    return Promise.resolve(buildBook(epub));
-}
-
-function section2structures(section: Section): StructureElement[] {
-    const tree = string2tree(section.htmlString);
-    const structures = tree2structures(tree);
-    return structures;
-}
-
-function tree2structures(tree: XmlNodeDocument): StructureElement[] {
-    const result = sectionP(tree.children);
-    return result.success ? result.value : [];
-}
-
-function buildBook(epub: Epub): Book {
-    const structures = epub.sections
-        .map(section2structures)
-        .reduce((acc, arr) => acc.concat(arr), [])
-        ;
-
-    const titlePage = findTitlePage(structures);
-    const content = buildContent(structures);
-
-    return {
-        kind: 'book' as 'book',
-        title: titlePage && titlePage.title || epub.info.title,
-        author: titlePage && titlePage.author || epub.info.author,
-        content: content,
-    };
-}
-
-function findTitlePage(structures: StructureElement[]): TitlePage | undefined {
-    return structures.find(s => s.kind === 'title') as TitlePage;
-}
-
-const first = firstNodeGeneric<StructureElement>();
-
-function chapterParser<T extends BookNode>(level: number, content: Parser<StructureElement, T>): Parser<StructureElement, BookNode> {
-    return choice(
-        translate(
-            seq(
-                first(se => se.kind === 'separator' && se.level === level ? se : null),
-                some(content),
-            ),
-            ([h, ps]) => ({
-                kind: 'chapter' as 'chapter',
-                level: level,
-                title: h.title,
-                content: ps,
-            }),
-        ),
-        content,
-    );
-}
-
-const paragraphS = first(
-    se => se.kind === 'paragraph' ? se.text : null,
-);
-
-const h6S = chapterParser(-2, paragraphS);
-const h5S = chapterParser(-1, h6S);
-const h4S = chapterParser(0, h5S);
-const h3S = chapterParser(1, h4S);
-const h2S = chapterParser(2, h3S);
-const h1S = chapterParser(3, h2S);
-
-const bookContentS = h1S;
-const skipOne = first(n => undefined);
-const book = translate(
-    some(choice(bookContentS, skipOne)),
-    nodes => filterUndefined(nodes),
-);
-
-function buildContent(structures: StructureElement[]): BookNode[] {
-    const result = book(structures);
-    return result.success ? result.value : [];
-}
-
 // ---- TypeDefs
 
-type Separator = {
+type Header = {
     kind: 'separator',
     title: string,
     level: number,
@@ -110,23 +29,98 @@ type TitlePage = {
     title?: string,
 };
 
-type StructureElement = Separator | Paragraph | TitlePage;
+type Element = Header | Paragraph | TitlePage;
 
-// ---- Helpers
+// ---- Converter
 
-function header(level: number): XmlParser<string> {
-    return translate(
-        and(
-            elementName('h' + level.toString()),
-            children(textNode(t => t)),
+export function traumEpubConverter(epub: Epub): Promise<Book> {
+    return Promise.resolve(buildBook(epub));
+}
+
+function section2elements(section: Section): Element[] {
+    const tree = string2tree(section.htmlString);
+    const structures = tree2elements(tree);
+    return structures;
+}
+
+function tree2elements(tree: XmlNodeDocument): Element[] {
+    const result = sectionP(tree.children);
+    return result.success ? result.value : [];
+}
+
+function buildBook(epub: Epub): Book {
+    const structures = epub.sections
+        .map(section2elements)
+        .reduce((acc, arr) => acc.concat(arr), [])
+        ;
+
+    const titlePage = findTitlePage(structures);
+    const content = buildContent(structures);
+
+    return {
+        kind: 'book' as 'book',
+        title: titlePage && titlePage.title || epub.info.title,
+        author: titlePage && titlePage.author || epub.info.author,
+        content: content,
+    };
+}
+
+function findTitlePage(structures: Element[]): TitlePage | undefined {
+    return structures.find(s => s.kind === 'title') as TitlePage;
+}
+
+const firstElement = firstNodeGeneric<Element>();
+
+function chapterParser<T extends BookNode>(level: number, content: Parser<Element, T>): Parser<Element, BookNode> {
+    return choice(
+        translate(
+            seq(
+                firstElement(se => se.kind === 'separator' && se.level === level ? se : null),
+                some(content),
+            ),
+            ([h, ps]) => ({
+                kind: 'chapter' as 'chapter',
+                level: level,
+                title: h.title,
+                content: ps,
+            }),
         ),
-        ([el, text]) => text,
+        content,
     );
+}
+
+const paragraphE = firstElement(
+    se => se.kind === 'paragraph' ? se.text : null,
+);
+
+const h6E = chapterParser(-2, paragraphE);
+const h5E = chapterParser(-1, h6E);
+const h4E = chapterParser(0, h5E);
+const h3E = chapterParser(1, h4E);
+const h2E = chapterParser(2, h3E);
+const h1E = chapterParser(3, h2E);
+
+const bookContentE = h1E;
+const skipOneE = firstElement(n => undefined);
+const bookE = translate(
+    some(choice(bookContentE, skipOneE)),
+    nodes => filterUndefined(nodes),
+);
+
+function buildContent(structures: Element[]): BookNode[] {
+    const result = bookE(structures);
+    return result.success ? result.value : [];
 }
 
 // ---- Title page
 
-const titleLinesP = afterWhitespaces(oneOrMore(header(2)));
+const titleLinesP = afterWhitespaces(oneOrMore(translate(
+    and(
+        elementName('h2'),
+        children(textNode(t => t)),
+    ),
+    ([el, text]) => text,
+)));
 export const titleDivP = translate(
     element({
         name: 'div',
