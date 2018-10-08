@@ -14,11 +14,6 @@ export type XmlParser<TOut = XmlNode> = Parser<XmlNode, TOut>;
 
 export const firstNodeXml = firstNodeGeneric<XmlNode>();
 
-export function ignoreWhitespaces<T>(parser: XmlParser<T>): XmlParser<T> {
-    return input => parser(input.filter(node =>
-        node.type !== 'text' || !isWhitespaces(node.text)));
-}
-
 export const nodeAny = firstNodeXml(x => x);
 export const nodeType = (type: XmlNodeType) => firstNodePredicate<XmlNode>(n => n.type === type);
 export const nodeComment = (content: string) => firstNodeXml(n =>

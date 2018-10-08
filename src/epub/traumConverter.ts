@@ -1,5 +1,5 @@
 import {
-    XmlParser, elementName, children, textNode, ignoreWhitespaces, element, parsePath, elementTranslate, afterWhitespaces, firstNodeXml,
+    XmlParser, elementName, children, textNode, element, parsePath, elementTranslate, afterWhitespaces, firstNodeXml,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -126,7 +126,7 @@ function header(level: number): XmlParser<string> {
 
 // ---- Title page
 
-const titleLinesP = ignoreWhitespaces(oneOrMore(header(2)));
+const titleLinesP = afterWhitespaces(oneOrMore(header(2)));
 export const titleDivP = translate(
     element({
         name: 'div',
@@ -151,7 +151,7 @@ export const titlePageP = parsePath(['html', 'body', 'div'], translate(
         })),
         report('div', element({
             name: 'div',
-            children: report('titleDivP', ignoreWhitespaces(titleDivP)),
+            children: report('titleDivP', afterWhitespaces(titleDivP)),
         })),
     ),
     ([_, [__, titlePage]]) => [titlePage],
