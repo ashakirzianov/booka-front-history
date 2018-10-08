@@ -1,6 +1,6 @@
 import {
     XmlParser, elementName, and, translate, children,
-    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser, firstNodeXml, ignoreWhitespaces, report,
+    textNode, oneOrMore, parsePath, element, choice, elementTranslate, some, firstNodeGeneric, seq, Parser, firstNodeXml, ignoreWhitespaces, report, afterWhitespaces,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -165,7 +165,7 @@ function headerToLevel(tag: string): number | null {
     return null;
 }
 
-const separatorHeaderP = translate(
+export const separatorHeaderP = translate(
     and(
         elementTranslate(el => headerToLevel(el.name)),
         children(textNode(t => t)),
@@ -177,10 +177,10 @@ const separatorHeaderP = translate(
     }),
 );
 
-const separatorP = translate(
+export const separatorP = translate(
     and(
         elementName('div'),
-        separatorHeaderP,
+        children(afterWhitespaces(separatorHeaderP)),
     ),
     ([_, sep]) => sep,
 );
@@ -221,13 +221,13 @@ const paragraphP = translate(
 
 const skipOneP = firstNodeXml(n => undefined);
 
-const pageContentP = some(choice(paragraphP, separatorP, skipOneP));
+const pageContentP = some(afterWhitespaces(choice(paragraphP, separatorP, skipOneP)));
 
 export const normalPageP = parsePath(['html', 'body'], translate(
-    children(and(
+    children(afterWhitespaces(and(
         elementTranslate(el => el.attributes.class !== undefined ? el : null),
         children(pageContentP),
-    )),
+    ))),
     ([_, content]) => filterUndefined(content),
 ));
 

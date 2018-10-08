@@ -111,6 +111,22 @@ export const textNode = <T>(f: (text: string) => T | null) => firstNodeXml(node 
         : null
 );
 
+export const whitespaces = textNode(text => isWhitespaces(text) ? true : null);
+
+export function afterWhitespaces<T>(parser: XmlParser<T>): XmlParser<T> {
+    return translate(
+        seq(whitespaces, parser),
+        ([_, result]) => result,
+    );
+}
+
+export function beforeWhitespaces<T>(parser: XmlParser<T>): XmlParser<T> {
+    return translate(
+        seq(parser, whitespaces),
+        ([result, _]) => result,
+    );
+}
+
 export function children<T>(parser: XmlParser<T>): XmlParser<T> {
     return input => {
         const list = split(input);
