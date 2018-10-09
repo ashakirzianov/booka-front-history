@@ -1,15 +1,10 @@
 import { XmlNode } from "./xmlNode";
 import { split } from "./parserCombinators";
-import { func } from "prop-types";
-import { assertNever, throwExp } from "src/utils";
+import { throwExp } from "../utils";
 
 // ---- TypeDefs
 
 export type Input = XmlNode;
-
-const wrapKey = 'wrap';
-type Wrap<T> = { [wrapKey]: T };
-type Unwrap<T> = T extends Wrap<infer In> ? In : T;
 
 export type NodeFunc<T> = {
     pattern: 'node',
@@ -31,14 +26,17 @@ export type Sequence<L extends Pattern, R extends Pattern> = {
 type ValuePattern<T> = NodeFunc<T>;
 export type Pattern = ValuePattern<any> | Capture<any, any> | Sequence<any, any>;
 
-export type Match<T extends Pattern> = Unwrap<WrappedMatch<T>>;
-type WrappedMatch<T extends Pattern> =
-    T extends Sequence<infer L, infer R> ? { [wrapKey]: IgnoreValueMatch<L> & IgnoreValueMatch<R> }
+export type Match<T extends Pattern> = Unwrap<DoMatch<T>>;
+type SecretField = '@@secret_type_helper';
+type Wrap<T> = { [k in SecretField]: T };
+type Unwrap<T> = T extends Wrap<infer U> ? U : T;
+type DoMatch<T extends Pattern> =
+    T extends Sequence<infer L, infer R> ? { [k in SecretField]: Match<L> & Match<R> }
     : T extends Capture<infer Name, infer Value> ? { [k in Name]: Match<Value> }
     : T extends NodeFunc<infer Fn> ? Fn
     : never
     ;
-type IgnoreValueMatch<T extends Pattern> = T extends ValuePattern<any> ? {} : Match<T>;
+export type IgnoreValueMatch<T extends Pattern> = T extends ValuePattern<any> ? {} : Match<T>;
 
 export type Success<T> = {
     success: true,
