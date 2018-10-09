@@ -1,14 +1,11 @@
-import { XmlNode } from "./xmlNode";
 import { split } from "./parserCombinators";
 import { throwExp } from "../utils";
 
 // ---- TypeDefs
 
-export type Input = XmlNode;
-
-export type NodeFunc<T> = {
+export type NodeFunc<TI, T> = {
     pattern: 'node',
-    fn: (node: Input) => T | null,
+    fn: (node: TI) => T | null,
 };
 
 export type Capture<Name extends string, T extends Pattern> = {
@@ -23,7 +20,7 @@ export type Sequence<L extends Pattern, R extends Pattern> = {
     second: R,
 };
 
-type ValuePattern<T> = NodeFunc<T>;
+type ValuePattern<T> = NodeFunc<any, T>;
 export type Pattern = ValuePattern<any> | Capture<any, any> | Sequence<any, any>;
 
 export type Match<T extends Pattern> = Unwrap<DoMatch<T>>;
@@ -33,24 +30,24 @@ type Unwrap<T> = T extends Wrap<infer U> ? U : T;
 type DoMatch<T extends Pattern> =
     T extends Sequence<infer L, infer R> ? { [k in SecretField]: Match<L> & Match<R> }
     : T extends Capture<infer Name, infer Value> ? { [k in Name]: Match<Value> }
-    : T extends NodeFunc<infer Fn> ? Fn
+    : T extends NodeFunc<any, infer Fn> ? Fn
     : never
     ;
 export type IgnoreValueMatch<T extends Pattern> = T extends ValuePattern<any> ? {} : Match<T>;
 
-export type Success<T> = {
+export type Success<TI, T> = {
     success: true,
     match: T,
-    next: Input[],
+    next: TI[],
 };
 export type Fail = {
     success: false,
 };
-export type Result<T> = Success<T> | Fail;
+export type Result<TI, T> = Success<TI, T> | Fail;
 
 // ---- Constructors
 
-export function success<T>(match: T, next: Input[]): Success<T> {
+export function success<TI, T>(match: T, next: TI[]): Success<TI, T> {
     return {
         success: true,
         match: match,
@@ -64,7 +61,7 @@ export function fail(): Fail {
     };
 }
 
-export function nodeFn<T>(fn: (node: Input) => T | null): NodeFunc<T> {
+export function nodeFn<TI, T>(fn: (node: TI) => T | null): NodeFunc<TI, T> {
     return {
         pattern: 'node',
         fn: fn,
@@ -105,7 +102,7 @@ export function isValuePattern(p: Pattern): p is ValuePattern<any> {
     return isNodeFunc(p);
 }
 
-export function isNodeFunc(p: Pattern): p is NodeFunc<any> {
+export function isNodeFunc(p: Pattern): p is NodeFunc<any, any> {
     return p.pattern === 'node';
 }
 
@@ -119,7 +116,7 @@ export function isSequence(p: Pattern): p is Sequence<any, any> {
 
 // ---- Matcher
 
-function matchNode(nodePattern: NodeFunc<any>, input: Input[]) {
+function matchNode<TI>(nodePattern: NodeFunc<TI, any>, input: TI[]) {
     const list = split(input);
     if (!list.head) {
         return fail();
@@ -129,7 +126,7 @@ function matchNode(nodePattern: NodeFunc<any>, input: Input[]) {
     return result === null ? fail() : success(result, list.tail);
 }
 
-function matchCapture(capturePattern: Capture<any, any>, input: Input[]) {
+function matchCapture<TI>(capturePattern: Capture<any, any>, input: TI[]) {
     const result = matchPattern(capturePattern.inside, input);
 
     return result.success ?
@@ -137,7 +134,7 @@ function matchCapture(capturePattern: Capture<any, any>, input: Input[]) {
         : result;
 }
 
-function matchSequence(sequencePattern: Sequence<any, any>, input: Input[]) {
+function matchSequence<TI>(sequencePattern: Sequence<any, any>, input: TI[]) {
     const first = matchPatternIgnoreValue(sequencePattern.first, input);
     if (!first.success) {
         return first;
@@ -154,14 +151,14 @@ function matchSequence(sequencePattern: Sequence<any, any>, input: Input[]) {
     }, second.next);
 }
 
-function matchPatternIgnoreValue(pattern: Pattern, input: Input[]) {
+function matchPatternIgnoreValue<TI>(pattern: Pattern, input: TI[]) {
     const result = matchPattern(pattern, input);
     return result.success ?
         (isValuePattern(pattern) ? success({}, result.next) : result)
         : result;
 }
 
-export function matchPattern<T extends Pattern>(pattern: T, input: Input[]): Result<Match<T>> {
+export function matchPattern<TI, T extends Pattern>(pattern: T, input: TI[]): Result<TI, Match<T>> {
     return isNodeFunc(pattern) ? matchNode(pattern, input)
         : isCapture(pattern) ? matchCapture(pattern, input)
             : isSequence(pattern) ? matchSequence(pattern, input)
