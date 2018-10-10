@@ -1,6 +1,6 @@
 import {
     nodeFn, matchPattern, Result, capture, Success,
-    sequence, Fail, and, choice, some,
+    sequence, Fail, and, choice, some, not,
 } from "./treePatterns";
 
 function expectSuccess<TI, T>(result: Result<TI, T>): result is Success<TI, T> {
@@ -95,5 +95,12 @@ describe('Basic', () => {
             expect(result.match[0].foo).toEqual('foo');
             expect(result.match[1].foo).toEqual('bar');
         }
+    });
+
+    it('Not', () => {
+        const pattern = not(nodeFn(x => x === 'bar' ? x : null));
+        const result = matchPattern(pattern, input);
+
+        expectSuccess(result);
     });
 });

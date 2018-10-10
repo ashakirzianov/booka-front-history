@@ -8,11 +8,17 @@ export type NodeFunc<TI, T> = {
     fn: (node: TI) => T | null,
 };
 
-export type Capture<Name extends string, T extends Pattern> = {
-    pattern: 'capture',
-    name: Name,
-    inside: T,
+type UnaryPattern<K extends string, I extends P> = {
+    pattern: K,
+    inside: I,
 };
+
+export type Capture<N extends string, I extends P> = UnaryPattern<'capture', I> & {
+    name: N,
+};
+
+export type Some<I extends P> = UnaryPattern<'some', I>;
+export type Not<I extends P> = UnaryPattern<'not', I>;
 
 type PairPattern<K extends string, F extends Pattern, S extends Pattern> = {
     pattern: K,
@@ -24,20 +30,14 @@ export type Sequence<F extends P, S extends P> = PairPattern<'sequence', F, S>;
 export type And<F extends P, S extends P> = PairPattern<'and', F, S>;
 export type Choice<F extends P, S extends P> = PairPattern<'choice', F, S>;
 
-export type Some<In extends P> = {
-    pattern: 'some',
-    inside: In,
-};
-
 type ValuePattern<T> = NodeFunc<any, T>;
 type ProductPattern<F extends P, S extends P> = Sequence<F, S> | And<F, S>;
 type SumPattern<F extends P, S extends P> = Choice<F, S>;
 type AlgebraicPattern<F extends P, S extends P> = ProductPattern<F, S> | SumPattern<F, S>;
 export type Pattern =
     | ValuePattern<any>
-    | Capture<any, any>
+    | Capture<any, any> | Some<any> | Not<any>
     | AlgebraicPattern<any, any>
-    | Some<any>
     ;
 type P = Pattern;
 
@@ -46,6 +46,7 @@ type DoMatch<T extends Pattern> =
     T extends ProductPattern<infer FP, infer SP> ? ReMatchIgnoreValue<FP> & ReMatchIgnoreValue<SP>
     : T extends SumPattern<infer FS, infer SS> ? ReMatch<FS> | ReMatch<SS>
     : T extends Some<infer I> ? Array<ReMatch<I>>
+    : T extends Not<infer IN> ? {}
     : T extends Capture<infer Name, infer Value> ? { [k in Name]: Match<Value> }
     : T extends NodeFunc<any, infer Fn> ? Fn
     : never
@@ -164,6 +165,13 @@ export function some<T extends P>(inside: T): Some<T> {
     };
 }
 
+export function not<T extends P>(inside: T): Not<T> {
+    return {
+        pattern: 'not',
+        inside: inside,
+    };
+}
+
 // ---- Type predicates
 
 export function isValuePattern(p: Pattern): p is ValuePattern<any> {
@@ -192,6 +200,10 @@ export function isChoice(p: Pattern): p is Choice<any, any> {
 
 export function isSome(p: Pattern): p is Some<any> {
     return p.pattern === 'some';
+}
+
+export function isNot(p: Pattern): p is Not<any> {
+    return p.pattern === 'not';
 }
 
 // ---- Matcher
@@ -277,6 +289,16 @@ function matchSome<TI>(somePattern: Some<any>, input: TI[]) {
     return success(results, currentInput);
 }
 
+function matchNot<TI>(notPattern: Not<any>, input: TI[]) {
+    const result = matchPattern(notPattern.inside, input);
+
+    if (result.success) {
+        return fail(); // TODO: report reason
+    } else {
+        return success({}, input);
+    }
+}
+
 function matchPatternIgnoreValue<TI>(pattern: Pattern, input: TI[]) {
     const result = matchPattern(pattern, input);
     return result.success ?
@@ -291,7 +313,8 @@ export function matchPattern<TI, T extends Pattern>(pattern: T, input: TI[]): Re
                 : isAnd(pattern) ? matchAnd(pattern, input)
                     : isChoice(pattern) ? matchChoice(pattern, input)
                         : isSome(pattern) ? matchSome(pattern, input)
-                            : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
+                            : isNot(pattern) ? matchNot(pattern, input)
+                                : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
 }
 
 // ---- Example
