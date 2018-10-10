@@ -24,6 +24,11 @@ export type Sequence<F extends P, S extends P> = PairPattern<'sequence', F, S>;
 export type And<F extends P, S extends P> = PairPattern<'and', F, S>;
 export type Choice<F extends P, S extends P> = PairPattern<'choice', F, S>;
 
+export type Some<In extends P> = {
+    pattern: 'some',
+    inside: In,
+};
+
 type ValuePattern<T> = NodeFunc<any, T>;
 type ProductPattern<F extends P, S extends P> = Sequence<F, S> | And<F, S>;
 type SumPattern<F extends P, S extends P> = Choice<F, S>;
@@ -32,13 +37,15 @@ export type Pattern =
     | ValuePattern<any>
     | Capture<any, any>
     | AlgebraicPattern<any, any>
+    | Some<any>
     ;
 type P = Pattern;
 
 export type Match<T extends Pattern> = Unwrap<DoMatch<T>>;
 type DoMatch<T extends Pattern> =
-    T extends ProductPattern<infer FP, infer SP> ? ProductMatch<FP> & ProductMatch<SP>
-    : T extends SumPattern<infer FS, infer SS> ? SumMatch<FS> | SumMatch<SS>
+    T extends ProductPattern<infer FP, infer SP> ? ReMatchIgnoreValue<FP> & ReMatchIgnoreValue<SP>
+    : T extends SumPattern<infer FS, infer SS> ? ReMatch<FS> | ReMatch<SS>
+    : T extends Some<infer I> ? Array<ReMatch<I>>
     : T extends Capture<infer Name, infer Value> ? { [k in Name]: Match<Value> }
     : T extends NodeFunc<any, infer Fn> ? Fn
     : never
@@ -47,9 +54,11 @@ type IgnoreValueMatch<T extends Pattern> = T extends ValuePattern<any> ? {} : Ma
 
 type SecretField = '@@secret_type_helper';
 type Wrap<T> = { [k in SecretField]: T };
-type Unwrap<T> = T extends Wrap<infer U> ? U : T;
-type SumMatch<T extends Pattern> = { [k in SecretField]: Match<T> };
-type ProductMatch<T extends Pattern> = { [k in SecretField]: IgnoreValueMatch<T> };
+type Unwrap<T> = T extends Wrap<infer U> ? U
+    : T extends Array<Wrap<infer A>> ? A[]
+    : T;
+type ReMatch<T extends Pattern> = { [k in SecretField]: Match<T> };
+type ReMatchIgnoreValue<T extends Pattern> = { [k in SecretField]: IgnoreValueMatch<T> };
 
 export type Success<TI, T> = {
     success: true,
@@ -148,6 +157,13 @@ export function choice(...ps: Pattern[]): Pattern {
     return reducePairPatterns('choice', ps);
 }
 
+export function some<T extends P>(inside: T): Some<T> {
+    return {
+        pattern: 'some',
+        inside: inside,
+    };
+}
+
 // ---- Type predicates
 
 export function isValuePattern(p: Pattern): p is ValuePattern<any> {
@@ -172,6 +188,10 @@ export function isAnd(p: Pattern): p is And<any, any> {
 
 export function isChoice(p: Pattern): p is Choice<any, any> {
     return p.pattern === 'choice';
+}
+
+export function isSome(p: Pattern): p is Some<any> {
+    return p.pattern === 'some';
 }
 
 // ---- Matcher
@@ -242,6 +262,21 @@ function matchChoice<TI>(choicePattern: Choice<any, any>, input: TI[]) {
     return fail(); // TODO: combine reasons
 }
 
+function matchSome<TI>(somePattern: Some<any>, input: TI[]) {
+    const results = [];
+    let currentInput = input;
+    let currentResult: Result<TI, any>;
+    do {
+        currentResult = matchPattern(somePattern.inside, currentInput);
+        if (currentResult.success) {
+            results.push(currentResult.match);
+            currentInput = currentResult.next;
+        }
+    } while (currentResult.success);
+
+    return success(results, currentInput);
+}
+
 function matchPatternIgnoreValue<TI>(pattern: Pattern, input: TI[]) {
     const result = matchPattern(pattern, input);
     return result.success ?
@@ -255,7 +290,8 @@ export function matchPattern<TI, T extends Pattern>(pattern: T, input: TI[]): Re
             : isSequence(pattern) ? matchSequence(pattern, input)
                 : isAnd(pattern) ? matchAnd(pattern, input)
                     : isChoice(pattern) ? matchChoice(pattern, input)
-                        : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
+                        : isSome(pattern) ? matchSome(pattern, input)
+                            : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
 }
 
 // ---- Example
