@@ -21,11 +21,11 @@ export const nodeComment = (content: string) => firstNodeXml(n =>
         ? n : null
 );
 
-function nameCompare(n1: string, n2: string) {
+export function nameEq(n1: string, n2: string) {
     return caseInsensitiveEq(n1, n2);
 }
 
-function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
+export function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
     return Object.keys(attrs1).every(k =>
         (attrs1[k] === attrs2[k])
         || (!attrs1[k]) // TODO: consider implementing 'negative' comparison
@@ -33,11 +33,7 @@ function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
 }
 
 export const elementName = (name: string) => firstNodeXml(n =>
-    isElement(n) && nameCompare(n.name, name)
-        ? n : null
-);
-export const elementAttributes = (attrs: XmlAttributes) => firstNodeXml(n =>
-    isElement(n) && attrsCompare(attrs, n.attributes)
+    isElement(n) && nameEq(n.name, name)
         ? n : null
 );
 export const elementChildren = <T>(name: string, parser: XmlParser<T>) => translate(
@@ -65,7 +61,7 @@ export function element<T>(arg: ElementParserArg, ch?: XmlParser<T>): XmlParser<
         }
 
         if (typeof arg === 'string') {
-            if (!nameCompare(arg, list.head.name)) {
+            if (!nameEq(arg, list.head.name)) {
                 return fail(`element: name ${list.head.name} does not match ${arg}`);
             }
         } else {
@@ -176,7 +172,7 @@ function parsePathHelper<T>(paths: string[], then: XmlParser<T>, input: XmlNode[
     const path = paths[0];
 
     const childIndex = input.findIndex(ch =>
-        ch.type === 'element' && nameCompare(ch.name, path));
+        ch.type === 'element' && nameEq(ch.name, path));
     const child = input[childIndex];
     if (!child) {
         return fail(`parse path: ${path}: can't find child`);
