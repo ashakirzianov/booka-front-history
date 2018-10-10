@@ -1,5 +1,5 @@
 import {
-    elementName, children, textNode, element, parsePath, afterWhitespaces, firstNodeXml, projectElement,
+    children, textNode, element, parsePath, afterWhitespaces, firstNodeXml, projectElement,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -114,13 +114,7 @@ function buildContent(structures: Element[]): BookNode[] {
 
 // ---- Title page
 
-const titleLinesP = afterWhitespaces(oneOrMore(translate(
-    and(
-        elementName('h2'),
-        children(textNode(t => t)),
-    ),
-    ([el, text]) => text,
-)));
+const titleLinesP = afterWhitespaces(oneOrMore(element('h2', textNode(t => t))));
 export const titleDivP = translate(
     element(
         el => el.name === 'div' && el.attributes.class === 'title2',
@@ -169,29 +163,13 @@ export const separatorHeaderP = translate(
     }),
 );
 
-export const separatorP = translate(
-    and(
-        elementName('div'),
-        children(afterWhitespaces(separatorHeaderP)),
-    ),
-    ([_, sep]) => sep,
-);
+export const separatorP = element('div', afterWhitespaces(separatorHeaderP));
 
 // ---- Paragraph
 
 const textP = textNode(t => t);
-const spanP = translate(
-    and(
-        elementName('span'),
-        children(textP),
-    ),
-    ([_, t]) => t,
-);
-// TODO: implement links
-const linkP = translate(
-    elementName('a'),
-    _ => '',
-);
+const spanP = element('span', textNode(t => t));
+const linkP = translate(element('a'), _ => ''); // TODO: implement links
 
 const paragraphContentP = translate(
     some(choice(textP, spanP, linkP)),
@@ -199,11 +177,8 @@ const paragraphContentP = translate(
 );
 
 const paragraphP = translate(
-    and(
-        elementName('p'),
-        children(paragraphContentP),
-    ),
-    ([_, text]) => ({
+    element('p', paragraphContentP),
+    text => ({
         kind: 'paragraph' as 'paragraph',
         text: text,
     }),

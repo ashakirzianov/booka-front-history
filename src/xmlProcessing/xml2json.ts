@@ -7,7 +7,7 @@ import {
     Parser, Result, success, fail,
     firstNodeGeneric, firstNodePredicate,
     split, seq, some, not, projectLast, report,
-    translate, and,
+    translate,
 } from "./parserCombinators";
 
 export type XmlParser<TOut = XmlNode> = Parser<XmlNode, TOut>;
@@ -32,14 +32,6 @@ export function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
     );
 }
 
-export const elementName = (name: string) => firstNodeXml(n =>
-    isElement(n) && nameEq(n.name, name)
-        ? n : null
-);
-export const elementChildren = <T>(name: string, parser: XmlParser<T>) => translate(
-    and(elementName(name), children(parser)),
-    results => results[1]
-);
 export const projectElement = <T>(f: (e: XmlNodeElement) => T | null) =>
     firstNodeXml(n => isElement(n) ? f(n) : null);
 
