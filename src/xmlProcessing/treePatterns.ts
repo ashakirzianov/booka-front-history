@@ -14,26 +14,40 @@ export type Capture<Name extends string, T extends Pattern> = {
     inside: T,
 };
 
-export type Sequence<L extends Pattern, R extends Pattern> = {
+export type Sequence<F extends Pattern, S extends Pattern> = {
     pattern: 'sequence',
-    first: L,
-    second: R,
+    first: F,
+    second: S,
+};
+
+export type And<F extends Pattern, S extends Pattern> = {
+    pattern: 'and',
+    first: F,
+    second: S,
 };
 
 type ValuePattern<T> = NodeFunc<any, T>;
-export type Pattern = ValuePattern<any> | Capture<any, any> | Sequence<any, any>;
+export type Pattern =
+    | ValuePattern<any>
+    | Capture<any, any>
+    | Sequence<any, any> | And<any, any>
+    ;
 
 export type Match<T extends Pattern> = Unwrap<DoMatch<T>>;
-type SecretField = '@@secret_type_helper';
-type Wrap<T> = { [k in SecretField]: T };
-type Unwrap<T> = T extends Wrap<infer U> ? U : T;
 type DoMatch<T extends Pattern> =
-    T extends Sequence<infer L, infer R> ? { [k in SecretField]: Match<L> & Match<R> }
+    T extends Sequence<infer F, infer S> ? ReMatch<F> & ReMatch<S>
+    : T extends And<infer FA, infer SA> ? ReMatch<FA> & ReMatch<SA>
     : T extends Capture<infer Name, infer Value> ? { [k in Name]: Match<Value> }
     : T extends NodeFunc<any, infer Fn> ? Fn
     : never
     ;
-export type IgnoreValueMatch<T extends Pattern> = T extends ValuePattern<any> ? {} : Match<T>;
+type IgnoreValueMatch<T extends Pattern> = T extends ValuePattern<any> ? {} : Match<T>;
+
+type SecretField = '@@secret_type_helper';
+type Wrap<T> = { [k in SecretField]: T };
+type Unwrap<T> = T extends Wrap<infer U> ? U : T;
+// type WrapMatch<T extends Pattern> = { [k in SecretField]: Match<T> };
+type ReMatch<T extends Pattern> = { [k in SecretField]: IgnoreValueMatch<T> };
 
 export type Success<TI, T> = {
     success: true,
@@ -96,6 +110,26 @@ export function sequence(...ps: Pattern[]): Pattern {
     }));
 }
 
+export function and
+    <T1 extends Pattern, T2 extends Pattern>(
+        p1: T1, p2: T2,
+): And<T1, T2>;
+export function and
+    <T1 extends Pattern, T2 extends Pattern, T3 extends Pattern>(
+        p1: T1, p2: T2, p3: T3,
+): And<T1, And<T2, T3>>;
+export function and
+    <T1 extends Pattern, T2 extends Pattern, T3 extends Pattern, T4 extends Pattern>(
+        p1: T1, p2: T2, p3: T3, p4: T4,
+): And<T1, And<T2, And<T3, T4>>>;
+export function and(...ps: Pattern[]): Pattern {
+    return ps.reduceRight((acc, p) => ({
+        pattern: 'and',
+        first: p,
+        second: acc,
+    }));
+}
+
 // ---- Type predicates
 
 export function isValuePattern(p: Pattern): p is ValuePattern<any> {
@@ -112,6 +146,10 @@ export function isCapture(p: Pattern): p is Capture<any, any> {
 
 export function isSequence(p: Pattern): p is Sequence<any, any> {
     return p.pattern === 'sequence';
+}
+
+export function isAnd(p: Pattern): p is And<any, any> {
+    return p.pattern === 'and';
 }
 
 // ---- Matcher
@@ -151,6 +189,23 @@ function matchSequence<TI>(sequencePattern: Sequence<any, any>, input: TI[]) {
     }, second.next);
 }
 
+function matchAnd<TI>(andPattern: And<any, any>, input: TI[]) {
+    const first = matchPatternIgnoreValue(andPattern.first, input);
+    if (!first.success) {
+        return first;
+    }
+
+    const second = matchPatternIgnoreValue(andPattern.second, input);
+    if (!second.success) {
+        return second;
+    }
+
+    return success({
+        ...first.match,
+        ...second.match,
+    }, second.next);
+}
+
 function matchPatternIgnoreValue<TI>(pattern: Pattern, input: TI[]) {
     const result = matchPattern(pattern, input);
     return result.success ?
@@ -162,7 +217,8 @@ export function matchPattern<TI, T extends Pattern>(pattern: T, input: TI[]): Re
     return isNodeFunc(pattern) ? matchNode(pattern, input)
         : isCapture(pattern) ? matchCapture(pattern, input)
             : isSequence(pattern) ? matchSequence(pattern, input)
-                : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
+                : isAnd(pattern) ? matchAnd(pattern, input)
+                    : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
 }
 
 // ---- Example
