@@ -1,6 +1,5 @@
 import { split } from "./parserCombinators";
 import { throwExp } from "../utils";
-import { func } from "../../node_modules/@types/prop-types";
 
 // ---- TypeDefs
 
@@ -85,7 +84,7 @@ export function nodeFn<TI, T>(fn: (node: TI) => T | null): NodeFunc<TI, T> {
     };
 }
 
-export function capture<N extends string, P extends Pattern>(name: N, inside: P): Capture<N, P> {
+export function capture<N extends string, In extends P>(name: N, inside: In): Capture<N, In> {
     return {
         pattern: 'capture',
         name: name,
