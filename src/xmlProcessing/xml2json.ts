@@ -44,9 +44,8 @@ export const elementChildren = <T>(name: string, parser: XmlParser<T>) => transl
     and(elementName(name), children(parser)),
     results => results[1]
 );
-export const elementTranslate = <T>(f: (e: XmlNodeElement) => T | null) => firstNodeXml(n =>
-    isElement(n) ? f(n) : null
-);
+export const projectElement = <T>(f: (e: XmlNodeElement) => T | null) =>
+    firstNodeXml(n => isElement(n) ? f(n) : null);
 
 type ElementParserArg =
     | string // match element name

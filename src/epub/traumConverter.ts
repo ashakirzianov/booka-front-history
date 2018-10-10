@@ -1,5 +1,5 @@
 import {
-    elementName, children, textNode, element, parsePath, afterWhitespaces, firstNodeXml, elementTranslate,
+    elementName, children, textNode, element, parsePath, afterWhitespaces, firstNodeXml, projectElement,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -159,7 +159,7 @@ function headerToLevel(tag: string): number | null {
 
 export const separatorHeaderP = translate(
     and(
-        elementTranslate(el => headerToLevel(el.name)),
+        projectElement(el => headerToLevel(el.name)),
         children(textNode(t => t)),
     ),
     ([level, title]) => ({
