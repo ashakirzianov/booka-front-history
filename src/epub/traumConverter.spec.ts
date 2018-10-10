@@ -1,5 +1,5 @@
 import { string2tree } from "../xmlProcessing/xmlNode";
-import { sectionP, titlePageP, titleDivP, normalPageP, separatorP, separatorHeaderP } from "./traumConverter";
+import { sectionP, titlePageP, normalPageP, separatorP, separatorHeaderP } from "./traumConverter";
 import { XmlParser } from "../xmlProcessing/xml2json";
 import { expectSuccess } from "../testUtils";
 
@@ -22,14 +22,6 @@ export const titlePageHtml =
     </div>
   </body>
 </html>`
-;
-
-const titleDivHtml =
-`<div class="title2">
-    <h2>Лев Николаевич Толстой</h2>
-    <h2>Собрание сочинений в двадцати двух томах</h2>
-    <h2>Том 4. Война и мир</h2>
-</div>`
 ;
 
 const separatorPageHtml =
@@ -65,11 +57,6 @@ describe('Example parsing', () => {
 
     it('Title parse title', () => {
         const result = stringParser(titlePageP)(titlePageHtml);
-        expectSuccess(result);
-    });
-
-    it('Title div parser', () => {
-        const result = stringParser(titleDivP)(titleDivHtml);
         expectSuccess(result);
     });
 

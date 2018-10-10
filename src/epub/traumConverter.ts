@@ -1,5 +1,5 @@
 import {
-    elementName, children, textNode, element, parsePath, elementTranslate, afterWhitespaces, firstNodeXml,
+    children, textNode, element, path, afterWhitespaces, firstNodeXml, projectElement,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -7,7 +7,7 @@ import { string2tree, XmlNodeDocument } from "../xmlProcessing/xmlNode";
 import { filterUndefined } from "../utils";
 import {
     firstNodeGeneric, Parser, choice, translate,
-    seq, and, oneOrMore, report, some,
+    seq, and, oneOrMore, some,
 } from "../xmlProcessing/parserCombinators";
 
 // ---- TypeDefs
@@ -114,42 +114,30 @@ function buildContent(structures: Element[]): BookNode[] {
 
 // ---- Title page
 
-const titleLinesP = afterWhitespaces(oneOrMore(translate(
-    and(
-        elementName('h2'),
-        children(textNode(t => t)),
-    ),
-    ([el, text]) => text,
-)));
 export const titleDivP = translate(
-    element({
-        name: 'div',
-        attrs: { class: 'title2' },
-        children: titleLinesP,
-    }),
-    ([_, lines]) => lines.length > 1 ? {
-        kind: 'title' as 'title',
-        author: lines[0],
-        title: lines[lines.length - 1],
-    }
+    afterWhitespaces(element(
+        el => el.name === 'div' && el.attributes.class === 'title2',
+        oneOrMore(afterWhitespaces(element('h2', textNode()))),
+    )),
+    lines => lines.length > 1 ?
+        {
+            kind: 'title' as 'title',
+            author: lines[0],
+            title: lines[lines.length - 1],
+        }
         : {
             kind: 'title' as 'title',
             title: lines[0],
         },
 );
 
-export const titlePageP = parsePath(['html', 'body', 'div'], translate(
-    and(
-        report('et', elementTranslate(el => {
-            return el.attributes.class === undefined ? el : null;
-        })),
-        report('div', element({
-            name: 'div',
-            children: report('titleDivP', afterWhitespaces(titleDivP)),
-        })),
-    ),
-    ([_, [__, titlePage]]) => [titlePage],
-));
+export const titlePageP = translate(path(['html', 'body', 'div'],
+    element(
+        el => el.name === 'div' && el.attributes.class === undefined,
+        titleDivP,
+    )),
+    tp => [tp], // TODO: do we need array?
+);
 
 // ---- Separator parser
 
@@ -164,8 +152,8 @@ function headerToLevel(tag: string): number | null {
 
 export const separatorHeaderP = translate(
     and(
-        elementTranslate(el => headerToLevel(el.name)),
-        children(textNode(t => t)),
+        projectElement(el => headerToLevel(el.name)),
+        children(textNode()),
     ),
     ([level, title]) => ({
         kind: 'separator' as 'separator',
@@ -174,29 +162,13 @@ export const separatorHeaderP = translate(
     }),
 );
 
-export const separatorP = translate(
-    and(
-        elementName('div'),
-        children(afterWhitespaces(separatorHeaderP)),
-    ),
-    ([_, sep]) => sep,
-);
+export const separatorP = element('div', afterWhitespaces(separatorHeaderP));
 
 // ---- Paragraph
 
-const textP = textNode(t => t);
-const spanP = translate(
-    and(
-        elementName('span'),
-        children(textP),
-    ),
-    ([_, t]) => t,
-);
-// TODO: implement links
-const linkP = translate(
-    elementName('a'),
-    _ => '',
-);
+const textP = textNode();
+const spanP = element('span', textNode());
+const linkP = translate(element('a'), _ => ''); // TODO: implement links
 
 const paragraphContentP = translate(
     some(choice(textP, spanP, linkP)),
@@ -204,11 +176,8 @@ const paragraphContentP = translate(
 );
 
 const paragraphP = translate(
-    and(
-        elementName('p'),
-        children(paragraphContentP),
-    ),
-    ([_, text]) => ({
+    element('p', paragraphContentP),
+    text => ({
         kind: 'paragraph' as 'paragraph',
         text: text,
     }),
@@ -220,13 +189,13 @@ const skipOneP = firstNodeXml(n => undefined);
 
 const pageContentP = some(afterWhitespaces(choice(paragraphP, separatorP, skipOneP)));
 
-export const normalPageP = parsePath(['html', 'body'], translate(
-    children(afterWhitespaces(and(
-        elementTranslate(el => el.attributes.class !== undefined ? el : null),
-        children(pageContentP),
-    ))),
-    ([_, content]) => filterUndefined(content),
-));
+export const normalPageP = translate(path(['html', 'body'],
+    children(afterWhitespaces(element(
+        el => el.attributes.class !== undefined,
+        pageContentP,
+    )))),
+    content => filterUndefined(content),
+);
 
 // ---- Section parser
 

@@ -2,8 +2,8 @@ import { combineFs, throwExp, letExp } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
 import {
-    nodeAny, nodeComment, parsePath, elementChildren, textNode, elementName,
-    children, elementAttributes, skipToNode, XmlParser,
+    nodeAny, nodeComment, path, textNode,
+    children, skipToNode, XmlParser, element, nameEq,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
 import { Chapter, BookNode } from '../model/book';
@@ -52,29 +52,22 @@ const stopMarker = '';
 export const bookStartParser = nodeComment(startMarker);
 export const bookEndParser = nodeComment(stopMarker);
 export const skipParser = translate(nodeAny, n => undefined);
-export const anyText = textNode(t => t);
 
-export const junkAtTheBeginning = some(
-    choice(elementName('dd'),
-        elementName('a'),
-        textNode(t => /^[ \n-]*$/.test(t) ? t : null),
-    ));
+export const junkAtTheBeginning = some(choice(
+    element('dd'),
+    element('a'),
+    textNode(t => /^[ \n-]*$/.test(t) ? t : null),
+));
 
 // ------ Structure
 
-export const headline = translate(and(
-    elementName('ul'),
-    children(seq(
-        and(
-            elementName('a'),
-            elementAttributes({ name: undefined }),
-        ),
-        and(
-            elementName('h2'),
-            children(anyText),
-        ),
-    ))),
-    ([ul, [[a, attr], [h2, text]]]) => ({
+export const headline = translate(element('ul',
+    seq(
+        element(el =>
+            nameEq(el.name, 'a') && el.attributes.name !== undefined),
+        element('h2', textNode()),
+    )),
+    ([a, text]) => ({
         text,
         level: parseInt(a.attributes.name || '-1', 10),
     }));
@@ -88,19 +81,19 @@ export function headlineLevel(level: number) {
 
 // ------ Paragraph
 
-const italicText = elementChildren('i', anyText); // TODO: support italic
-const supText = translate(elementName('sup'), node => ''); // TODO: process properly
+const italicText = element('i', textNode()); // TODO: support italic
+const supText = translate(element('sup'), node => ''); // TODO: process properly
 
 export const paragraphSpaces = '    ';
 export const nonParagraphStart = textNode(t =>
     t.startsWith(paragraphSpaces) ? null : t
 );
-const paragraphStart = anyText;
+const paragraphStart = textNode();
 
 const withinParagraph = choice(
     italicText,
     supText,
-    translate(elementName('dd'), node => ''),
+    translate(element('dd'), node => ''),
 );
 
 export const paragraph = translate(
@@ -165,7 +158,7 @@ export const bookParser = translate(
 
 export const bodyParser = bookParser;
 
-export const tree2book = parsePath(['html', 'body'], children(bodyParser));
+export const tree2book = path(['html', 'body'], children(bodyParser));
 
 // ---------- string2book
 

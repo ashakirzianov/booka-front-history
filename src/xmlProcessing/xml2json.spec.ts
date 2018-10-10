@@ -1,6 +1,5 @@
-import { skipToNode, elementName, parsePath, children, element } from "./xml2json";
+import { skipToNode, path, children, element } from "./xml2json";
 import { xmlElement, XmlNode } from "./xmlNode";
-import { htmlFragmentToNodes } from "./xmlUtils";
 import { expectSuccess } from "../testUtils";
 import { success, and } from "./parserCombinators";
 
@@ -17,7 +16,7 @@ it('skipToNode', () => {
         xmlElement('b'),
     ];
 
-    const parser = skipToNode(and(elementName('c'), children(elementName('ca'))));
+    const parser = skipToNode(and(element('c'), children(element('ca'))));
 
     const result = parser(input);
     expect(result.success).toBeTruthy();
@@ -36,25 +35,9 @@ it('pathParser', () => {
         ]),
     ])];
 
-    const parser = parsePath(['root', 'c', 'cb', 'cba'], elementName('cba'));
+    const parser = path(['root', 'c', 'cb', 'cba'], element('cba'));
 
     const result = parser(input);
 
     expectSuccess(result);
-});
-
-it('element', () => {
-    const xml = `<div class="title2">
-    <h2>Author</h2>
-    <h2>Line 2</h2>
-    <h2>Book Title</h2>
-  </div>`;
-    const input = htmlFragmentToNodes(xml);
-    const parser = element({
-        name: 'div',
-        attrs: { class: 'title2' },
-    });
-    const result = parser(input);
-
-    expect(result.success).toBeTruthy();
 });
