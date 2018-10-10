@@ -114,7 +114,7 @@ function buildContent(structures: Element[]): BookNode[] {
 
 // ---- Title page
 
-const titleLinesP = afterWhitespaces(oneOrMore(element('h2', textNode(t => t))));
+const titleLinesP = afterWhitespaces(oneOrMore(element('h2', textNode())));
 export const titleDivP = translate(
     element(
         el => el.name === 'div' && el.attributes.class === 'title2',
@@ -154,7 +154,7 @@ function headerToLevel(tag: string): number | null {
 export const separatorHeaderP = translate(
     and(
         projectElement(el => headerToLevel(el.name)),
-        children(textNode(t => t)),
+        children(textNode()),
     ),
     ([level, title]) => ({
         kind: 'separator' as 'separator',
@@ -167,8 +167,8 @@ export const separatorP = element('div', afterWhitespaces(separatorHeaderP));
 
 // ---- Paragraph
 
-const textP = textNode(t => t);
-const spanP = element('span', textNode(t => t));
+const textP = textNode();
+const spanP = element('span', textNode());
 const linkP = translate(element('a'), _ => ''); // TODO: implement links
 
 const paragraphContentP = translate(

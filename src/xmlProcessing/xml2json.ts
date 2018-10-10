@@ -75,9 +75,9 @@ export function element<T>(arg: ElementParserArg, ch?: XmlParser<T>): XmlParser<
     };
 }
 
-export const textNode = <T>(f: (text: string) => T | null) => firstNodeXml(node =>
+export const textNode = <T = string>(f?: (text: string) => T | null) => firstNodeXml(node =>
     node.type === 'text'
-        ? f(node.text)
+        ? (f ? f(node.text) : node.text)
         : null
 );
 
