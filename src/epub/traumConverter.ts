@@ -1,5 +1,5 @@
 import {
-    elementName, children, textNode, element, parsePath, elementTranslate, afterWhitespaces, firstNodeXml,
+    elementName, children, textNode, element, parsePath, afterWhitespaces, firstNodeXml, elementTranslate,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -216,11 +216,11 @@ const skipOneP = firstNodeXml(n => undefined);
 const pageContentP = some(afterWhitespaces(choice(paragraphP, separatorP, skipOneP)));
 
 export const normalPageP = parsePath(['html', 'body'], translate(
-    children(afterWhitespaces(and(
-        elementTranslate(el => el.attributes.class !== undefined ? el : null),
-        children(pageContentP),
+    children(afterWhitespaces(element(
+        el => el.attributes.class !== undefined,
+        pageContentP,
     ))),
-    ([_, content]) => filterUndefined(content),
+    content => filterUndefined(content),
 ));
 
 // ---- Section parser
