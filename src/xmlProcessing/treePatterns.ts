@@ -1,5 +1,6 @@
 import { split } from "./parserCombinators";
 import { throwExp } from "../utils";
+import { func } from "../../node_modules/@types/prop-types";
 
 // ---- TypeDefs
 
@@ -14,29 +15,31 @@ export type Capture<Name extends string, T extends Pattern> = {
     inside: T,
 };
 
-export type Sequence<F extends Pattern, S extends Pattern> = {
-    pattern: 'sequence',
+type PairPattern<K extends string, F extends Pattern, S extends Pattern> = {
+    pattern: K,
     first: F,
     second: S,
 };
 
-export type And<F extends Pattern, S extends Pattern> = {
-    pattern: 'and',
-    first: F,
-    second: S,
-};
+export type Sequence<F extends P, S extends P> = PairPattern<'sequence', F, S>;
+export type And<F extends P, S extends P> = PairPattern<'and', F, S>;
+export type Choice<F extends P, S extends P> = PairPattern<'choice', F, S>;
 
 type ValuePattern<T> = NodeFunc<any, T>;
+type ProductPattern<F extends P, S extends P> = Sequence<F, S> | And<F, S>;
+type SumPattern<F extends P, S extends P> = Choice<F, S>;
+type AlgebraicPattern<F extends P, S extends P> = ProductPattern<F, S> | SumPattern<F, S>;
 export type Pattern =
     | ValuePattern<any>
     | Capture<any, any>
-    | Sequence<any, any> | And<any, any>
+    | AlgebraicPattern<any, any>
     ;
+type P = Pattern;
 
 export type Match<T extends Pattern> = Unwrap<DoMatch<T>>;
 type DoMatch<T extends Pattern> =
-    T extends Sequence<infer F, infer S> ? ReMatch<F> & ReMatch<S>
-    : T extends And<infer FA, infer SA> ? ReMatch<FA> & ReMatch<SA>
+    T extends ProductPattern<infer FP, infer SP> ? ProductMatch<FP> & ProductMatch<SP>
+    : T extends SumPattern<infer FS, infer SS> ? SumMatch<FS> | SumMatch<SS>
     : T extends Capture<infer Name, infer Value> ? { [k in Name]: Match<Value> }
     : T extends NodeFunc<any, infer Fn> ? Fn
     : never
@@ -46,8 +49,8 @@ type IgnoreValueMatch<T extends Pattern> = T extends ValuePattern<any> ? {} : Ma
 type SecretField = '@@secret_type_helper';
 type Wrap<T> = { [k in SecretField]: T };
 type Unwrap<T> = T extends Wrap<infer U> ? U : T;
-// type WrapMatch<T extends Pattern> = { [k in SecretField]: Match<T> };
-type ReMatch<T extends Pattern> = { [k in SecretField]: IgnoreValueMatch<T> };
+type SumMatch<T extends Pattern> = { [k in SecretField]: Match<T> };
+type ProductMatch<T extends Pattern> = { [k in SecretField]: IgnoreValueMatch<T> };
 
 export type Success<TI, T> = {
     success: true,
@@ -90,44 +93,60 @@ export function capture<N extends string, P extends Pattern>(name: N, inside: P)
     };
 }
 
+function reducePairPatterns<Key extends AlgebraicPattern<any, any>['pattern']>(key: Key, ps: Pattern[]): Pattern {
+    return ps.reduceRight((acc, p) => ({
+        pattern: key,
+        first: p,
+        second: acc,
+    } as any as Pattern)); // TODO: remove 'as any'?
+}
+
 export function sequence
-    <T1 extends Pattern, T2 extends Pattern>(
+    <T1 extends P, T2 extends P>(
         p1: T1, p2: T2):
     Sequence<T1, T2>;
 export function sequence
-    <T1 extends Pattern, T2 extends Pattern, T3 extends Pattern>(
+    <T1 extends P, T2 extends P, T3 extends P>(
         p1: T1, p2: T2, p3: T3):
     Sequence<T1, Sequence<T2, T3>>;
 export function sequence
-    <T1 extends Pattern, T2 extends Pattern, T3 extends Pattern, T4 extends Pattern>(
+    <T1 extends P, T2 extends P, T3 extends P, T4 extends P>(
         p1: T1, p2: T2, p3: T3, p4: T4):
     Sequence<T1, Sequence<T2, Sequence<T3, T4>>>;
 export function sequence(...ps: Pattern[]): Pattern {
-    return ps.reduceRight((acc, p) => ({
-        pattern: 'sequence',
-        first: p,
-        second: acc,
-    }));
+    return reducePairPatterns('sequence', ps);
 }
 
 export function and
-    <T1 extends Pattern, T2 extends Pattern>(
+    <T1 extends P, T2 extends P>(
         p1: T1, p2: T2,
 ): And<T1, T2>;
 export function and
-    <T1 extends Pattern, T2 extends Pattern, T3 extends Pattern>(
+    <T1 extends P, T2 extends P, T3 extends P>(
         p1: T1, p2: T2, p3: T3,
 ): And<T1, And<T2, T3>>;
 export function and
-    <T1 extends Pattern, T2 extends Pattern, T3 extends Pattern, T4 extends Pattern>(
+    <T1 extends P, T2 extends P, T3 extends P, T4 extends P>(
         p1: T1, p2: T2, p3: T3, p4: T4,
 ): And<T1, And<T2, And<T3, T4>>>;
 export function and(...ps: Pattern[]): Pattern {
-    return ps.reduceRight((acc, p) => ({
-        pattern: 'and',
-        first: p,
-        second: acc,
-    }));
+    return reducePairPatterns('and', ps);
+}
+
+export function choice
+    <T1 extends P, T2 extends P>(
+        p1: T1, p2: T2,
+): Choice<T1, T2>;
+export function choice
+    <T1 extends P, T2 extends P, T3 extends P>(
+        p1: T1, p2: T2, p3: T3,
+): Choice<T1, Choice<T2, T3>>;
+export function choice
+    <T1 extends P, T2 extends P, T3 extends P, T4 extends P>(
+        p1: T1, p2: T2, p3: T3, p4: T4,
+): Choice<T1, Choice<T2, Choice<T3, T4>>>;
+export function choice(...ps: Pattern[]): Pattern {
+    return reducePairPatterns('choice', ps);
 }
 
 // ---- Type predicates
@@ -150,6 +169,10 @@ export function isSequence(p: Pattern): p is Sequence<any, any> {
 
 export function isAnd(p: Pattern): p is And<any, any> {
     return p.pattern === 'and';
+}
+
+export function isChoice(p: Pattern): p is Choice<any, any> {
+    return p.pattern === 'choice';
 }
 
 // ---- Matcher
@@ -206,6 +229,20 @@ function matchAnd<TI>(andPattern: And<any, any>, input: TI[]) {
     }, second.next);
 }
 
+function matchChoice<TI>(choicePattern: Choice<any, any>, input: TI[]) {
+    const first = matchPatternIgnoreValue(choicePattern.first, input);
+    if (first.success) {
+        return first;
+    }
+
+    const second = matchPatternIgnoreValue(choicePattern.second, input);
+    if (second.success) {
+        return second;
+    }
+
+    return fail(); // TODO: combine reasons
+}
+
 function matchPatternIgnoreValue<TI>(pattern: Pattern, input: TI[]) {
     const result = matchPattern(pattern, input);
     return result.success ?
@@ -218,7 +255,8 @@ export function matchPattern<TI, T extends Pattern>(pattern: T, input: TI[]): Re
         : isCapture(pattern) ? matchCapture(pattern, input)
             : isSequence(pattern) ? matchSequence(pattern, input)
                 : isAnd(pattern) ? matchAnd(pattern, input)
-                    : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
+                    : isChoice(pattern) ? matchChoice(pattern, input)
+                        : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
 }
 
 // ---- Example
