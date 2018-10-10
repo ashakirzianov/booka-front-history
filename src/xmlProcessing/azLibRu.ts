@@ -2,7 +2,7 @@ import { combineFs, throwExp, letExp } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
 import {
-    nodeAny, nodeComment, parsePath, textNode,
+    nodeAny, nodeComment, path, textNode,
     children, skipToNode, XmlParser, element, nameEq,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
@@ -158,7 +158,7 @@ export const bookParser = translate(
 
 export const bodyParser = bookParser;
 
-export const tree2book = parsePath(['html', 'body'], children(bodyParser));
+export const tree2book = path(['html', 'body'], children(bodyParser));
 
 // ---------- string2book
 

@@ -166,25 +166,25 @@ export function skipToNode<T>(node: XmlParser<T>): XmlParser<T> {
 }
 
 // TODO: handle empty path scenario
-function parsePathHelper<T>(paths: string[], then: XmlParser<T>, input: XmlNode[]): Result<XmlNode, T> {
-    const path = paths[0];
+function parsePathHelper<T>(pathComponents: string[], then: XmlParser<T>, input: XmlNode[]): Result<XmlNode, T> {
+    const pc = pathComponents[0];
 
     const childIndex = input.findIndex(ch =>
-        ch.type === 'element' && nameEq(ch.name, path));
+        ch.type === 'element' && nameEq(ch.name, pc));
     const child = input[childIndex];
     if (!child) {
-        return fail(`parse path: ${path}: can't find child`);
+        return fail(`parse path: ${pc}: can't find child`);
     }
 
-    if (paths.length < 2) {
+    if (pathComponents.length < 2) {
         return report('parse path: then', then)(input.slice(childIndex));
     }
 
     const nextInput = hasChildren(child) ? child.children : []; // TODO: rethink
 
-    return parsePathHelper(paths.slice(1), then, nextInput);
+    return parsePathHelper(pathComponents.slice(1), then, nextInput);
 }
 
-export function parsePath<T>(paths: string[], then: XmlParser<T>): XmlParser<T> {
+export function path<T>(paths: string[], then: XmlParser<T>): XmlParser<T> {
     return (input: XmlNode[]) => parsePathHelper(paths, then, input);
 }

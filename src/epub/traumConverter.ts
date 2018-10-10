@@ -1,5 +1,5 @@
 import {
-    children, textNode, element, parsePath, afterWhitespaces, firstNodeXml, projectElement,
+    children, textNode, element, path, afterWhitespaces, firstNodeXml, projectElement,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
@@ -120,18 +120,19 @@ export const titleDivP = translate(
         el => el.name === 'div' && el.attributes.class === 'title2',
         titleLinesP,
     ),
-    lines => lines.length > 1 ? {
-        kind: 'title' as 'title',
-        author: lines[0],
-        title: lines[lines.length - 1],
-    }
+    lines => lines.length > 1 ?
+        {
+            kind: 'title' as 'title',
+            author: lines[0],
+            title: lines[lines.length - 1],
+        }
         : {
             kind: 'title' as 'title',
             title: lines[0],
         },
 );
 
-export const titlePageP = translate(parsePath(['html', 'body', 'div'],
+export const titlePageP = translate(path(['html', 'body', 'div'],
     element(
         el => el.name === 'div' && el.attributes.class === undefined,
         afterWhitespaces(titleDivP)
@@ -189,7 +190,7 @@ const skipOneP = firstNodeXml(n => undefined);
 
 const pageContentP = some(afterWhitespaces(choice(paragraphP, separatorP, skipOneP)));
 
-export const normalPageP = translate(parsePath(['html', 'body'],
+export const normalPageP = translate(path(['html', 'body'],
     children(afterWhitespaces(element(
         el => el.attributes.class !== undefined,
         pageContentP,

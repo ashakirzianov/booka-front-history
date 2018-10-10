@@ -1,4 +1,4 @@
-import { skipToNode, parsePath, children, element } from "./xml2json";
+import { skipToNode, path, children, element } from "./xml2json";
 import { xmlElement, XmlNode } from "./xmlNode";
 import { expectSuccess } from "../testUtils";
 import { success, and } from "./parserCombinators";
@@ -35,7 +35,7 @@ it('pathParser', () => {
         ]),
     ])];
 
-    const parser = parsePath(['root', 'c', 'cb', 'cba'], element('cba'));
+    const parser = path(['root', 'c', 'cb', 'cba'], element('cba'));
 
     const result = parser(input);
 
