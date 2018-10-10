@@ -70,8 +70,13 @@ export type Success<TI, T> = {
     match: T,
     next: TI[],
 };
+export type FailReasonSingle = string;
+export type FailReasonCompound = { reasons: FailReason[] };
+export type FailReasonTagged = { tag: string, reason: FailReason };
+export type FailReason = FailReasonSingle | FailReasonCompound | FailReasonTagged;
 export type Fail = {
     success: false,
+    reason: FailReason,
 };
 export type Result<TI, T> = Success<TI, T> | Fail;
 
@@ -85,9 +90,10 @@ export function success<TI, T>(match: T, next: TI[]): Success<TI, T> {
     };
 }
 
-export function fail(): Fail {
+export function fail(reason: FailReason): Fail {
     return {
         success: false,
+        reason: reason,
     };
 }
 
@@ -226,11 +232,11 @@ export function isOptional(p: Pattern): p is Optional<any> {
 function matchNode<TI>(nodePattern: NodeFunc<TI, any>, input: TI[]) {
     const list = split(input);
     if (!list.head) {
-        return fail();
+        return fail('fn: input is empty');
     }
 
     const result = nodePattern.fn(list.head);
-    return result === null ? fail() : success(result, list.tail);
+    return result === null ? fail('fn: not matched') : success(result, list.tail);
 }
 
 function matchCapture<TI>(capturePattern: Capture<any, any>, input: TI[]) {
@@ -286,7 +292,7 @@ function matchChoice<TI>(choicePattern: Choice<any, any>, input: TI[]) {
         return second;
     }
 
-    return fail(); // TODO: combine reasons
+    return fail({ reasons: [first.reason, second.reason]}); // TODO: combine reasons
 }
 
 function matchSome<TI>(somePattern: Some<any>, input: TI[]) {
@@ -308,7 +314,7 @@ function matchNot<TI>(notPattern: Not<any>, input: TI[]) {
     const result = matchPattern(notPattern.inside, input);
 
     if (result.success) {
-        return fail(); // TODO: report reason
+        return fail('not: pattern succeed'); // TODO: report reason
     } else {
         return success({}, input);
     }
