@@ -131,14 +131,13 @@ export const titleDivP = translate(
         },
 );
 
-export const titlePageP = parsePath(['html', 'body', 'div'], translate(
-
+export const titlePageP = translate(parsePath(['html', 'body', 'div'],
     element(
         el => el.name === 'div' && el.attributes.class === undefined,
         afterWhitespaces(titleDivP)
-    ),
-    tp => [tp],
-));
+    )),
+    tp => [tp], // TODO: do we need array?
+);
 
 // ---- Separator parser
 
@@ -190,13 +189,13 @@ const skipOneP = firstNodeXml(n => undefined);
 
 const pageContentP = some(afterWhitespaces(choice(paragraphP, separatorP, skipOneP)));
 
-export const normalPageP = parsePath(['html', 'body'], translate(
+export const normalPageP = translate(parsePath(['html', 'body'],
     children(afterWhitespaces(element(
         el => el.attributes.class !== undefined,
         pageContentP,
-    ))),
+    )))),
     content => filterUndefined(content),
-));
+);
 
 // ---- Section parser
 
