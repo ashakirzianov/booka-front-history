@@ -19,6 +19,7 @@ export type Capture<N extends string, I extends P> = UnaryPattern<'capture', I> 
 
 export type Some<I extends P> = UnaryPattern<'some', I>;
 export type Not<I extends P> = UnaryPattern<'not', I>;
+export type Optional<I extends P> = UnaryPattern<'optional', I>;
 
 type BinaryPattern<K extends string, F extends Pattern, S extends Pattern> = {
     pattern: K,
@@ -36,7 +37,7 @@ type SumPattern<F extends P, S extends P> = Choice<F, S>;
 type AlgebraicPattern<F extends P, S extends P> = ProductPattern<F, S> | SumPattern<F, S>;
 export type Pattern =
     | ValuePattern<any>
-    | Capture<any, any> | Some<any> | Not<any>
+    | Capture<any, any> | Some<any> | Not<any> | Optional<any>
     | AlgebraicPattern<any, any>
     ;
 type P = Pattern;
@@ -47,11 +48,14 @@ type DoMatch<T extends Pattern> =
     : T extends SumPattern<infer FS, infer SS> ? ReMatch<FS> | ReMatch<SS>
     : T extends Some<infer I> ? Array<ReMatch<I>>
     : T extends Not<infer IN> ? {}
+    : T extends Optional<infer IO> ? ReMatch<IO> | undefined
     : T extends Capture<infer Name, infer Value> ? { [k in Name]: Match<Value> }
     : T extends NodeFunc<any, infer Fn> ? Fn
     : never
     ;
-type IgnoreValueMatch<T extends Pattern> = T extends ValuePattern<any> ? {} : Match<T>;
+type IgnoreValueMatch<T extends Pattern> = T extends ValuePattern<any> ? {}
+    : T extends Optional<ValuePattern<any>> ? {}
+    : Match<T>;
 
 type SecretField = '@@secret_type_helper';
 type Wrap<T> = { [k in SecretField]: T };
@@ -172,6 +176,13 @@ export function not<T extends P>(inside: T): Not<T> {
     };
 }
 
+export function optional<T extends P>(inside: T): Optional<T> {
+    return {
+        pattern: 'optional',
+        inside: inside,
+    };
+}
+
 // ---- Type predicates
 
 export function isValuePattern(p: Pattern): p is ValuePattern<any> {
@@ -204,6 +215,10 @@ export function isSome(p: Pattern): p is Some<any> {
 
 export function isNot(p: Pattern): p is Not<any> {
     return p.pattern === 'not';
+}
+
+export function isOptional(p: Pattern): p is Optional<any> {
+    return p.pattern === 'optional';
 }
 
 // ---- Matcher
@@ -299,6 +314,16 @@ function matchNot<TI>(notPattern: Not<any>, input: TI[]) {
     }
 }
 
+function matchOptional<TI>(optPattern: Optional<any>, input: TI[]) {
+    const result = matchPattern(optPattern.inside, input);
+
+    if (result.success) {
+        return result;
+    } else {
+        return success(undefined, input);
+    }
+}
+
 function matchPatternIgnoreValue<TI>(pattern: Pattern, input: TI[]) {
     const result = matchPattern(pattern, input);
     return result.success ?
@@ -314,7 +339,8 @@ export function matchPattern<TI, T extends Pattern>(pattern: T, input: TI[]): Re
                     : isChoice(pattern) ? matchChoice(pattern, input)
                         : isSome(pattern) ? matchSome(pattern, input)
                             : isNot(pattern) ? matchNot(pattern, input)
-                                : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
+                                : isOptional(pattern) ? matchOptional(pattern, input)
+                                    : throwExp({ cantHandlePattern: pattern }); // : assertNever(pattern);
 }
 
 // ---- Example
