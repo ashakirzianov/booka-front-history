@@ -114,12 +114,11 @@ function buildContent(structures: Element[]): BookNode[] {
 
 // ---- Title page
 
-const titleLinesP = afterWhitespaces(oneOrMore(element('h2', textNode())));
 export const titleDivP = translate(
-    element(
+    afterWhitespaces(element(
         el => el.name === 'div' && el.attributes.class === 'title2',
-        titleLinesP,
-    ),
+        oneOrMore(afterWhitespaces(element('h2', textNode()))),
+    )),
     lines => lines.length > 1 ?
         {
             kind: 'title' as 'title',
@@ -135,7 +134,7 @@ export const titleDivP = translate(
 export const titlePageP = translate(path(['html', 'body', 'div'],
     element(
         el => el.name === 'div' && el.attributes.class === undefined,
-        afterWhitespaces(titleDivP)
+        titleDivP,
     )),
     tp => [tp], // TODO: do we need array?
 );
