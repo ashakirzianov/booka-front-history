@@ -20,7 +20,7 @@
     "react": "^16.5.2",
     "react-art": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-native-web": "^0.9.1",
+    "react-native-web": "^0.9.2",
     "react-redux": "^5.0.7",
     "react-scripts-ts": "2.14.0",
     "redux": "^3.7.2",
@@ -30,17 +30,17 @@
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",
-    "@types/lodash": "^4.14.116",
-    "@types/node": "^9.6.34",
+    "@types/lodash": "^4.14.117",
+    "@types/node": "^9.6.35",
     "@types/radium": "^0.18.24",
-    "@types/react": "^16.4.14",
-    "@types/react-dom": "^16.0.8",
+    "@types/react": "^16.4.16",
+    "@types/react-dom": "^16.0.9",
     "@types/react-native": "^0.52.25",
     "@types/react-redux": "^5.0.21",
     "jest": "^22.4.4",
     "jest-cli": "^22.4.4",
-    "react-native": "^0.57.1",
+    "react-native": "^0.57.2",
     "ts-jest": "^22.4.6",
-    "typescript": "^3.0.1"
+    "typescript": "^3.1.2"
   }
 }

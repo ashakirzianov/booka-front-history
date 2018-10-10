@@ -45,5 +45,6 @@
         "**/node_modules/**": true,
         "package-lock.json": true
     },
-    "tslint.autoFixOnSave": true
+    "tslint.autoFixOnSave": true,
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
