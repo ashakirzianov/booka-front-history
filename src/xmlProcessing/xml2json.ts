@@ -48,19 +48,45 @@ export const elementTranslate = <T>(f: (e: XmlNodeElement) => T | null) => first
     isElement(n) ? f(n) : null
 );
 
-export const element = <T = null>(arg: {
-    name?: string,
-    attrs?: XmlAttributes,
-    children?: XmlParser<T>,
-}) => and(
-    firstNodeXml(n =>
-        isElement(n)
-            && (!arg.name || caseInsensitiveEq(n.name, arg.name))
-            && (!arg.attrs || attrsCompare(arg.attrs, n.attributes))
-            ? n : null
-    ),
-    arg.children ? children(arg.children) : x => success(null as any as T, []),
-);
+type ElementParserArg =
+    | string // match element name
+    | ((node: XmlNodeElement) => boolean) // element predicate
+    ;
+export function element<T>(arg: ElementParserArg, ch: XmlParser<T>): XmlParser<T>;
+export function element<T>(arg: ElementParserArg): XmlParser<XmlNodeElement>;
+export function element<T>(arg: ElementParserArg, ch?: XmlParser<T>): XmlParser<T | XmlNodeElement> {
+    return function f(input: XmlNode[]) {
+        const list = split(input);
+        if (!list.head) {
+            return fail('element: empty input');
+        }
+
+        if (!isElement(list.head)) {
+            return fail('element: head is not an element');
+        }
+
+        if (typeof arg === 'string') {
+            if (!nameCompare(arg, list.head.name)) {
+                return fail(`element: name ${list.head.name} does not match ${arg}`);
+            }
+        } else {
+            if (!arg(list.head)) {
+                return fail('element: predicate failed');
+            }
+        }
+
+        if (ch) {
+            const result = ch(list.head.children);
+            if (!result.success) {
+                return result;
+            } else {
+                return success(result.value, list.tail);
+            }
+        }
+
+        return success(list.head, list.tail);
+    };
+}
 
 export const textNode = <T>(f: (text: string) => T | null) => firstNodeXml(node =>
     node.type === 'text'
@@ -138,6 +164,7 @@ export function between<T>(left: XmlParser<any>, right: XmlParser<any>, inside: 
     };
 }
 
+// TODO: make universal and move to parserCombinators
 export function skipToNode<T>(node: XmlParser<T>): XmlParser<T> {
     return projectLast(seq(
         some(not(node)),

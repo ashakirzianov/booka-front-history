@@ -7,7 +7,7 @@ import { string2tree, XmlNodeDocument } from "../xmlProcessing/xmlNode";
 import { filterUndefined } from "../utils";
 import {
     firstNodeGeneric, Parser, choice, translate,
-    seq, and, oneOrMore, report, some,
+    seq, and, oneOrMore, some,
 } from "../xmlProcessing/parserCombinators";
 
 // ---- TypeDefs
@@ -122,12 +122,11 @@ const titleLinesP = afterWhitespaces(oneOrMore(translate(
     ([el, text]) => text,
 )));
 export const titleDivP = translate(
-    element({
-        name: 'div',
-        attrs: { class: 'title2' },
-        children: titleLinesP,
-    }),
-    ([_, lines]) => lines.length > 1 ? {
+    element(
+        el => el.name === 'div' && el.attributes.class === 'title2',
+        titleLinesP,
+    ),
+    lines => lines.length > 1 ? {
         kind: 'title' as 'title',
         author: lines[0],
         title: lines[lines.length - 1],
@@ -139,16 +138,12 @@ export const titleDivP = translate(
 );
 
 export const titlePageP = parsePath(['html', 'body', 'div'], translate(
-    and(
-        report('et', elementTranslate(el => {
-            return el.attributes.class === undefined ? el : null;
-        })),
-        report('div', element({
-            name: 'div',
-            children: report('titleDivP', afterWhitespaces(titleDivP)),
-        })),
+
+    element(
+        el => el.name === 'div' && el.attributes.class === undefined,
+        afterWhitespaces(titleDivP)
     ),
-    ([_, [__, titlePage]]) => [titlePage],
+    tp => [tp],
 ));
 
 // ---- Separator parser

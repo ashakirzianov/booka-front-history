@@ -1,6 +1,5 @@
-import { skipToNode, elementName, parsePath, children, element } from "./xml2json";
+import { skipToNode, elementName, parsePath, children } from "./xml2json";
 import { xmlElement, XmlNode } from "./xmlNode";
-import { htmlFragmentToNodes } from "./xmlUtils";
 import { expectSuccess } from "../testUtils";
 import { success, and } from "./parserCombinators";
 
@@ -41,20 +40,4 @@ it('pathParser', () => {
     const result = parser(input);
 
     expectSuccess(result);
-});
-
-it('element', () => {
-    const xml = `<div class="title2">
-    <h2>Author</h2>
-    <h2>Line 2</h2>
-    <h2>Book Title</h2>
-  </div>`;
-    const input = htmlFragmentToNodes(xml);
-    const parser = element({
-        name: 'div',
-        attrs: { class: 'title2' },
-    });
-    const result = parser(input);
-
-    expect(result.success).toBeTruthy();
 });
