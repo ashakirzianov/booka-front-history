@@ -39,7 +39,7 @@ export const childrenText = children(extractText);
 const extractTextParser = translate(
     some(choice(
         anyText,
-        childrenText
+        childrenText,
     )),
     arrays => arrays.reduce((result, arr) => result.concat(arr), []),
 );

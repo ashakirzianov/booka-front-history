@@ -75,11 +75,17 @@ export function element<T>(arg: ElementParserArg, ch?: XmlParser<T>): XmlParser<
     };
 }
 
-export const textNode = <T = string>(f?: (text: string) => T | null) => firstNodeXml(node =>
+const textNodeImpl = <T>(f?: (text: string) => T | null) => firstNodeXml(node =>
     node.type === 'text'
         ? (f ? f(node.text) : node.text)
         : null
 );
+
+export function textNode<T>(f: (text: string) => T | null): XmlParser<T>;
+export function textNode(): XmlParser<string>;
+export function textNode<T>(f?: (text: string) => T | null): XmlParser<T | string> {
+    return textNodeImpl(f);
+}
 
 export const whitespaces = textNode(text => isWhitespaces(text) ? true : null);
 
