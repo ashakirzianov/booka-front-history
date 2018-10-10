@@ -20,15 +20,15 @@ export type Capture<N extends string, I extends P> = UnaryPattern<'capture', I> 
 export type Some<I extends P> = UnaryPattern<'some', I>;
 export type Not<I extends P> = UnaryPattern<'not', I>;
 
-type PairPattern<K extends string, F extends Pattern, S extends Pattern> = {
+type BinaryPattern<K extends string, F extends Pattern, S extends Pattern> = {
     pattern: K,
     first: F,
     second: S,
 };
 
-export type Sequence<F extends P, S extends P> = PairPattern<'sequence', F, S>;
-export type And<F extends P, S extends P> = PairPattern<'and', F, S>;
-export type Choice<F extends P, S extends P> = PairPattern<'choice', F, S>;
+export type Sequence<F extends P, S extends P> = BinaryPattern<'sequence', F, S>;
+export type And<F extends P, S extends P> = BinaryPattern<'and', F, S>;
+export type Choice<F extends P, S extends P> = BinaryPattern<'choice', F, S>;
 
 type ValuePattern<T> = NodeFunc<any, T>;
 type ProductPattern<F extends P, S extends P> = Sequence<F, S> | And<F, S>;
