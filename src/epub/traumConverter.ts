@@ -100,21 +100,21 @@ function findTitlePage(structures: Element[]): TitlePage | undefined {
 
 const headElement = head<Element>();
 
-function chapterParser<T extends BookNode>(level: number, content: Parser<Element, T>): Parser<Element, BookNode> {
+function chapterParser<T extends BookNode>(level: number, contentE: Parser<Element, T>): Parser<Element, BookNode> {
     return choice(
         translate(
             seq(
                 headElement(se => se.kind === 'separator' && se.level === level ? se : null),
-                some(content),
+                some(contentE),
             ),
-            ([h, ps]) => ({
+            ([h, c]) => ({
                 kind: 'chapter' as 'chapter',
                 level: level,
                 title: h.title,
-                content: ps,
+                content: c,
             }),
         ),
-        content,
+        contentE,
     );
 }
 
@@ -138,7 +138,10 @@ const bookE = translate(
 
 function buildContent(structures: Element[]): BookNode[] {
     const result = bookE(structures);
-    return result.success ? result.value : [];
+    return result.success ?
+        result.value
+        : [] // TODO: report parsing problems
+        ;
 }
 
 // ---- Title page
@@ -162,10 +165,10 @@ export const titleDivP = translate(
 
 export const titlePageP = translate(path(['html', 'body', 'div'],
     element(
-        el => el.name === 'div' && el.attributes.class === undefined,
+        el => el.attributes.class === undefined,
         titleDivP,
     )),
-    tp => [tp], // TODO: do we need array?
+    tp => [tp],
 );
 
 // ---- Separator parser
