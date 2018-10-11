@@ -5,18 +5,18 @@ import {
 import { caseInsensitiveEq, isWhitespaces } from "./xmlUtils";
 import {
     Parser, Result, success, fail,
-    firstNodeGeneric, firstNodePredicate,
+    head, firstNodePredicate,
     split, seq, some, not, projectLast, report,
     translate,
 } from "./parserCombinators";
 
 export type XmlParser<TOut = XmlNode> = Parser<XmlNode, TOut>;
 
-export const firstNodeXml = firstNodeGeneric<XmlNode>();
+export const headNode = head<XmlNode>();
 
-export const nodeAny = firstNodeXml(x => x);
+export const nodeAny = headNode(x => x);
 export const nodeType = (type: XmlNodeType) => firstNodePredicate<XmlNode>(n => n.type === type);
-export const nodeComment = (content: string) => firstNodeXml(n =>
+export const nodeComment = (content: string) => headNode(n =>
     isComment(n) && n.content === content
         ? n : null
 );
@@ -33,7 +33,7 @@ export function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
 }
 
 export const projectElement = <T>(f: (e: XmlNodeElement) => T | null) =>
-    firstNodeXml(n => isElement(n) ? f(n) : null);
+    headNode(n => isElement(n) ? f(n) : null);
 
 type ElementParserArg =
     | string // match element name
@@ -75,7 +75,7 @@ export function element<T>(arg: ElementParserArg, ch?: XmlParser<T>): XmlParser<
     };
 }
 
-const textNodeImpl = <T>(f?: (text: string) => T | null) => firstNodeXml(node =>
+const textNodeImpl = <T>(f?: (text: string) => T | null) => headNode(node =>
     node.type === 'text'
         ? (f ? f(node.text) : node.text)
         : null

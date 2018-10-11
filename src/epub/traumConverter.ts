@@ -1,12 +1,12 @@
 import {
-    children, textNode, element, path, afterWhitespaces, firstNodeXml, projectElement,
+    children, textNode, element, path, afterWhitespaces, headNode, projectElement,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
 import { Book, BookNode } from "../model/book";
 import { string2tree, XmlNodeDocument } from "../xmlProcessing/xmlNode";
 import { filterUndefined } from "../utils";
 import {
-    firstNodeGeneric, Parser, choice, translate,
+    head, Parser, choice, translate,
     seq, and, oneOrMore, some,
 } from "../xmlProcessing/parserCombinators";
 import { EpubConverter } from "./epubConverter";
@@ -98,13 +98,13 @@ function findTitlePage(structures: Element[]): TitlePage | undefined {
     return structures.find(s => s.kind === 'title') as TitlePage;
 }
 
-const firstElement = firstNodeGeneric<Element>();
+const headElement = head<Element>();
 
 function chapterParser<T extends BookNode>(level: number, content: Parser<Element, T>): Parser<Element, BookNode> {
     return choice(
         translate(
             seq(
-                firstElement(se => se.kind === 'separator' && se.level === level ? se : null),
+                headElement(se => se.kind === 'separator' && se.level === level ? se : null),
                 some(content),
             ),
             ([h, ps]) => ({
@@ -118,7 +118,7 @@ function chapterParser<T extends BookNode>(level: number, content: Parser<Elemen
     );
 }
 
-const paragraphE = firstElement(
+const paragraphE = headElement(
     se => se.kind === 'paragraph' ? se.text : null,
 );
 
@@ -130,7 +130,7 @@ const h2E = chapterParser(2, h3E);
 const h1E = chapterParser(3, h2E);
 
 const bookContentE = h1E;
-const skipOneE = firstElement(n => undefined);
+const skipOneE = headElement(n => undefined);
 const bookE = translate(
     some(choice(bookContentE, skipOneE)),
     nodes => filterUndefined(nodes),
@@ -214,7 +214,7 @@ const paragraphP = translate(
 
 // ---- Normal page
 
-const skipOneP = firstNodeXml(n => undefined);
+const skipOneP = headNode(n => undefined);
 
 const pageContentP = some(afterWhitespaces(choice(paragraphP, separatorP, skipOneP)));
 
