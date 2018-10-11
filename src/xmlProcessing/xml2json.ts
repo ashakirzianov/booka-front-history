@@ -1,11 +1,11 @@
 import {
-    XmlNode, hasChildren, XmlNodeType, isElement,
-    isComment, XmlAttributes, XmlNodeElement,
+    XmlNode, hasChildren, isElement,
+    XmlAttributes, XmlNodeElement,
 } from "./xmlNode";
 import { caseInsensitiveEq, isWhitespaces } from "./xmlUtils";
 import {
     Parser, Result, success, fail,
-    head, firstNodePredicate,
+    head,
     split, seq, some, not, projectLast, report,
     translate,
 } from "./parserCombinators";
@@ -15,11 +15,6 @@ export type XmlParser<TOut = XmlNode> = Parser<XmlNode, TOut>;
 export const headNode = head<XmlNode>();
 
 export const nodeAny = headNode(x => x);
-export const nodeType = (type: XmlNodeType) => firstNodePredicate<XmlNode>(n => n.type === type);
-export const nodeComment = (content: string) => headNode(n =>
-    isComment(n) && n.content === content
-        ? n : null
-);
 
 export function nameEq(n1: string, n2: string) {
     return caseInsensitiveEq(n1, n2);

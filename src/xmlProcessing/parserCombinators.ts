@@ -45,9 +45,6 @@ export function head<TIn>() {
     };
 }
 
-export const firstNodePredicate = <TIn>(p: (n: TIn) => boolean) =>
-    head<TIn>()(n => p(n) ? n : null);
-
 export function not<T>(parser: Parser<T, any>): Parser<T, T> {
     return input => {
         const list = split(input);
