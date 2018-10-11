@@ -4,11 +4,14 @@ import { tree2book, html2xml, nonParagraphStart, paragraph, bookInfo, junkAtTheB
 import { string2tree, xmlText, xmlElement } from './xmlNode';
 import { skipToNode } from './xml2json';
 import { htmlFragmentToNodes } from './xmlUtils';
+import { expectDefined } from '../testUtils';
 
 it('War and Peace short parsing', () => {
     const xmlString = html2xml(shortTextLoad());
     const xmlTree = string2tree(xmlString);
-    expect(xmlTree).toBeDefined();
+    if (!expectDefined(xmlTree)) {
+        return;
+    }
     expect(xmlTree.type).toBe('document');
 
     const bookResult = tree2book(xmlTree.children);

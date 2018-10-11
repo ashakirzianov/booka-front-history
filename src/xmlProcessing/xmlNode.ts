@@ -25,8 +25,12 @@ export function hasChildren(node: XmlNode): node is XmlNodeWithChildren {
 export const isElement = typeGuard<XmlNode, XmlNodeElement>(node => node.type === 'element');
 export const isComment = typeGuard<XmlNode, XmlNodeComment>(node => node.type === 'comment');
 
-export function string2tree(xml: string): XmlNodeDocument {
-    return parseXmlLib(xml, { preserveComments: true });
+export function string2tree(xml: string): XmlNodeDocument | undefined {
+    try {
+        return parseXmlLib(xml, { preserveComments: true });
+    } catch (e) {
+        return undefined; // TODO: report parsing errors
+    }
 }
 
 export function xmlText(text: string, parent?: XmlNodeWithChildren): XmlNodeText {

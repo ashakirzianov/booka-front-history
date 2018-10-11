@@ -64,6 +64,9 @@ function convertEpub(epub: Epub): Promise<Book> {
 
 function section2elements(section: Section): Element[] {
     const tree = string2tree(section.htmlString);
+    if (!tree) {
+        return []; // TODO: report parsing problems
+    }
     const structures = tree2elements(tree);
     return structures;
 }
@@ -82,6 +85,7 @@ function buildBook(epub: Epub): Book {
     const titlePage = findTitlePage(structures);
     const content = buildContent(structures);
 
+    // TODO: report when no title page
     return {
         kind: 'book' as 'book',
         title: titlePage && titlePage.title || epub.info.title,

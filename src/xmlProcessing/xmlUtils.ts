@@ -46,6 +46,9 @@ export function htmlFragmentToNodes(html: string, html2xml?: (h: string) => stri
     const properHtml = `<html>${html}</html>`;
     const xml = html2xml ? html2xml(`<html>${html}</html>`) : properHtml;
     const document = string2tree(xml);
+    if (!document) {
+        throw new Error("Can't parse xml");
+    }
     const root = document.children[0];
 
     return root && hasChildren(root) ? root.children : throwExp("Can't parse html: " + html);

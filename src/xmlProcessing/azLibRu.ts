@@ -165,6 +165,9 @@ export const tree2book = path(['html', 'body'], children(bodyParser));
 export function string2book(html: string) {
     const xmlString = html2xml(html);
     const xmlTree = string2tree(xmlString);
+    if (!xmlTree) {
+        throw new Error("Couldn't parse xml");
+    }
     const bookResult = tree2book(xmlTree.children);
 
     return bookResult.success

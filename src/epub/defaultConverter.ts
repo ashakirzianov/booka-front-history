@@ -4,6 +4,7 @@ import { string2tree, XmlNodeDocument, XmlNode } from "../xmlProcessing/xmlNode"
 import { textNode, children } from "../xmlProcessing/xml2json";
 import { translate, choice, some, Result } from "../xmlProcessing/parserCombinators";
 import { EpubConverter } from "./epubConverter";
+import { filterUndefined } from "../utils";
 
 export const converter: EpubConverter = {
     canHandleEpub: _ => true,
@@ -20,11 +21,15 @@ function defaultEpubConverter(epub: Epub): Promise<Book> {
 }
 
 function convertSections(sections: Section[]): BookNode[] {
-    return sections.map(convertSingleSection);
+    return filterUndefined(sections.map(convertSingleSection));
 }
 
-function convertSingleSection(section: Section): BookNode {
+function convertSingleSection(section: Section): BookNode | undefined {
     const tree = string2tree(section.htmlString);
+    if (!tree) {
+        return undefined;
+    }
+
     const node = tree2node(tree);
     return {
         kind: 'chapter' as 'chapter',
@@ -36,7 +41,10 @@ function convertSingleSection(section: Section): BookNode {
 
 function tree2node(tree: XmlNodeDocument): BookNode[] {
     const result = extractText(tree.children);
-    return result.success ? result.value : ["CAN NOT PARSE"];
+    return result.success ?
+        result.value
+        : ["CAN NOT PARSE"] // TODO: better reporting
+        ;
 }
 
 const anyText = textNode(t => [t]);
