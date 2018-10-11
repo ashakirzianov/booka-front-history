@@ -4,6 +4,11 @@ import { defaultEpubConverter } from './defaultConverter';
 import { Epub } from './epubParser';
 import { traumEpubConverter } from './traumConverter';
 
+export type EpubConverter = {
+    canHandleEpub: (epub: Epub) => boolean,
+    convertEpub: (epub: Epub) => Promise<Book>,
+};
+
 export function arrayBuffer2epub(arrayBuffer: ArrayBuffer): Promise<Epub> {
     const buffer = new Buffer(arrayBuffer);
     return epubParser(buffer);
