@@ -6,7 +6,7 @@ import { caseInsensitiveEq, isWhitespaces } from "./xmlUtils";
 import {
     Parser, Result, success, fail,
     head,
-    split, seq, some, not, projectLast, report,
+    split, seq, some, not, report,
     translate,
 } from "./parserCombinators";
 
@@ -150,14 +150,6 @@ export function between<T>(left: XmlParser<any>, right: XmlParser<any>, inside: 
             : result
             ;
     };
-}
-
-// TODO: make universal and move to parserCombinators
-export function skipToNode<T>(node: XmlParser<T>): XmlParser<T> {
-    return projectLast(seq(
-        some(not(node)),
-        node,
-    ));
 }
 
 // TODO: handle empty path scenario

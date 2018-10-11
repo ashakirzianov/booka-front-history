@@ -169,3 +169,10 @@ export function report<TIn, TOut>(tag: string, parser: Parser<TIn, TOut>): Parse
         });
     };
 }
+
+export function skipTo<TI, TO>(parser: Parser<TI, TO>): Parser<TI, TO> {
+    return projectLast(seq(
+        some(not(parser)),
+        parser,
+    ));
+}

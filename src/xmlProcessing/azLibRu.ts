@@ -3,12 +3,12 @@ import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
 import {
     nodeAny, path, textNode,
-    children, skipToNode, XmlParser, element, nameEq, headNode,
+    children, XmlParser, element, nameEq, headNode,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
 import { Chapter, BookNode } from '../model/book';
 import {
-    translate, some, choice, and, seq, oneOrMore, projectLast, not,
+    translate, some, choice, and, seq, oneOrMore, projectLast, not, skipTo,
 } from './parserCombinators';
 
 // ---------- html2xml
@@ -150,7 +150,7 @@ export const bookInfo = translate(
 export const bookContent = some(projectLast(and(not(bookEndParser), bookNodeParser)));
 
 export const bookParser = translate(
-    skipToNode(seq(bookInfo, junkAtTheBeginning, bookContent)),
+    skipTo(seq(bookInfo, junkAtTheBeginning, bookContent)),
     ([bi, junk, nodes]) => ({
         kind: 'book' as 'book',
         title: bi.title,
