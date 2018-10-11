@@ -14,25 +14,22 @@ const convertersRegistry = [
     defaultConverter,
 ];
 
-export function arrayBuffer2epub(arrayBuffer: ArrayBuffer): Promise<Epub> {
-    const buffer = new Buffer(arrayBuffer);
-    return epubParser(buffer);
-}
-
 export function arrayBuffer2book(arrayBuffer: ArrayBuffer): Promise<Book> {
     const buffer = new Buffer(arrayBuffer);
-    return epubParser(buffer)
+    const book = epubParser(buffer)
         .then(epub2book);
+
+    return book;
 }
 
-export function epub2book(epub: Epub): Promise<Book> {
+function epub2book(epub: Epub): Promise<Book> {
     const converter = resolveEpubConverter(epub);
     const book = converter(epub);
 
     return book;
 }
 
-export function resolveEpubConverter(epub: Epub): (epub: Epub) => Promise<Book> {
+function resolveEpubConverter(epub: Epub): (epub: Epub) => Promise<Book> {
     const converter = convertersRegistry.find(c => c.canHandleEpub(epub)) || defaultConverter;
 
     return converter.convertEpub;
