@@ -3,8 +3,14 @@ import { Epub, Section } from "./epubParser";
 import { string2tree, XmlNodeDocument, XmlNode } from "../xmlProcessing/xmlNode";
 import { textNode, children } from "../xmlProcessing/xml2json";
 import { translate, choice, some, Result } from "../xmlProcessing/parserCombinators";
+import { EpubConverter } from "./epubConverter";
 
-export function defaultEpubConverter(epub: Epub): Promise<Book> {
+export const converter: EpubConverter = {
+    canHandleEpub: _ => true,
+    convertEpub: defaultEpubConverter,
+};
+
+function defaultEpubConverter(epub: Epub): Promise<Book> {
     return Promise.resolve({
         kind: 'book' as 'book',
         title: epub.info.title,
@@ -33,8 +39,8 @@ function tree2node(tree: XmlNodeDocument): BookNode[] {
     return result.success ? result.value : ["CAN NOT PARSE"];
 }
 
-export const anyText = textNode(t => [t]);
-export const childrenText = children(extractText);
+const anyText = textNode(t => [t]);
+const childrenText = children(extractText);
 
 const extractTextParser = translate(
     some(choice(
@@ -44,6 +50,6 @@ const extractTextParser = translate(
     arrays => arrays.reduce((result, arr) => result.concat(arr), []),
 );
 
-export function extractText(tree: XmlNode[]): Result<XmlNode, string[]> {
+function extractText(tree: XmlNode[]): Result<XmlNode, string[]> {
     return extractTextParser(tree);
 }

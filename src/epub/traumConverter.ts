@@ -9,6 +9,20 @@ import {
     firstNodeGeneric, Parser, choice, translate,
     seq, and, oneOrMore, some,
 } from "../xmlProcessing/parserCombinators";
+import { EpubConverter } from "./epubConverter";
+
+// ---- Export
+
+export const converter: EpubConverter = {
+    canHandleEpub: canHandleEpub,
+    convertEpub: convertEpub,
+};
+
+// ---- Resolver
+
+function canHandleEpub(epub: Epub): boolean {
+    return true;
+}
 
 // ---- TypeDefs
 
@@ -33,7 +47,7 @@ type Element = Header | Paragraph | TitlePage;
 
 // ---- Converter
 
-export function traumEpubConverter(epub: Epub): Promise<Book> {
+function convertEpub(epub: Epub): Promise<Book> {
     return Promise.resolve(buildBook(epub));
 }
 
