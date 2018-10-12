@@ -5,3 +5,7 @@ export function expectSuccess<TIn, TOut>(result: Result<TIn, TOut>): result is S
     expect(failReason).toBeUndefined();
     return result.success;
 }
+
+export function expectDefined<T>(x: T | undefined): x is T {
+    return x !== undefined;
+}

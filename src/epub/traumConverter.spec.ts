@@ -45,7 +45,8 @@ const separatorPageHtml =
 function stringParser<T>(xmlNodeParser: XmlParser<T>) {
     return (html: string) => {
         const tree = string2tree(html);
-        return xmlNodeParser(tree.children);
+        const input = tree ? tree.children : [];
+        return xmlNodeParser(input);
     };
 }
 

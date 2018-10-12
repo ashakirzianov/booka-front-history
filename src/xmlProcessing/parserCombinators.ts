@@ -31,7 +31,7 @@ export function split<T>(arr: T[]) {
     };
 }
 
-export function firstNodeGeneric<TIn>() {
+export function head<TIn>() {
     return <TOut>(f: (n: TIn) => TOut | null) => (input: TIn[]) => {
         const list = split(input);
         if (!list.head) {
@@ -44,9 +44,6 @@ export function firstNodeGeneric<TIn>() {
             ;
     };
 }
-
-export const firstNodePredicate = <TIn>(p: (n: TIn) => boolean) =>
-    firstNodeGeneric<TIn>()(n => p(n) ? n : null);
 
 export function not<T>(parser: Parser<T, any>): Parser<T, T> {
     return input => {
@@ -171,4 +168,11 @@ export function report<TIn, TOut>(tag: string, parser: Parser<TIn, TOut>): Parse
             reason: result.reason,
         });
     };
+}
+
+export function skipTo<TI, TO>(parser: Parser<TI, TO>): Parser<TI, TO> {
+    return projectLast(seq(
+        some(not(parser)),
+        parser,
+    ));
 }

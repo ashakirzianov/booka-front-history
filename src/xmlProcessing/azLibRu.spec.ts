@@ -1,14 +1,20 @@
 import { loadText as shortTextLoad } from '../samples/warAndPeaceShort';
 import { throwExp } from '../utils';
-import { tree2book, html2xml, nonParagraphStart, paragraph, bookInfo, junkAtTheBeginning } from './azLibRu';
+import {
+    tree2book, html2xml, nonParagraphStart,
+    paragraph, bookInfo, junkAtTheBeginning,
+} from './azLibRu';
 import { string2tree, xmlText, xmlElement } from './xmlNode';
-import { skipToNode } from './xml2json';
 import { htmlFragmentToNodes } from './xmlUtils';
+import { expectDefined } from '../testUtils';
+import { skipTo } from './parserCombinators';
 
 it('War and Peace short parsing', () => {
     const xmlString = html2xml(shortTextLoad());
     const xmlTree = string2tree(xmlString);
-    expect(xmlTree).toBeDefined();
+    if (!expectDefined(xmlTree)) {
+        return;
+    }
     expect(xmlTree.type).toBe('document');
 
     const bookResult = tree2book(xmlTree.children);
@@ -66,7 +72,7 @@ it('bookInfo', () => {
         ]),
     ];
 
-    const result = skipToNode(bookInfo)(input);
+    const result = skipTo(bookInfo)(input);
 
     expect(result.success).toBeTruthy();
     expect(result.success && result.value).toEqual({ title: 'Hello', author: 'John Smith' });

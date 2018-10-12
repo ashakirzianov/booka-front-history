@@ -1,25 +1,20 @@
 import {
-    XmlNode, hasChildren, XmlNodeType, isElement,
-    isComment, XmlAttributes, XmlNodeElement,
+    XmlNode, hasChildren, isElement,
+    XmlAttributes, XmlNodeElement,
 } from "./xmlNode";
 import { caseInsensitiveEq, isWhitespaces } from "./xmlUtils";
 import {
     Parser, Result, success, fail,
-    firstNodeGeneric, firstNodePredicate,
-    split, seq, some, not, projectLast, report,
+    head,
+    split, seq, some, not, report,
     translate,
 } from "./parserCombinators";
 
 export type XmlParser<TOut = XmlNode> = Parser<XmlNode, TOut>;
 
-export const firstNodeXml = firstNodeGeneric<XmlNode>();
+export const headNode = head<XmlNode>();
 
-export const nodeAny = firstNodeXml(x => x);
-export const nodeType = (type: XmlNodeType) => firstNodePredicate<XmlNode>(n => n.type === type);
-export const nodeComment = (content: string) => firstNodeXml(n =>
-    isComment(n) && n.content === content
-        ? n : null
-);
+export const nodeAny = headNode(x => x);
 
 export function nameEq(n1: string, n2: string) {
     return caseInsensitiveEq(n1, n2);
@@ -33,7 +28,7 @@ export function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
 }
 
 export const projectElement = <T>(f: (e: XmlNodeElement) => T | null) =>
-    firstNodeXml(n => isElement(n) ? f(n) : null);
+    headNode(n => isElement(n) ? f(n) : null);
 
 type ElementParserArg =
     | string // match element name
@@ -75,7 +70,7 @@ export function element<T>(arg: ElementParserArg, ch?: XmlParser<T>): XmlParser<
     };
 }
 
-const textNodeImpl = <T>(f?: (text: string) => T | null) => firstNodeXml(node =>
+const textNodeImpl = <T>(f?: (text: string) => T | null) => headNode(node =>
     node.type === 'text'
         ? (f ? f(node.text) : node.text)
         : null
@@ -155,14 +150,6 @@ export function between<T>(left: XmlParser<any>, right: XmlParser<any>, inside: 
             : result
             ;
     };
-}
-
-// TODO: make universal and move to parserCombinators
-export function skipToNode<T>(node: XmlParser<T>): XmlParser<T> {
-    return projectLast(seq(
-        some(not(node)),
-        node,
-    ));
 }
 
 // TODO: handle empty path scenario

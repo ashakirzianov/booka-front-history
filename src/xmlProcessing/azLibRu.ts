@@ -2,13 +2,13 @@ import { combineFs, throwExp, letExp } from '../utils';
 import { string2tree } from './xmlNode';
 import { html2xmlFixes } from './html2xml';
 import {
-    nodeAny, nodeComment, path, textNode,
-    children, skipToNode, XmlParser, element, nameEq,
+    nodeAny, path, textNode,
+    children, XmlParser, element, nameEq, headNode,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
 import { Chapter, BookNode } from '../model/book';
 import {
-    translate, some, choice, and, seq, oneOrMore, projectLast, not,
+    translate, some, choice, and, seq, oneOrMore, projectLast, not, skipTo,
 } from './parserCombinators';
 
 // ---------- html2xml
@@ -48,6 +48,9 @@ export function textProcessing(text: string) {
 
 const startMarker = 'Собственно произведение'; // spellchecker:disable-line
 const stopMarker = '';
+
+const nodeComment = (c: string) => headNode(
+    n => n.type === 'comment' && n.content === c);
 
 export const bookStartParser = nodeComment(startMarker);
 export const bookEndParser = nodeComment(stopMarker);
@@ -108,10 +111,10 @@ export const paragraph = translate(
 
 export const chapter: XmlParser<Chapter> = translate(
     seq(headline, junkAtTheBeginning, oneOrMore(projectLast(and(not(headline), choice(paragraph, skipParser))))),
-    ([head, junk, pars]) => ({
+    ([h, junk, pars]) => ({
         kind: 'chapter' as 'chapter',
         level: 0,
-        title: head.text,
+        title: h.text,
         content: pars.filter(n => n) as BookNode[],
     }),
 );
@@ -124,10 +127,10 @@ export const partInfo = translate(
 );
 export const part: XmlParser<Chapter> = translate(
     seq(partInfo, junkAtTheBeginning, oneOrMore(chapter)),
-    ([head, junk, chapters]) => ({
+    ([h, junk, chapters]) => ({
         kind: 'chapter' as 'chapter',
         level: 1,
-        title: head,
+        title: h,
         content: chapters,
     }),
 );
@@ -147,7 +150,7 @@ export const bookInfo = translate(
 export const bookContent = some(projectLast(and(not(bookEndParser), bookNodeParser)));
 
 export const bookParser = translate(
-    skipToNode(seq(bookInfo, junkAtTheBeginning, bookContent)),
+    skipTo(seq(bookInfo, junkAtTheBeginning, bookContent)),
     ([bi, junk, nodes]) => ({
         kind: 'book' as 'book',
         title: bi.title,
@@ -165,6 +168,9 @@ export const tree2book = path(['html', 'body'], children(bodyParser));
 export function string2book(html: string) {
     const xmlString = html2xml(html);
     const xmlTree = string2tree(xmlString);
+    if (!xmlTree) {
+        throw new Error("Couldn't parse xml");
+    }
     const bookResult = tree2book(xmlTree.children);
 
     return bookResult.success
