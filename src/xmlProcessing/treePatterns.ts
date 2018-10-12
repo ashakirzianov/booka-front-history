@@ -292,7 +292,7 @@ function matchChoice<TI>(choicePattern: Choice<any, any>, input: TI[]) {
         return second;
     }
 
-    return fail({ reasons: [first.reason, second.reason]}); // TODO: combine reasons
+    return fail({ reasons: [first.reason, second.reason]});
 }
 
 function matchSome<TI>(somePattern: Some<any>, input: TI[]) {
@@ -314,7 +314,7 @@ function matchNot<TI>(notPattern: Not<any>, input: TI[]) {
     const result = matchPattern(notPattern.inside, input);
 
     if (result.success) {
-        return fail('not: pattern succeed'); // TODO: report reason
+        return fail('not: pattern succeed');
     } else {
         return success({}, input);
     }
