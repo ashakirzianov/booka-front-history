@@ -37,6 +37,8 @@ export type ValueConstraint<T, ValueType> = {
     [k in keyof T]: ValueType;
 };
 
+export type PromiseType<T> = T extends Promise<infer U> ? U : any;
+
 export function range(end: number): number[];
 // tslint:disable-next-line:unified-signatures
 export function range(start: number, end: number): number[];

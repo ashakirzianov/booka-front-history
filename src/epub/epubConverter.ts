@@ -1,6 +1,5 @@
-import epubParser from '@gxl/epub-parser';
 import { Book } from '../model/book';
-import { Epub } from './epubParser';
+import { Epub, epubParser } from './epubParser';
 import { converter as defaultConverter } from './defaultConverter';
 import { converter as traumConverter } from './traumConverter';
 

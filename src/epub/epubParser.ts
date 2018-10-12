@@ -1,5 +1,6 @@
-// tslint:disable:no-submodule-imports
-import { Epub } from "@gxl/epub-parser/build/types/epubParser";
-import { Section } from "@gxl/epub-parser/build/types/parseSection";
+import epubParser from '@gxl/epub-parser';
+import { PromiseType } from '../utils';
 
-export { Epub, Section };
+export type Epub = PromiseType<ReturnType<typeof epubParser>>;
+export type Section = Epub['sections'][0];
+export { epubParser };

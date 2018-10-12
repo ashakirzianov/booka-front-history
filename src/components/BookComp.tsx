@@ -35,7 +35,7 @@ const LoadingComp: Comp<LoadingStub> = props =>
     <div>Loading now...</div>;
 
 function buildNodes(nodes: BookNode[]) {
-    return nodes.map((bn, i) => <BookNodeComp node={bn} count={i} />);
+    return nodes.map((bn, i) => <BookNodeComp key={i} node={bn} count={i} />);
 }
 
 export { BookComp };
