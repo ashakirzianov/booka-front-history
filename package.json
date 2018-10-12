@@ -26,6 +26,7 @@
     "redux": "^3.7.2",
     "redux-loop": "^4.4.1",
     "redux-promise-middleware": "^5.1.1",
+    "typescript": "^3.1.2",
     "store": "^2.0.12"
   },
   "devDependencies": {
@@ -40,7 +41,6 @@
     "jest": "^22.4.4",
     "jest-cli": "^22.4.4",
     "react-native": "^0.57.2",
-    "ts-jest": "^22.4.6",
-    "typescript": "^3.1.2"
+    "ts-jest": "^22.4.6"
   }
 }
