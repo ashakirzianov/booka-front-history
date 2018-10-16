@@ -2,7 +2,7 @@ import * as React from "react";
 import { App } from "../model/app";
 import { ActionsTemplate } from "../model/actions";
 import { Callbacks } from "./comp-utils";
-import { BookComp } from "./BookComp";
+import { TopComp } from "./BookComp";
 
 class AppComp extends React.Component<{
     store: App,
@@ -14,7 +14,7 @@ class AppComp extends React.Component<{
 
     render() {
         const store = this.props.store;
-        return <BookComp {...store.book} />;
+        return <TopComp {...store.book} />;
     }
 }
 

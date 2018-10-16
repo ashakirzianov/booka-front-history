@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { Comp } from './comp-utils';
-import { Book, BookNode, Chapter, Paragraph, isParagraph, LoadingStub } from '../model/book';
+import {
+    Book, BookNode, Chapter, Paragraph,
+    isParagraph, LoadingStub,
+} from '../model/book';
 import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle } from './Elements';
 import { assertNever } from '../utils';
 
@@ -34,8 +37,11 @@ const BookComp: Comp<Book> = props =>
 const LoadingComp: Comp<LoadingStub> = props =>
     <div>Loading now...</div>;
 
+const TopComp: Comp<Book> = props =>
+        <BookComp {...props} />;
+
 function buildNodes(nodes: BookNode[]) {
     return nodes.map((bn, i) => <BookNodeComp key={i} node={bn} count={i} />);
 }
 
-export { BookComp };
+export { TopComp };
