@@ -1,6 +1,7 @@
 {
     "extends": "tslint:latest",
     "rules": {
+        "no-unused-variable": { "severity": "warning" },
         "no-unnecessary-initializer": false,
         "quotemark": false,
         "trailing-comma": [
