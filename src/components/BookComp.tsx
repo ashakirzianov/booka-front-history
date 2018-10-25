@@ -4,7 +4,7 @@ import {
     Book, BookNode, Chapter, Paragraph,
     isParagraph, LoadingStub,
 } from '../model/book';
-import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle, Router, Route } from './Elements';
+import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle, Router } from './Elements';
 import { assertNever } from '../utils';
 
 const ParagraphComp: Comp<{ p: Paragraph }> = props =>
