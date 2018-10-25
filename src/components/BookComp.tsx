@@ -4,7 +4,7 @@ import {
     Book, BookNode, Chapter, Paragraph,
     isParagraph, LoadingStub,
 } from '../model/book';
-import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle, Router } from './Elements';
+import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle, Router, Route } from './Elements';
 import { assertNever } from '../utils';
 
 const ParagraphComp: Comp<{ p: Paragraph }> = props =>
@@ -38,11 +38,9 @@ const LoadingComp: Comp<LoadingStub> = props =>
     <div>Loading now...</div>;
 
 const TopComp: Comp<Book> = props =>
-        <Router>
-            Hello!!!!
-            <BookComp {...props} />
-            {/* <Route path ='/' component={BookComp} /> } />; */}
-        </Router>;
+        <Router><div>
+            <Route path ='/' render={() => <BookComp {...props}/>} />
+        </div></Router>;
 
 function buildNodes(nodes: BookNode[]) {
     return nodes.map((bn, i) => <BookNodeComp key={i} node={bn} count={i} />);
