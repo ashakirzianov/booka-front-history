@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Comp } from './comp-utils';
 import {
     Book, BookNode, Chapter, Paragraph,
-    isParagraph, LoadingStub, NoBook, ActualBook,
+    isParagraph, LoadingStub, NoBook, ActualBook, ErrorBook,
 } from '../model/book';
 import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle, Router, Route } from './Elements';
 import { assertNever } from '../utils';
@@ -35,13 +35,18 @@ const ActualBookComp: Comp<ActualBook> = props =>
 const BookComp: Comp<Book> = props =>
     props.book === 'loading-stub' ? <LoadingStubComp {...props} />
         : props.book === 'no-book' ? <NoBookComp {...props} />
-            : <ActualBookComp {...props} />;
+            : props.book === 'error' ? <ErrorBookComp {...props} />
+                : props.book === 'book' ? <ActualBookComp {...props} />
+                    : assertNever(props);
 
 const LoadingStubComp: Comp<LoadingStub> = props =>
     <div>Loading now...</div>;
 
 const NoBookComp: Comp<NoBook> = props =>
     <div>No book selected</div>;
+
+const ErrorBookComp: Comp<ErrorBook> = props =>
+    <div>{props.error}</div>;
 
 const TopComp: Comp<Book> = props =>
     <Router><div>

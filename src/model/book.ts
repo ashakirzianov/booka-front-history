@@ -27,7 +27,12 @@ export type NoBook = {
     book: 'no-book',
 };
 
-export type Book = ActualBook | LoadingStub | NoBook;
+export type ErrorBook = {
+    book: 'error',
+    error: string,
+};
+
+export type Book = ActualBook | NoBook | ErrorBook | LoadingStub;
 
 export function createNoBook(): NoBook {
     return {
@@ -38,5 +43,12 @@ export function createNoBook(): NoBook {
 export function createLoadingStub(): LoadingStub {
     return {
         book: 'loading-stub',
+    };
+}
+
+export function createErrorBook(error: string): ErrorBook {
+    return {
+        book: 'error',
+        error: error,
     };
 }
