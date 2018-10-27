@@ -22,6 +22,7 @@ function validateStore(restored: Store | undefined) {
 function createNewStore(): Store {
     return {
         book: { book: 'no-book' },
+        currentBL: { bl: 'no-book' },
     };
 }
 
