@@ -12,13 +12,19 @@ export type Chapter = {
 
 export type BookNode = Chapter | Paragraph | LoadingStub;
 
-export type Book = {
+export type ActualBook = {
     kind: "book",
     title: string,
     author?: string,
     content: BookNode[],
-} | LoadingStub;
+};
 
 export type LoadingStub = {
     kind: 'loadingStub',
 };
+
+export type NoBook = {
+    kind: 'no-book',
+};
+
+export type Book = ActualBook | LoadingStub | NoBook;

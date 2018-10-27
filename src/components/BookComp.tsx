@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Comp } from './comp-utils';
 import {
     Book, BookNode, Chapter, Paragraph,
-    isParagraph, LoadingStub,
+    isParagraph, LoadingStub, NoBook, ActualBook,
 } from '../model/book';
 import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle, Router, Route } from './Elements';
 import { assertNever } from '../utils';
@@ -23,24 +23,30 @@ const ChapterComp: Comp<Chapter> = props =>
 const BookNodeComp: Comp<{ node: BookNode, count: number }> = props =>
     isParagraph(props.node) ? <ParagraphComp p={props.node} />
         : props.node.kind === 'chapter' ? <ChapterComp {...props.node} />
-            : props.node.kind === 'loadingStub' ? <LoadingComp {...props.node} />
+            : props.node.kind === 'loadingStub' ? <LoadingStubComp {...props.node} />
                 : assertNever(props.node, props.count.toString());
 
-const BookComp: Comp<Book> = props =>
-    props.kind === 'loadingStub'
-        ? <LoadingComp {...props} />
-        : <Column>
-            <BookTitle text={props.title} />
-            {buildNodes(props.content)}
-        </Column>;
+const ActualBookComp: Comp<ActualBook> = props =>
+    <Column>
+        <BookTitle text={props.title} />
+        {buildNodes(props.content)}
+    </Column>;
 
-const LoadingComp: Comp<LoadingStub> = props =>
+const BookComp: Comp<Book> = props =>
+    props.kind === 'loadingStub' ? <LoadingStubComp {...props} />
+        : props.kind === 'no-book' ? <NoBookComp {...props} />
+            : <ActualBookComp {...props} />;
+
+const LoadingStubComp: Comp<LoadingStub> = props =>
     <div>Loading now...</div>;
 
+const NoBookComp: Comp<NoBook> = props =>
+    <div>No book selected</div>;
+
 const TopComp: Comp<Book> = props =>
-        <Router><div>
-            <Route path ='/' render={() => <BookComp {...props}/>} />
-        </div></Router>;
+    <Router><div>
+        <Route path='/' render={() => <BookComp {...props} />} />
+    </div></Router>;
 
 function buildNodes(nodes: BookNode[]) {
     return nodes.map((bn, i) => <BookNodeComp key={i} node={bn} count={i} />);
