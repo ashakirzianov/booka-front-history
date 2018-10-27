@@ -5,6 +5,7 @@ import { throttle } from "lodash";
 import { reducer } from "./reducers";
 import { Store, storeState, restoreState } from "./storage";
 import promiseMiddleware from 'redux-promise-middleware';
+import { createBrowserHistory } from "history";
 
 // TODO: hide this preparations behind some interface?
 
@@ -32,3 +33,24 @@ export const store = createStore(reducer, initial, enhancer);
 store.subscribe(throttle(() => {
     storeState(store.getState());
 }, 1000));
+
+const history = createBrowserHistory();
+
+history.listen((location, action) => {
+    store.dispatch({
+        type: 'loadBL',
+        payload: {
+            bl: 'static-book',
+            name: location.pathname,
+        },
+    });
+});
+
+store.dispatch({
+    type: 'loadBL',
+    payload: {
+        bl: 'static-book',
+        name: history.location.pathname,
+    },
+
+});

@@ -8,12 +8,6 @@ class AppComp extends React.Component<{
     store: App,
     callbacks: Callbacks<ActionsTemplate>,
 }> {
-    componentWillMount() {
-        this.props.callbacks.loadBL({
-            bl: 'static-book',
-            name: 'wap',
-        });
-    }
 
     render() {
         const store = this.props.store;
