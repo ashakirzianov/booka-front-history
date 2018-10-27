@@ -26,6 +26,9 @@ const book = buildPartialReducer<App['book'], ActionsTemplate>({
     },
 });
 
+const currentBL = buildPartialReducer<App['currentBL'], ActionsTemplate>({});
+
 export const reducer = combineReducers<App, ActionsTemplate>({
     book,
+    currentBL,
 });
