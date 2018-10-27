@@ -21,7 +21,7 @@ function validateStore(restored: Store | undefined) {
 
 function createNewStore(): Store {
     return {
-        book: { kind: 'loadingStub' },
+        book: { kind: 'no-book' },
     };
 }
 
