@@ -87,7 +87,7 @@ function buildBook(epub: Epub): Book {
 
     // TODO: report when no title page
     return {
-        kind: 'book' as 'book',
+        book: 'book' as 'book',
         title: titlePage && titlePage.title || epub.info.title,
         author: titlePage && titlePage.author || epub.info.author,
         content: content,
@@ -108,7 +108,7 @@ function chapterParser<T extends BookNode>(level: number, contentE: Parser<Eleme
                 some(contentE),
             ),
             ([h, c]) => ({
-                kind: 'chapter' as 'chapter',
+                book: 'chapter' as 'chapter',
                 level: level,
                 title: h.title,
                 content: c,
