@@ -2,7 +2,7 @@ import { def } from "../utils";
 import { Book } from "./book";
 
 export const actionsTemplate = {
-    loadBook: def(),
+    loadDefaultBook: def(),
     setBook: def<Book>(),
     bookLoadFail: def(),
 };

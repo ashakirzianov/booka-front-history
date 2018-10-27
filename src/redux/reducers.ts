@@ -11,7 +11,7 @@ export function testLoader(): Promise<Book> {
 }
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
-    loadBook: {
+    loadDefaultBook: {
         loop: {
             sync: (s, p) => {
                 return s;
