@@ -23,7 +23,7 @@ const ChapterComp: Comp<Chapter> = props =>
 const BookNodeComp: Comp<{ node: BookNode, count: number }> = props =>
     isParagraph(props.node) ? <ParagraphComp p={props.node} />
         : props.node.book === 'chapter' ? <ChapterComp {...props.node} />
-            : props.node.book === 'loadingStub' ? <LoadingStubComp {...props.node} />
+            : props.node.book === 'loading-stub' ? <LoadingStubComp {...props.node} />
                 : assertNever(props.node, props.count.toString());
 
 const ActualBookComp: Comp<ActualBook> = props =>
@@ -33,7 +33,7 @@ const ActualBookComp: Comp<ActualBook> = props =>
     </Column>;
 
 const BookComp: Comp<Book> = props =>
-    props.book === 'loadingStub' ? <LoadingStubComp {...props} />
+    props.book === 'loading-stub' ? <LoadingStubComp {...props} />
         : props.book === 'no-book' ? <NoBookComp {...props} />
             : <ActualBookComp {...props} />;
 

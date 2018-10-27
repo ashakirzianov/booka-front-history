@@ -20,7 +20,7 @@ export type ActualBook = {
 };
 
 export type LoadingStub = {
-    book: 'loadingStub',
+    book: 'loading-stub',
 };
 
 export type NoBook = {
@@ -37,6 +37,6 @@ export function createNoBook(): NoBook {
 
 export function createLoadingStub(): LoadingStub {
     return {
-        book: 'loadingStub',
+        book: 'loading-stub',
     };
 }
