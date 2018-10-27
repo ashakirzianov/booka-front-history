@@ -5,7 +5,6 @@ import { App } from "../model/app";
 import { loadStaticEpub } from '../loader/epubLoad';
 import { Book, createLoadingStub, createNoBook } from "../model/book";
 import { BookLocator } from "../model/bookLocator";
-// import { url } from "../samples/warAndPeace";
 
 export function testLoader(): Promise<Book> {
     return loadStaticEpub('wap.epub');
@@ -23,14 +22,6 @@ export function loadBL(bookLocator: BookLocator): Promise<Book> {
 }
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
-    loadDefaultBook: {
-        loop: {
-            sync: (s, p) => createLoadingStub(),
-            async: testLoader,
-            success: 'setBook',
-            fail: 'bookLoadFail',
-        },
-    },
     loadBL: {
         loop: {
             sync: (s, p) => createLoadingStub(),

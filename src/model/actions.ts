@@ -3,7 +3,6 @@ import { Book } from "./book";
 import { BookLocator } from "./bookLocator";
 
 export const actionsTemplate = {
-    loadDefaultBook: def(),
     loadBL: def<BookLocator>(),
     setBook: def<Book>(),
     bookLoadFail: def(),
