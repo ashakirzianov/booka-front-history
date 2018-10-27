@@ -25,9 +25,10 @@ const book = buildPartialReducer<App['book'], ActionsTemplate>({
     loadBL: {
         loop: {
             sync: (s, p) => createLoadingStub(),
-            async: testLoader,
+            async: loadBL,
             success: 'setBook',
             fail: 'bookLoadFail',
+            args: p => p,
         },
     },
     setBook: (s, p) => {

@@ -52,7 +52,7 @@ type LoopReducerForm<
     > = {
         loop: {
             sync: SimpleReducer<State, ActionsT[Key]>,
-            args?: Args[],
+            args?: (payload: ActionsT[Key]) => Args,
             async: (x: Args) => Promise<ActionsT[Succ]>,
             success: Succ,
             fail: Fail,
@@ -149,7 +149,7 @@ export function buildLoopReducer<State extends NoNew<State>, ActionsT, Key exten
                 Cmd.run(loopReducerTemplate.loop.async, {
                     successActionCreator: makeActionCreator(loopReducerTemplate.loop.success),
                     failActionCreator: makeActionCreator(loopReducerTemplate.loop.fail),
-                    args: loopReducerTemplate.loop.args,
+                    args: loopReducerTemplate.loop.args && [loopReducerTemplate.loop.args(payload)],
                 }),
             ) as any, // loop function returns special Loop thing. Proper typing does not worth an effort in this case.
         };
