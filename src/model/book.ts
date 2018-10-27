@@ -28,3 +28,15 @@ export type NoBook = {
 };
 
 export type Book = ActualBook | LoadingStub | NoBook;
+
+export function createNoBook(): NoBook {
+    return {
+        book: 'no-book',
+    };
+}
+
+export function createLoadingStub(): LoadingStub {
+    return {
+        book: 'loadingStub',
+    };
+}
