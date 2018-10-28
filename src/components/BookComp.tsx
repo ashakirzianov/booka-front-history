@@ -4,7 +4,10 @@ import {
     Book, BookNode, Chapter, Paragraph,
     isParagraph, LoadingStub, NoBook, ActualBook, ErrorBook,
 } from '../model/book';
-import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle, Router, Route } from './Elements';
+import {
+    TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle,
+    Router, Route, Redirect,
+} from './Elements';
 import { assertNever } from '../utils';
 
 const ParagraphComp: Comp<{ p: Paragraph }> = props =>
@@ -50,6 +53,7 @@ const ErrorBookComp: Comp<ErrorBook> = props =>
 
 const TopComp: Comp<Book> = props =>
     <Router><div>
+        <Redirect exact from='/' to='wap' />
         <Route path='/' render={() => <BookComp {...props} />} />
     </div></Router>;
 
