@@ -30,5 +30,5 @@ export const BookTitle: Comp<{ text?: string }> = props =>
 
 export {
     Text,
-    Route, Router, Redirect,
+    Route, Redirect, Switch,
 } from './Atoms';

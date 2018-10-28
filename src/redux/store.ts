@@ -35,15 +35,7 @@ store.subscribe(throttle(() => {
     storeState(store.getState());
 }, 1000));
 
-const history = createBrowserHistory();
-
-history.listen((location, action) => {
-    dispatchHistoryEvent(location, action);
-    // tslint:disable-next-line:no-console
-    console.log('hello!!!!');
-});
-
-dispatchHistoryEvent(history.location);
+export const history = createBrowserHistory();
 
 export function dispatchHistoryEvent(location: Location, action?: Action) {
     dispatchLoadBLAction(staticBookLocator(location.pathname));

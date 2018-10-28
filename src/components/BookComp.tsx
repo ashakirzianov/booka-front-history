@@ -6,7 +6,7 @@ import {
 } from '../model/book';
 import {
     TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle,
-    Router, Route, Redirect,
+    Route, Redirect, Switch,
 } from './Elements';
 import { assertNever } from '../utils';
 
@@ -52,10 +52,10 @@ const ErrorBookComp: Comp<ErrorBook> = props =>
     <div>{props.error}</div>;
 
 const TopComp: Comp<Book> = props =>
-    <Router><div>
-        <Redirect exact from='/' to='wap' />
-        <Route path='/' render={() => <BookComp {...props} />} />
-    </div></Router>;
+        <Switch>
+            <Redirect push exact from='/' to='/wap' />
+            <Route path='/' render={() => <BookComp {...props} />} />
+        </Switch>;
 
 function buildNodes(nodes: BookNode[]) {
     return nodes.map((bn, i) => <BookNodeComp key={i} node={bn} count={i} />);
