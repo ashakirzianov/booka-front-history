@@ -1,8 +1,9 @@
 import { def } from "../utils";
 import { Book } from "./book";
+import { BookLocator } from "./bookLocator";
 
 export const actionsTemplate = {
-    loadBook: def(),
+    loadBL: def<BookLocator>(),
     setBook: def<Book>(),
     bookLoadFail: def(),
 };

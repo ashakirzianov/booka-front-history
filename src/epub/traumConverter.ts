@@ -38,18 +38,18 @@ function checkAboutSection(section: Section): boolean {
 // ---- TypeDefs
 
 type Header = {
-    kind: 'separator',
+    element: 'separator',
     title: string,
     level: number,
 };
 
 type Paragraph = {
-    kind: 'paragraph',
+    element: 'paragraph',
     text: string,
 };
 
 type TitlePage = {
-    kind: 'title',
+    element: 'title',
     author?: string,
     title?: string,
 };
@@ -87,7 +87,7 @@ function buildBook(epub: Epub): Book {
 
     // TODO: report when no title page
     return {
-        kind: 'book' as 'book',
+        book: 'book' as 'book',
         title: titlePage && titlePage.title || epub.info.title,
         author: titlePage && titlePage.author || epub.info.author,
         content: content,
@@ -95,7 +95,7 @@ function buildBook(epub: Epub): Book {
 }
 
 function findTitlePage(structures: Element[]): TitlePage | undefined {
-    return structures.find(s => s.kind === 'title') as TitlePage;
+    return structures.find(s => s.element === 'title') as TitlePage;
 }
 
 const headElement = head<Element>();
@@ -104,11 +104,11 @@ function chapterParser<T extends BookNode>(level: number, contentE: Parser<Eleme
     return choice(
         translate(
             seq(
-                headElement(se => se.kind === 'separator' && se.level === level ? se : null),
+                headElement(se => se.element === 'separator' && se.level === level ? se : null),
                 some(contentE),
             ),
             ([h, c]) => ({
-                kind: 'chapter' as 'chapter',
+                book: 'chapter' as 'chapter',
                 level: level,
                 title: h.title,
                 content: c,
@@ -119,7 +119,7 @@ function chapterParser<T extends BookNode>(level: number, contentE: Parser<Eleme
 }
 
 const paragraphE = headElement(
-    se => se.kind === 'paragraph' ? se.text : null,
+    se => se.element === 'paragraph' ? se.text : null,
 );
 
 const h6E = chapterParser(-2, paragraphE);
@@ -153,12 +153,12 @@ export const titleDivP = translate(
     )),
     lines => lines.length > 1 ?
         {
-            kind: 'title' as 'title',
+            element: 'title' as 'title',
             author: lines[0],
             title: lines[lines.length - 1],
         }
         : {
-            kind: 'title' as 'title',
+            element: 'title' as 'title',
             title: lines[0],
         },
 );
@@ -188,7 +188,7 @@ export const separatorHeaderP = translate(
         children(textNode()),
     ),
     ([level, title]) => ({
-        kind: 'separator' as 'separator',
+        element: 'separator' as 'separator',
         title: title,
         level: 4 - level,
     }),
@@ -210,7 +210,7 @@ const paragraphContentP = translate(
 const paragraphP = translate(
     element('p', paragraphContentP),
     text => ({
-        kind: 'paragraph' as 'paragraph',
+        element: 'paragraph' as 'paragraph',
         text: text,
     }),
 );

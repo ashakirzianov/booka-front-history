@@ -13,7 +13,7 @@ export const converter: EpubConverter = {
 
 function defaultEpubConverter(epub: Epub): Promise<Book> {
     return Promise.resolve({
-        kind: 'book' as 'book',
+        book: 'book' as 'book',
         title: epub.info.title,
         author: epub.info.author,
         content: convertSections(epub.sections),
@@ -32,7 +32,7 @@ function convertSingleSection(section: Section): BookNode | undefined {
 
     const node = tree2node(tree);
     return {
-        kind: 'chapter' as 'chapter',
+        book: 'chapter' as 'chapter',
         level: 0,
         title: '',
         content: node,

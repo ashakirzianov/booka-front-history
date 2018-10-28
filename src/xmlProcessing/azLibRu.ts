@@ -112,7 +112,7 @@ export const paragraph = translate(
 export const chapter: XmlParser<Chapter> = translate(
     seq(headline, junkAtTheBeginning, oneOrMore(projectLast(and(not(headline), choice(paragraph, skipParser))))),
     ([h, junk, pars]) => ({
-        kind: 'chapter' as 'chapter',
+        book: 'chapter' as 'chapter',
         level: 0,
         title: h.text,
         content: pars.filter(n => n) as BookNode[],
@@ -128,7 +128,7 @@ export const partInfo = translate(
 export const part: XmlParser<Chapter> = translate(
     seq(partInfo, junkAtTheBeginning, oneOrMore(chapter)),
     ([h, junk, chapters]) => ({
-        kind: 'chapter' as 'chapter',
+        book: 'chapter' as 'chapter',
         level: 1,
         title: h,
         content: chapters,

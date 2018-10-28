@@ -1,7 +1,13 @@
 import * as React from 'react';
 import { Comp } from './comp-utils';
-import { Book, BookNode, Chapter, Paragraph, isParagraph, LoadingStub } from '../model/book';
-import { TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle } from './Elements';
+import {
+    Book, BookNode, Chapter, Paragraph,
+    isParagraph, LoadingStub, NoBook, ActualBook, ErrorBook,
+} from '../model/book';
+import {
+    TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle,
+    Route, Redirect, Switch,
+} from './Elements';
 import { assertNever } from '../utils';
 
 const ParagraphComp: Comp<{ p: Paragraph }> = props =>
@@ -19,23 +25,40 @@ const ChapterComp: Comp<Chapter> = props =>
 
 const BookNodeComp: Comp<{ node: BookNode, count: number }> = props =>
     isParagraph(props.node) ? <ParagraphComp p={props.node} />
-        : props.node.kind === 'chapter' ? <ChapterComp {...props.node} />
-            : props.node.kind === 'loadingStub' ? <LoadingComp {...props.node} />
+        : props.node.book === 'chapter' ? <ChapterComp {...props.node} />
+            : props.node.book === 'loading-stub' ? <LoadingStubComp {...props.node} />
                 : assertNever(props.node, props.count.toString());
 
-const BookComp: Comp<Book> = props =>
-    props.kind === 'loadingStub'
-        ? <LoadingComp {...props} />
-        : <Column>
-            <BookTitle text={props.title} />
-            {buildNodes(props.content)}
-        </Column>;
+const ActualBookComp: Comp<ActualBook> = props =>
+    <Column>
+        <BookTitle text={props.title} />
+        {buildNodes(props.content)}
+    </Column>;
 
-const LoadingComp: Comp<LoadingStub> = props =>
+const BookComp: Comp<Book> = props =>
+    props.book === 'loading-stub' ? <LoadingStubComp {...props} />
+        : props.book === 'no-book' ? <NoBookComp {...props} />
+            : props.book === 'error' ? <ErrorBookComp {...props} />
+                : props.book === 'book' ? <ActualBookComp {...props} />
+                    : assertNever(props);
+
+const LoadingStubComp: Comp<LoadingStub> = props =>
     <div>Loading now...</div>;
+
+const NoBookComp: Comp<NoBook> = props =>
+    <div>No book selected</div>;
+
+const ErrorBookComp: Comp<ErrorBook> = props =>
+    <div>{props.error}</div>;
+
+const TopComp: Comp<Book> = props =>
+        <Switch>
+            <Redirect push exact from='/' to='/wap' />
+            <Route path='/' render={() => <BookComp {...props} />} />
+        </Switch>;
 
 function buildNodes(nodes: BookNode[]) {
     return nodes.map((bn, i) => <BookNodeComp key={i} node={bn} count={i} />);
 }
 
-export { BookComp };
+export { TopComp, BookComp };
