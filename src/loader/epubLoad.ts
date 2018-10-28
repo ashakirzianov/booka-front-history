@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { arrayBuffer2book } from '../epub/epubConverter';
-import { Book, createErrorBook } from '../model/book';
+import { Book, errorBook } from '../model/book';
 
 export async function loadStaticEpub(fileName: string): Promise<Book> {
     try {
@@ -9,6 +9,6 @@ export async function loadStaticEpub(fileName: string): Promise<Book> {
         });
         return arrayBuffer2book(response.data);
     } catch (reason) {
-        return createErrorBook("Can't find static book: " + fileName);
+        return errorBook("Can't find static book: " + fileName);
     }
 }

@@ -3,7 +3,7 @@ import { ActionsTemplate } from "../model/actions";
 import { combineReducers } from "./react-redux-utils";
 import { App } from "../model/app";
 import { loadStaticEpub } from '../loader/epubLoad';
-import { Book, createLoadingStub, createNoBook } from "../model/book";
+import { Book, loadingStub, noBook } from "../model/book";
 import { BookLocator } from "../model/bookLocator";
 
 export function testLoader(): Promise<Book> {
@@ -13,18 +13,18 @@ export function testLoader(): Promise<Book> {
 export function loadBL(bookLocator: BookLocator): Promise<Book> {
     switch (bookLocator.bl) {
         case 'no-book':
-            return Promise.resolve(createNoBook());
+            return Promise.resolve(noBook());
         case 'static-book':
             return loadStaticEpub(bookLocator.name + '.epub');
         default:
-            return Promise.resolve(createNoBook());
+            return Promise.resolve(noBook());
     }
 }
 
 const book = buildPartialReducer<App['book'], ActionsTemplate>({
     loadBL: {
         loop: {
-            sync: (s, p) => createLoadingStub(),
+            sync: (s, p) => loadingStub(),
             async: loadBL,
             success: 'setBook',
             fail: 'bookLoadFail',

@@ -34,19 +34,19 @@ export type ErrorBook = {
 
 export type Book = ActualBook | NoBook | ErrorBook | LoadingStub;
 
-export function createNoBook(): NoBook {
+export function noBook(): NoBook {
     return {
         book: 'no-book',
     };
 }
 
-export function createLoadingStub(): LoadingStub {
+export function loadingStub(): LoadingStub {
     return {
         book: 'loading-stub',
     };
 }
 
-export function createErrorBook(error: string): ErrorBook {
+export function errorBook(error: string): ErrorBook {
     return {
         book: 'error',
         error: error,
