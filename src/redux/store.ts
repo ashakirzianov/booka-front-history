@@ -1,5 +1,5 @@
 import { createStore, compose, applyMiddleware } from "redux";
-import { install } from 'redux-loop';
+import { install as installReduxLoop } from 'redux-loop';
 // import { logger } from "redux-logger";
 import { throttle } from "lodash";
 import { reducer } from "./reducers";
@@ -14,7 +14,7 @@ const enhancer = compose(
     applyMiddleware(
         promiseMiddleware(), // TODO: consider removing promise support?
     ),
-    install(),
+    installReduxLoop(),
 ) as any; // TODO: find out what are expected types
 
 function validateState(restored: State | undefined) {
