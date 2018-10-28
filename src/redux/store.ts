@@ -5,7 +5,8 @@ import { throttle } from "lodash";
 import { reducer } from "./reducers";
 import { Store, storeState, restoreState } from "./storage";
 import promiseMiddleware from 'redux-promise-middleware';
-import { createBrowserHistory } from "history";
+import { createBrowserHistory, Location, Action } from "history";
+import { BookLocator, staticBookLocator } from "../model/bookLocator";
 
 // TODO: hide this preparations behind some interface?
 
@@ -37,20 +38,20 @@ store.subscribe(throttle(() => {
 const history = createBrowserHistory();
 
 history.listen((location, action) => {
+    dispatchHistoryEvent(location, action);
+    // tslint:disable-next-line:no-console
+    console.log('hello!!!!');
+});
+
+dispatchHistoryEvent(history.location);
+
+export function dispatchHistoryEvent(location: Location, action?: Action) {
+    dispatchLoadBLAction(staticBookLocator(location.pathname));
+}
+
+export function dispatchLoadBLAction(bl: BookLocator) {
     store.dispatch({
         type: 'loadBL',
-        payload: {
-            bl: 'static-book',
-            name: location.pathname,
-        },
+        payload: bl,
     });
-});
-
-store.dispatch({
-    type: 'loadBL',
-    payload: {
-        bl: 'static-book',
-        name: history.location.pathname,
-    },
-
-});
+}

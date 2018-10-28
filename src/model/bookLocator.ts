@@ -5,3 +5,16 @@ export type StaticBookLocator = {
 };
 
 export type BookLocator = NoBookLocator | StaticBookLocator;
+
+export function noBookLocator(): NoBookLocator {
+    return {
+        bl: 'no-book',
+    };
+}
+
+export function staticBookLocator(name: string): StaticBookLocator {
+    return {
+        bl: 'static-book',
+        name: name,
+    };
+}
