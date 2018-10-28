@@ -3,7 +3,7 @@ import { install } from 'redux-loop';
 // import { logger } from "redux-logger";
 import { throttle } from "lodash";
 import { reducer } from "./reducers";
-import { Store, storeState, restoreState } from "./storage";
+import { State, storeState, restoreState } from "./storage";
 import promiseMiddleware from 'redux-promise-middleware';
 import { createBrowserHistory, Location, Action } from "history";
 import { BookLocator, staticBookLocator } from "../model/bookLocator";
@@ -17,18 +17,18 @@ const enhancer = compose(
     install(),
 ) as any; // TODO: find out what are expected types
 
-function validateStore(restored: Store | undefined) {
+function validateState(restored: State | undefined) {
     return undefined;
 }
 
-function createNewStore(): Store {
+function createNewState(): State {
     return {
         book: { book: 'no-book' },
         currentBL: { bl: 'no-book' },
     };
 }
 
-const initial: Store = validateStore(restoreState()) || createNewStore();
+const initial: State = validateState(restoreState()) || createNewState();
 export const store = createStore(reducer, initial, enhancer);
 
 store.subscribe(throttle(() => {
