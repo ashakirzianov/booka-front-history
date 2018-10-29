@@ -171,10 +171,3 @@ function stringEndCondition<T>(str: string, toTrim: string, f: (trimmed: string)
         : undefined
         ;
 }
-
-export function bugWorkaround<State, Template>(
-    reducer: Reducer<State, Template>
-): (state: State | undefined, action: { type: string }) => State {
-    // This is workaround for issue in redux: https://github.com/reactjs/redux/issues/2709
-    return reducer as any;
-}
