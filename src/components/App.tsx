@@ -1,7 +1,7 @@
 import * as React from "react";
 import { TopComp } from "./BookComp";
 import { Router } from "react-router-dom";
-import { dispatchHistoryEvent, history } from "../redux/store";
+import { dispatchHistoryEvent, history } from "../redux/history";
 
 export class AppComp extends React.Component {
     componentWillMount() {
