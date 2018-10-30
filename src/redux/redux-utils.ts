@@ -1,8 +1,5 @@
 // NOTE: this file contains lots of crypto code. I'm sorry, future Anton, but you have to deal with it!
-import { mapObject, KeyRestriction } from "../utils";
-
-// TODO: consider remove restriction ?
-export type NoNew<State> = KeyRestriction<State, 'new'>;
+import { mapObject } from "../utils";
 
 // Actions:
 
@@ -31,34 +28,33 @@ export function buildActionCreators<Template>(actionTemplate: Template): ActionC
 
 // Reducers:
 
-type Update<State extends NoNew<State>> = Partial<State> | { new: State };
-type SimpleReducerT<State extends NoNew<State>, Payload = {}> =
-    (state: State, payload: Payload) => Update<State>;
-type PromiseReducerT<State extends NoNew<State>, Payload = {}> = {
+type SimpleReducerT<State, Payload = {}> =
+    (state: State, payload: Payload) => State;
+type PromiseReducerT<State, Payload = {}> = {
     pending?: SimpleReducerT<State, {}>,
     rejected?: SimpleReducerT<State, any>,
     fulfilled?: SimpleReducerT<State, Payload>,
 };
-type SingleReducerT<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> = ActionsT[Key] extends Promise<infer Fulfilled>
+type SingleReducerT<State, ActionsT, Key extends keyof ActionsT> = ActionsT[Key] extends Promise<infer Fulfilled>
     ? PromiseReducerT<State, Fulfilled>
     : SimpleReducerT<State, ActionsT[Key]>
     ;
 
-type ReducerTs<State extends NoNew<State>, ActionsT> = {
+type ReducerTs<State, ActionsT> = {
     [k in keyof ActionsT]: SingleReducerT<State, ActionsT, k>;
 };
 
-export type Reducer<State extends NoNew<State>, Template> =
+export type Reducer<State, Template> =
     (state: State | undefined, action: ActionsType<Template>) => State;
 
-export function buildReducer<State extends NoNew<State>, Template>(
+export function buildReducer<State, Template>(
     reducerTemplate: ReducerTs<State, Template>,
     initial?: State,
 ): Reducer<State, Template> {
     return buildPartialReducer(reducerTemplate, initial);
 }
 
-export function buildPartialReducer<State extends NoNew<State>, Template>(
+export function buildPartialReducer<State, Template>(
     reducerTemplate: Partial<ReducerTs<State, Template>>,
     initial?: State,
 ): Reducer<State, Template> {
@@ -73,26 +69,12 @@ export function buildPartialReducer<State extends NoNew<State>, Template>(
             return state; // Always return current state if action type is not supported
         }
 
-        const updates = single(state, action.payload);
-        return buildState(updates, state);
+        const newState = single(state, action.payload);
+        return newState;
     };
 }
 
-function buildState<State extends NoNew<State>>(updates: Update<State>, state: State): State {
-    if (updates === state) { // no need to copy
-        return state;
-    } else if (updates.new !== undefined) { // "new" means we returned whole new state
-        return updates.new;
-    } else {
-        return { // returned updates -- copy them
-            // Need to cast due ts bug: https://github.com/Microsoft/TypeScript/issues/14409
-            ...(state as any),
-            ...(updates as any),
-        };
-    }
-}
-
-function findReducerT<State extends NoNew<State>, Template, Key extends keyof Template>(
+function findReducerT<State, Template, Key extends keyof Template>(
     reducerTs: Partial<ReducerTs<State, Template>>,
     actionType: Extract<keyof Template, string>,
 ): SimpleReducerT<State, any> | undefined {

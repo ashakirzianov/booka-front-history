@@ -4,7 +4,7 @@ import { Dispatch, connect } from "react-redux";
 import { mapObject, pick, ExcludeKeys } from "../utils";
 import {
     ActionDispatchers, ActionCreators, Reducer,
-    buildActionCreators, ActionDispatcher, NoNew,
+    buildActionCreators, ActionDispatcher,
 } from "./redux-utils";
 
 export function buildConnectRedux<S, AT>(at: AT) {
@@ -37,10 +37,10 @@ export function buildConnectRedux<S, AT>(at: AT) {
     };
 }
 
-export type ReducersMap<Store, ActionsTemplate> = {
-    [k in keyof Store]: Reducer<Store[k], ActionsTemplate>;
+export type ReducersMap<State, ActionsTemplate> = {
+    [k in keyof State]: Reducer<State[k], ActionsTemplate>;
 };
-export function combineReducers<Store extends NoNew<Store>, ActionsTemplate>(map: ReducersMap<Store, ActionsTemplate>): ReducerRedux<Store> {
+export function combineReducers<State, ActionsTemplate>(map: ReducersMap<State, ActionsTemplate>): ReducerRedux<State> {
     // This is workaround for issue in redux: https://github.com/reactjs/redux/issues/2709
-    return combineReducersRedux<Store>(map as any) as any;
+    return combineReducersRedux<State>(map as any) as any;
 }
