@@ -35,12 +35,3 @@ export function buildConnectRedux<S, AT>(at: AT) {
         };
     };
 }
-
-// import { AnyAction, Reducer as ReducerRedux, combineReducers as combineReducersRedux } from "redux";
-// export type ReducersMap<State, ActionsTemplate> = {
-//     [k in keyof State]: Reducer<State[k], ActionsTemplate>;
-// };
-// export function combineReducers<State, ActionsTemplate>(map: ReducersMap<State, ActionsTemplate>): ReducerRedux<State> {
-//     // This is workaround for issue in redux: https://github.com/reactjs/redux/issues/2709
-//     return combineReducersRedux<State>(map as any) as any;
-// }
