@@ -39,6 +39,11 @@ export type ValueConstraint<T, ValueType> = {
 
 export type PromiseType<T> = T extends Promise<infer U> ? U : any;
 
+export type KeyType = string | number | symbol;
+export type HaveKeys<Keys extends KeyType> = {
+    [t in Keys]: unknown;
+};
+
 export function range(end: number): number[];
 // tslint:disable-next-line:unified-signatures
 export function range(start: number, end: number): number[];
@@ -161,4 +166,8 @@ export function timeouted<T, U>(f: (x: T) => U, timeout?: number): (x: T) => Pro
 
 export function filterUndefined<T>(arr: Array<T | undefined>): T[] {
     return arr.filter(e => e !== undefined) as T[];
+}
+
+export function pick<T, Keys extends keyof T>(obj: T, ...ks: Keys[]): Pick<T, Keys> {
+    return ks.reduce((ret, key) => ({ ...ret, [key]: obj[key] }), {}) as any;
 }

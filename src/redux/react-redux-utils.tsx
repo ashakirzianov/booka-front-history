@@ -1,17 +1,50 @@
 import * as React from "react";
 import { AnyAction, Reducer as ReducerRedux, combineReducers as combineReducersRedux } from "redux";
 import { Dispatch, connect } from "react-redux";
-import { mapObject, KeyRestriction } from "../utils";
-import { ActionDispatchers, ActionCreators, Reducer, ReducerTemplate, buildPartialReducer } from "./redux-utils";
+import { mapObject, KeyRestriction, pick } from "../utils";
+import { ActionDispatchers, ActionCreators, Reducer, ReducerTemplate, buildPartialReducer, actionCreators, ActionDispatcher } from "./redux-utils";
 
 export type TopComponent<Store, ActionsTemplate> = React.ComponentType<{
     store: Store,
     callbacks: ActionDispatchers<ActionsTemplate>,
 }>;
 
+export function buildConnectRedux<Store>() {
+    // TODO: We're using currying to make it possible to infer generic arg (ActionsTemplate) from func arg (at). Consider NOT to use currying.
+    return function f<AT>(at: AT) {
+        return function ff<SK extends keyof Store, AK extends Exclude<keyof AT, SK>>(
+            sk: SK[], ak: AK[]
+        ) {
+            type ComponentProps = Pick<Store, SK> & {
+                [k in AK]: ActionDispatcher<AT[k]>;
+            };
+            return function fff<P extends ComponentProps>(Comp: React.ComponentType<P>): React.ComponentType<Pick<P, Exclude<keyof P, SK & AK>>> {
+                function mapStateToProps(store: Store): Pick<Store, SK> {
+                    return pick(store, ...sk);
+                }
+
+                const ac = actionCreators(pick(at, ...ak));
+                function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+                    function buildCallbacks<T>(creators: ActionCreators<T>): ActionDispatchers<T> {
+                        return mapObject(creators, (key, value) => (x: any) => dispatch(value(x)));
+                    }
+
+                    const callbacks = buildCallbacks(ac);
+                    return callbacks;
+                }
+
+                const connector = connect(mapStateToProps, mapDispatchToProps);
+
+                const connected = connector(Comp);
+                return connected as any; // TODO: try not to use 'as any'
+            };
+        };
+    };
+}
+
 export function connectRedux<Store, ActionsTemplate>(
     Comp: TopComponent<Store, ActionsTemplate>,
-    actionCreators: ActionCreators<ActionsTemplate>,
+    ac: ActionCreators<ActionsTemplate>,
 ) {
     function mapStateToProps(store: Store) {
         return {
@@ -25,13 +58,14 @@ export function connectRedux<Store, ActionsTemplate>(
         }
 
         return {
-            callbacks: buildCallbacks(actionCreators),
+            callbacks: buildCallbacks(ac),
         };
     }
 
     const connector = connect(mapStateToProps, mapDispatchToProps);
 
-    return connector(Comp);
+    const connected = connector(Comp);
+    return connected;
 }
 
 export type ReducersMap<Store, ActionsTemplate> = {
