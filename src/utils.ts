@@ -44,6 +44,8 @@ export type HaveKeys<Keys extends KeyType> = {
     [t in Keys]: unknown;
 };
 
+export type ExcludeKeys<T, K extends KeyType> = Pick<T, Exclude<keyof T, K>>;
+
 export function range(end: number): number[];
 // tslint:disable-next-line:unified-signatures
 export function range(start: number, end: number): number[];

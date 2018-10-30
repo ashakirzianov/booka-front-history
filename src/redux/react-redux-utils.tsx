@@ -1,7 +1,7 @@
 import * as React from "react";
 import { AnyAction, Reducer as ReducerRedux, combineReducers as combineReducersRedux } from "redux";
 import { Dispatch, connect } from "react-redux";
-import { mapObject, KeyRestriction, pick } from "../utils";
+import { mapObject, KeyRestriction, pick, ExcludeKeys } from "../utils";
 import { ActionDispatchers, ActionCreators, Reducer, ReducerTemplate, buildPartialReducer, actionCreators, ActionDispatcher } from "./redux-utils";
 
 export type TopComponent<Store, ActionsTemplate> = React.ComponentType<{
@@ -12,13 +12,13 @@ export type TopComponent<Store, ActionsTemplate> = React.ComponentType<{
 export function buildConnectRedux<Store>() {
     // TODO: We're using currying to make it possible to infer generic arg (ActionsTemplate) from func arg (at). Consider NOT to use currying.
     return function f<AT>(at: AT) {
-        return function ff<SK extends keyof Store, AK extends Exclude<keyof AT, SK>>(
-            sk: SK[], ak: AK[]
+        return function ff<SK extends keyof Store, AK extends Exclude<keyof AT, SK> = never>(
+            sk: SK[], ak: AK[] = []
         ) {
             type ComponentProps = Pick<Store, SK> & {
                 [k in AK]: ActionDispatcher<AT[k]>;
             };
-            return function fff<P extends ComponentProps>(Comp: React.ComponentType<P>): React.ComponentType<Pick<P, Exclude<keyof P, SK & AK>>> {
+            return function fff<P extends ComponentProps>(Comp: React.ComponentType<P>): React.ComponentType<ExcludeKeys<P, SK | AK>> {
                 function mapStateToProps(store: Store): Pick<Store, SK> {
                     return pick(store, ...sk);
                 }
@@ -85,3 +85,11 @@ export function combineReducersTemplate<Store extends NoNew<Store>, ActionsTempl
     o: CombineReducersObject<Store, ActionsTemplate>) {
     return combineReducers(mapObject(o, (k, v) => buildPartialReducer(v) as any));
 }
+
+export type Test = {
+    foo: number,
+    bar: string,
+    baz: boolean,
+};
+
+export type PickTest = Pick<Test, Exclude<keyof Test, 'foo'>>;

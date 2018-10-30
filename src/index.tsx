@@ -4,16 +4,10 @@ import * as ReactDOM from 'react-dom';
 import { store } from "./redux/store";
 import { AppComp } from './components/App';
 import registerServiceWorker from './registerServiceWorker';
-import { actionCreators } from './redux/redux-utils';
-import { actionsTemplate } from './model/actions';
-import { connectRedux } from './redux/react-redux-utils';
 import { Provider } from 'react-redux';
 
-const allActionCreators = actionCreators(actionsTemplate);
-export const App = connectRedux(AppComp, allActionCreators);
-
 ReactDOM.render(
-  <Provider store={store}><App /></Provider>,
+  <Provider store={store}><AppComp /></Provider>,
   document.getElementById('root') as HTMLElement
 );
 registerServiceWorker();
