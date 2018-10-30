@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware } from "redux";
 import { throttle } from "lodash";
 import { reducer } from "./reducers";
-import { storeState, initialState } from "./storage";
+import { storeState, initialState } from "./state";
 import promiseMiddleware from 'redux-promise-middleware';
 
 const initial = initialState();
