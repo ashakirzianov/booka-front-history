@@ -1,4 +1,3 @@
-import { typeGuard } from "../utils";
 import * as parseXmlLib from '@rgrove/parse-xml';
 
 export type XmlAttributes = { [key: string]: string | undefined };
@@ -22,8 +21,13 @@ export function hasChildren(node: XmlNode): node is XmlNodeWithChildren {
     return (node.type === 'document' || node.type === 'element') && node.children !== undefined;
 }
 
-export const isElement = typeGuard<XmlNode, XmlNodeElement>(node => node.type === 'element');
-export const isComment = typeGuard<XmlNode, XmlNodeComment>(node => node.type === 'comment');
+export function isElement(node: XmlNode): node is XmlNodeElement {
+    return node.type === 'element';
+}
+
+export function isComment(node: XmlNode): node is XmlNodeComment {
+    return node.type === 'comment';
+}
 
 export function string2tree(xml: string): XmlNodeDocument | undefined {
     try {

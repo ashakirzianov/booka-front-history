@@ -9,6 +9,7 @@ import {
     Route, Redirect, Switch,
 } from './Elements';
 import { assertNever } from '../utils';
+import { connect } from './misc';
 
 const ParagraphComp: Comp<{ p: Paragraph }> = props =>
     <TextBlock text={props.p} />;
@@ -51,11 +52,12 @@ const NoBookComp: Comp<NoBook> = props =>
 const ErrorBookComp: Comp<ErrorBook> = props =>
     <div>{props.error}</div>;
 
-const TopComp: Comp<Book> = props =>
-        <Switch>
-            <Redirect push exact from='/' to='/wap' />
-            <Route path='/' render={() => <BookComp {...props} />} />
-        </Switch>;
+const TopComp = connect(['book'])((props) =>
+    <Switch>
+        <Redirect push exact from='/' to='/wap' />
+        <Route path='/' render={() => <BookComp {...props.book} />} />
+    </Switch>
+);
 
 function buildNodes(nodes: BookNode[]) {
     return nodes.map((bn, i) => <BookNodeComp key={i} node={bn} count={i} />);
