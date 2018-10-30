@@ -171,3 +171,37 @@ function stringEndCondition<T>(str: string, toTrim: string, f: (trimmed: string)
         : undefined
         ;
 }
+
+// Here is how we can solve loop reducer validation. Would require very un-intuitive client syntax, something like this:
+// const reducerTemplate = validate(buildReducerTemplate<State, ActionsTemplate>({ ... reducer template ... })());
+// const reducer = buildReducer<State, ActionsTemplate>(reducerTemplate);
+// I don't think it worth it.
+
+// export type ValidateRT<RT, T, S> = {
+//     // tslint:disable-next-line:ban-types
+//     [k in keyof RT]: RT[k] extends Function ? RT[k]
+//         : k extends keyof T ? RT[k] extends {
+//             loop: {
+//                 sync: any,
+//                 args?: (payload: T[k]) => infer Args,
+//                 async: infer Async,
+//                 success: infer Succ,
+//                 fail: infer Fail,
+//             },
+//         }
+//         ? Succ extends keyof T ? Async extends (x: Args) => Promise<T[Succ]>
+//         ? Fail extends keyof T ? T[Fail] extends (string | undefined)
+//         ? RT[k] : never : never : never : never : never : never; // Never again! :)
+// };
+
+// export function validator<AT, S>() {
+//     return function validate<T extends ValidateRT<T, AT, S>>(x: T) {
+//         return x;
+//     };
+// }
+
+// export function redTemplate<State extends NoNew<State>, Template>() {
+//     return function f<RT extends ReducerTemplate<State, Template>>(rt: RT) {
+//         return rt;
+//     };
+// }
