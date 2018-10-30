@@ -7,6 +7,7 @@ import { State, storeState, restoreState } from "./storage";
 import promiseMiddleware from 'redux-promise-middleware';
 import { createBrowserHistory, Location, Action } from "history";
 import { BookLocator, staticBookLocator } from "../model/bookLocator";
+import { loadBL } from "./api";
 
 // TODO: hide this preparations behind some interface?
 
@@ -24,7 +25,6 @@ function validateState(restored: State | undefined) {
 function createNewState(): State {
     return {
         book: { book: 'no-book' },
-        currentBL: { bl: 'no-book' },
     };
 }
 
@@ -43,7 +43,7 @@ export function dispatchHistoryEvent(location: Location, action?: Action) {
 
 export function dispatchLoadBLAction(bl: BookLocator) {
     store.dispatch({
-        type: 'loadBL',
-        payload: bl,
+        type: 'setBook',
+        payload: loadBL(bl),
     });
 }
