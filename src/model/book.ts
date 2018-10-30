@@ -1,8 +1,4 @@
-import { typeGuard } from "../utils";
-
 export type Paragraph = string;
-export const isParagraph = typeGuard<BookNode, Paragraph>(bn => typeof bn === 'string');
-
 export type Chapter = {
     book: "chapter",
     level: number,
@@ -51,4 +47,9 @@ export function errorBook(error: string): ErrorBook {
         book: 'error',
         error: error,
     };
+}
+// Type guards:
+
+export function isParagraph(bn: BookNode): bn is Paragraph {
+    return typeof bn === 'string';
 }
