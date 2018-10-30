@@ -4,13 +4,8 @@ import { Dispatch, connect } from "react-redux";
 import { mapObject, pick, ExcludeKeys } from "../utils";
 import {
     ActionDispatchers, ActionCreators, Reducer,
-    actionCreators, ActionDispatcher,
+    buildActionCreators, ActionDispatcher, NoNew,
 } from "./redux-utils";
-
-export type TopComponent<Store, ActionsTemplate> = React.ComponentType<{
-    store: Store,
-    callbacks: ActionDispatchers<ActionsTemplate>,
-}>;
 
 export function buildConnectRedux<S, AT>(at: AT) {
     return function f<SK extends keyof S, AK extends Exclude<keyof AT, SK> = never>(
@@ -24,7 +19,7 @@ export function buildConnectRedux<S, AT>(at: AT) {
                 return pick(store, ...sk);
             }
 
-            const ac = actionCreators(pick(at, ...ak));
+            const ac = buildActionCreators(pick(at, ...ak));
             function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
                 function buildCallbacks<T>(creators: ActionCreators<T>): ActionDispatchers<T> {
                     return mapObject(creators, (key, value) => (x: any) => dispatch(value(x)));
@@ -45,7 +40,7 @@ export function buildConnectRedux<S, AT>(at: AT) {
 export type ReducersMap<Store, ActionsTemplate> = {
     [k in keyof Store]: Reducer<Store[k], ActionsTemplate>;
 };
-export function combineReducers<Store, ActionsTemplate>(map: ReducersMap<Store, ActionsTemplate>): ReducerRedux<Store> {
+export function combineReducers<Store extends NoNew<Store>, ActionsTemplate>(map: ReducersMap<Store, ActionsTemplate>): ReducerRedux<Store> {
     // This is workaround for issue in redux: https://github.com/reactjs/redux/issues/2709
     return combineReducersRedux<Store>(map as any) as any;
 }

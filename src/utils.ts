@@ -24,9 +24,11 @@ export type Partialize<T, U> = {
 export type Undefined<T> = { [t in keyof T]: undefined };
 
 export type KeyRestriction<T, U extends PropertyKey> = {
-    [k in StringIntersection<keyof T, U>]?: never
-} &  {
-    [k in U]?: undefined
+    [k in U]?: never;
+} & {
+    [k in U]?: undefined;
+} & {
+    [k in keyof T]: T[k];
 };
 
 export type RestrictedComb<T extends KeyRestriction<T, keyof U>, U> = T & U;
@@ -39,12 +41,11 @@ export type ValueConstraint<T, ValueType> = {
 
 export type PromiseType<T> = T extends Promise<infer U> ? U : any;
 
-export type KeyType = string | number | symbol;
-export type HaveKeys<Keys extends KeyType> = {
+export type HaveKeys<Keys extends PropertyKey> = {
     [t in Keys]: unknown;
 };
 
-export type ExcludeKeys<T, K extends KeyType> = Pick<T, Exclude<keyof T, K>>;
+export type ExcludeKeys<T, K extends PropertyKey> = Pick<T, Exclude<keyof T, K>>;
 
 export function range(end: number): number[];
 // tslint:disable-next-line:unified-signatures
