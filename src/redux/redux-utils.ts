@@ -40,7 +40,7 @@ type SingleReducerT<State, ActionsT, Key extends keyof ActionsT> = ActionsT[Key]
     : SimpleReducerT<State, ActionsT[Key]>
     ;
 
-type ReducerTs<State, ActionsT> = {
+export type ReducerTs<State, ActionsT> = {
     [k in keyof ActionsT]: SingleReducerT<State, ActionsT, k>;
 };
 
@@ -72,6 +72,15 @@ export function buildPartialReducer<State, Template>(
         const newState = single(state, action.payload);
         return newState;
     };
+}
+
+type AnyAction = { type: any };
+type ReducerRedux<S> = (state: S, action: AnyAction) => S;
+type PartialReducersTemplate<State, AT> = {
+    [k in keyof State]: Partial<ReducerTs<State[k], AT>>;
+};
+export function buildPartialReducers<State, AT>(template: PartialReducersTemplate<State, AT>): ReducerRedux<State> {
+    return mapObject(template, (_, pt) => buildPartialReducer(pt as any)) as any;
 }
 
 function findReducerT<State, Template, Key extends keyof Template>(

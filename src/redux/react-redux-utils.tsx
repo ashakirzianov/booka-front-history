@@ -1,9 +1,8 @@
 import * as React from "react";
-import { AnyAction, Reducer as ReducerRedux, combineReducers as combineReducersRedux } from "redux";
 import { Dispatch, connect } from "react-redux";
 import { mapObject, pick, ExcludeKeys } from "../utils";
 import {
-    ActionDispatchers, ActionCreators, Reducer,
+    ActionDispatchers, ActionCreators,
     buildActionCreators, ActionDispatcher,
 } from "./redux-utils";
 
@@ -20,7 +19,7 @@ export function buildConnectRedux<S, AT>(at: AT) {
             }
 
             const ac = buildActionCreators(pick(at, ...ak));
-            function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+            function mapDispatchToProps(dispatch: Dispatch<any>) {
                 function buildCallbacks<T>(creators: ActionCreators<T>): ActionDispatchers<T> {
                     return mapObject(creators, (key, value) => (x: any) => dispatch(value(x)));
                 }
@@ -37,10 +36,11 @@ export function buildConnectRedux<S, AT>(at: AT) {
     };
 }
 
-export type ReducersMap<State, ActionsTemplate> = {
-    [k in keyof State]: Reducer<State[k], ActionsTemplate>;
-};
-export function combineReducers<State, ActionsTemplate>(map: ReducersMap<State, ActionsTemplate>): ReducerRedux<State> {
-    // This is workaround for issue in redux: https://github.com/reactjs/redux/issues/2709
-    return combineReducersRedux<State>(map as any) as any;
-}
+// import { AnyAction, Reducer as ReducerRedux, combineReducers as combineReducersRedux } from "redux";
+// export type ReducersMap<State, ActionsTemplate> = {
+//     [k in keyof State]: Reducer<State[k], ActionsTemplate>;
+// };
+// export function combineReducers<State, ActionsTemplate>(map: ReducersMap<State, ActionsTemplate>): ReducerRedux<State> {
+//     // This is workaround for issue in redux: https://github.com/reactjs/redux/issues/2709
+//     return combineReducersRedux<State>(map as any) as any;
+// }
