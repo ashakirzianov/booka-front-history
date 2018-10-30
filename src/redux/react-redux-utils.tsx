@@ -1,6 +1,5 @@
 import * as React from "react";
-import { AnyAction, Reducer as ReducerRedux } from "redux";
-import { combineReducers as combineReducersRedux } from 'redux-loop';
+import { AnyAction, Reducer as ReducerRedux, combineReducers as combineReducersRedux } from "redux";
 import { Dispatch, connect } from "react-redux";
 import { mapObject, KeyRestriction } from "../utils";
 import { ActionDispatchers, ActionCreators, Reducer, ReducerTemplate, buildPartialReducer } from "./redux-utils";

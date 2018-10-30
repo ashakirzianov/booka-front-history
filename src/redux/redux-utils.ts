@@ -1,6 +1,5 @@
 // NOTE: this file contains lots of crypto code. I'm sorry, future Anton, but you have to deal with it!
 import { mapObject, KeyRestriction } from "../utils";
-import { Cmd, loop } from 'redux-loop';
 
 type NoNew<State> = KeyRestriction<State, 'new'>;
 
@@ -42,28 +41,9 @@ type PromiseReducer<State extends NoNew<State>, Payload = {}> = {
     rejected?: SimpleReducer<State, any>,
     fulfilled?: SimpleReducer<State, Payload>,
 };
-type LoopReducerForm<
-    State extends NoNew<State>,
-    ActionsT,
-    Key extends keyof ActionsT,
-    Succ extends keyof ActionsT,
-    Fail extends keyof ActionsT,
-    Args
-    > = {
-        loop: {
-            sync: SimpleReducer<State, ActionsT[Key]>,
-            args?: (payload: ActionsT[Key]) => Args,
-            async: (x: Args) => Promise<ActionsT[Succ]>,
-            success: Succ,
-            fail: Fail,
-        },
-    };
-type LoopReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> =
-    LoopReducerForm<State, ActionsT, Key, keyof ActionsT, keyof ActionsT, any>;
 type SingleReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT> = ActionsT[Key] extends Promise<infer Fulfilled>
     ? PromiseReducer<State, Fulfilled>
     : SimpleReducer<State, ActionsT[Key]>
-    | LoopReducer<State, ActionsT, Key>
     ;
 export type ReducerTemplate<State extends NoNew<State>, ActionsT> = {
     [k in keyof ActionsT]: SingleReducer<State, ActionsT, k>;
@@ -123,10 +103,6 @@ function findReducer<State extends NoNew<State>, Template, Key extends keyof Tem
         return reducer as SimpleReducer<State, any>;
     }
 
-    if (reducer && reducer.loop) {
-        return buildLoopReducer(reducer);
-    }
-
     const promiseTemplate = reducerTemplate as { [k: string]: PromiseReducer<State, any> };
     const promiseReducer = stringEndCondition(actionType, '_PENDING', actual => promiseTemplate[actual].pending)
         || stringEndCondition(actionType, '_REJECTED', actual => promiseTemplate[actual].rejected)
@@ -139,69 +115,9 @@ function findReducer<State extends NoNew<State>, Template, Key extends keyof Tem
     return undefined;
 }
 
-export function buildLoopReducer<State extends NoNew<State>, ActionsT, Key extends keyof ActionsT>(
-    loopReducerTemplate: LoopReducer<State, ActionsT, Key>
-) {
-    return function loopReducer(s: State, payload: any) {
-        return {
-            new: loop(
-                buildState(loopReducerTemplate.loop.sync(s, payload), s),
-                Cmd.run(loopReducerTemplate.loop.async, {
-                    successActionCreator: makeActionCreator(loopReducerTemplate.loop.success),
-                    failActionCreator: makeActionCreator(loopReducerTemplate.loop.fail),
-                    args: loopReducerTemplate.loop.args && [loopReducerTemplate.loop.args(payload)],
-                }),
-            ) as any, // loop function returns special Loop thing. Proper typing does not worth an effort in this case.
-        };
-    };
-}
-
-function makeActionCreator(actionType: PropertyKey) {
-    return (p: any) => {
-        return {
-            type: actionType as string,
-            payload: p,
-        };
-    };
-}
-
 function stringEndCondition<T>(str: string, toTrim: string, f: (trimmed: string) => T): T | undefined {
     return str.endsWith(toTrim)
         ? f(str.substring(0, str.length - toTrim.length))
         : undefined
         ;
 }
-
-// Here is how we can solve loop reducer validation. Would require very un-intuitive client syntax, something like this:
-// const reducerTemplate = validate(buildReducerTemplate<State, ActionsTemplate>({ ... reducer template ... })());
-// const reducer = buildReducer<State, ActionsTemplate>(reducerTemplate);
-// I don't think it worth it.
-
-// export type ValidateRT<RT, T, S> = {
-//     // tslint:disable-next-line:ban-types
-//     [k in keyof RT]: RT[k] extends Function ? RT[k]
-//         : k extends keyof T ? RT[k] extends {
-//             loop: {
-//                 sync: any,
-//                 args?: (payload: T[k]) => infer Args,
-//                 async: infer Async,
-//                 success: infer Succ,
-//                 fail: infer Fail,
-//             },
-//         }
-//         ? Succ extends keyof T ? Async extends (x: Args) => Promise<T[Succ]>
-//         ? Fail extends keyof T ? T[Fail] extends (string | undefined)
-//         ? RT[k] : never : never : never : never : never : never; // Never again! :)
-// };
-
-// export function validator<AT, S>() {
-//     return function validate<T extends ValidateRT<T, AT, S>>(x: T) {
-//         return x;
-//     };
-// }
-
-// export function redTemplate<State extends NoNew<State>, Template>() {
-//     return function f<RT extends ReducerTemplate<State, Template>>(rt: RT) {
-//         return rt;
-//     };
-// }

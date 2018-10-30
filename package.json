@@ -34,7 +34,6 @@
     "react-router-dom": "^4.3.1",
     "react-scripts-ts": "^2.17.0",
     "redux": "^3.7.2",
-    "redux-loop": "^4.4.1",
     "redux-promise-middleware": "^5.1.1",
     "store": "^2.0.12",
     "typescript": "^3.1.3"
