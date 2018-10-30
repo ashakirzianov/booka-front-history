@@ -9,7 +9,7 @@ import {
     Route, Redirect, Switch,
 } from './Elements';
 import { assertNever } from '../utils';
-import { connect } from './Atoms';
+import { connect } from './misc';
 
 const ParagraphComp: Comp<{ p: Paragraph }> = props =>
     <TextBlock text={props.p} />;
