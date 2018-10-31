@@ -152,8 +152,10 @@ export function between<T>(left: XmlParser<any>, right: XmlParser<any>, inside: 
     };
 }
 
-// TODO: now: handle empty path scenario
 function parsePathHelper<T>(pathComponents: string[], then: XmlParser<T>, input: XmlNode[]): Result<XmlNode, T> {
+    if (pathComponents.length === 0) {
+        return fail("parse path: can't parse to empty path");
+    }
     const pc = pathComponents[0];
 
     const childIndex = input.findIndex(ch =>
@@ -167,7 +169,7 @@ function parsePathHelper<T>(pathComponents: string[], then: XmlParser<T>, input:
         return report('parse path: then', then)(input.slice(childIndex));
     }
 
-    const nextInput = hasChildren(child) ? child.children : []; // TODO: now: rethink
+    const nextInput = hasChildren(child) ? child.children : [];
 
     return parsePathHelper(pathComponents.slice(1), then, nextInput);
 }
