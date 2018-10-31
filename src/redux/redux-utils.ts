@@ -1,5 +1,6 @@
 // NOTE: this file contains lots of crypto code. I'm sorry, future Anton, but you have to deal with it!
 import { mapObject } from "../utils";
+import { combineReducers } from "redux";
 
 // Actions:
 
@@ -80,7 +81,8 @@ type PartialReducersTemplate<State, AT> = {
     [k in keyof State]: Partial<ReducerTs<State[k], AT>>;
 };
 export function buildPartialReducers<State, AT>(template: PartialReducersTemplate<State, AT>): ReducerRedux<State> {
-    return mapObject(template, (_, pt) => buildPartialReducer(pt as any)) as any;
+    const reducersMap = mapObject(template, (_, pt) => buildPartialReducer(pt as any)) as any;
+    return combineReducers(reducersMap);
 }
 
 function findReducerT<State, Template, Key extends keyof Template>(
