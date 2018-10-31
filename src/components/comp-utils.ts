@@ -15,7 +15,7 @@ export function partial<T>(Cmp: React.SFC<T>) {
     return <P extends keyof T>(partials: Pick<T, P>): React.SFC<ExcludeKeys<T, P>> => {
         return props => React.createElement(
             Cmp,
-            { ...(partials as any), ...(props as any) },
+            { ...(partials as any), ...(props as any) }, // TODO: investigate why we need 'as any'
             props.children
         );
     };

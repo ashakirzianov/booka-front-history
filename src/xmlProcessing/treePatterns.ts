@@ -362,6 +362,3 @@ export const sequenceE = sequence(
         capture('bar', nodeFn(x => 'hello')),
     ),
 );
-
-export type Test = Match<typeof sequenceE>;
-export const tttt: Test = null as any;

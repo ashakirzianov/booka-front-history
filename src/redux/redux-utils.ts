@@ -79,7 +79,7 @@ type PartialReducersTemplate<State, AT> = {
     [k in keyof State]: Partial<ReducerTs<State[k], AT>>;
 };
 export function buildPartialReducers<State, AT>(template: PartialReducersTemplate<State, AT>): ReducerRedux<State> {
-    const reducersMap = mapObject(template, (_, pt) => buildPartialReducer(pt as any)) as any;
+    const reducersMap = mapObject(template, (_, pt) => buildPartialReducer(pt as any)) as any; // TODO: add note whe we need to cast to any
     return combineReducers(reducersMap);
 }
 
@@ -88,7 +88,7 @@ function findReducerT<State, Template, Key extends keyof Template>(
     actionType: Extract<keyof Template, string>,
 ): SimpleReducerT<State, any> | undefined {
 
-    const reducer = reducerTs[actionType] as any;
+    const reducer = reducerTs[actionType] as any; // TODO: add note why we need to cast to any
     if (reducer && typeof reducer === 'function') {
         return reducer as SimpleReducerT<State, any>;
     }
