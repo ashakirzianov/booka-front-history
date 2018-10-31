@@ -12,7 +12,6 @@
     "@gxl/epub-parser": "^1.0.6",
     "@rgrove/parse-xml": "^1.1.1",
     "@types/axios": "^0.14.0",
-    "@types/jest": "^23.3.9",
     "@types/lodash": "^4.14.117",
     "@types/node": "^10.12.1",
     "@types/radium": "^0.24.2",
@@ -37,10 +36,10 @@
     "redux": "^4.0.1",
     "redux-promise-middleware": "^5.1.1",
     "store": "^2.0.12",
-    "ts-jest": "^23.10.4",
     "typescript": "^3.1.4"
   },
   "devDependencies": {
-    "react-native": "^0.57.4"
+    "react-native": "^0.57.4",
+    "ts-jest": "^22.4.6"
   }
 }
