@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as Radium from "radium";
+import Radium from "radium";
 import { KeyRestriction, ExcludeKeys } from "../utils";
 
 type Callbacks<A> = {
