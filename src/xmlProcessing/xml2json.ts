@@ -23,7 +23,7 @@ export function nameEq(n1: string, n2: string) {
 export function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
     return Object.keys(attrs1).every(k =>
         (attrs1[k] === attrs2[k])
-        || (!attrs1[k]) // TODO: now: consider implementing 'negative' comparison
+        || (!attrs1[k] && !attrs2[k])
     );
 }
 
