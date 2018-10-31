@@ -117,7 +117,7 @@ function reducePairPatterns<Key extends AlgebraicPattern<any, any>['pattern']>(k
         pattern: key,
         first: p,
         second: acc,
-    } as any as Pattern)); // TODO: remove 'as any'?
+    } as any as Pattern)); // TODO: try to remove 'as any'?
 }
 
 export function sequence

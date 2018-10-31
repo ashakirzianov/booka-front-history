@@ -23,7 +23,7 @@ export function nameEq(n1: string, n2: string) {
 export function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
     return Object.keys(attrs1).every(k =>
         (attrs1[k] === attrs2[k])
-        || (!attrs1[k]) // TODO: consider implementing 'negative' comparison
+        || (!attrs1[k]) // TODO: now: consider implementing 'negative' comparison
     );
 }
 
@@ -152,7 +152,7 @@ export function between<T>(left: XmlParser<any>, right: XmlParser<any>, inside: 
     };
 }
 
-// TODO: handle empty path scenario
+// TODO: now: handle empty path scenario
 function parsePathHelper<T>(pathComponents: string[], then: XmlParser<T>, input: XmlNode[]): Result<XmlNode, T> {
     const pc = pathComponents[0];
 
@@ -167,7 +167,7 @@ function parsePathHelper<T>(pathComponents: string[], then: XmlParser<T>, input:
         return report('parse path: then', then)(input.slice(childIndex));
     }
 
-    const nextInput = hasChildren(child) ? child.children : []; // TODO: rethink
+    const nextInput = hasChildren(child) ? child.children : []; // TODO: now: rethink
 
     return parsePathHelper(pathComponents.slice(1), then, nextInput);
 }
