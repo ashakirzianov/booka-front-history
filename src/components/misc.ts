@@ -1,5 +1,5 @@
 import { createBrowserHistory, Location, Action } from "history";
-import { fetchBL } from "../api/fetch";
+import { fetchBL } from "../api";
 import { store, buildActionCreators, buildConnectRedux } from '../redux';
 import { staticBookLocator, BookLocator, actionsTemplate, App } from "../model";
 
