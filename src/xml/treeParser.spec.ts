@@ -1,4 +1,4 @@
-import { path, element } from "./xml2json";
+import { path, element } from "./treeParser";
 import { xmlElement, XmlNode } from "./xmlNode";
 import { expectSuccess } from "../testUtils";
 import { success } from "./parserCombinators";

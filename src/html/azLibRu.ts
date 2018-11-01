@@ -4,7 +4,7 @@ import { html2xmlFixes, multiRun } from './html2xml';
 import {
     nodeAny, path, textNode,
     children, XmlParser, element, nameEq, headNode,
-} from "../xml/xml2json";
+} from "../xml/treeParser";
 import { Chapter, BookNode } from '../model';
 import {
     translate, some, choice, and, seq, oneOrMore, projectLast, not, skipTo,
