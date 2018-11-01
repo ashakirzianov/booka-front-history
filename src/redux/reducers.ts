@@ -1,6 +1,4 @@
-import { ActionsTemplate } from "../model/actions";
-import { App } from "../model/app";
-import { loadingStub, errorBook } from "../model/book";
+import { ActionsTemplate, App, loadingStub, errorBook } from "../model";
 import { buildPartialReducers } from "./redux-utils";
 
 export const reducer = buildPartialReducers<App, ActionsTemplate>({

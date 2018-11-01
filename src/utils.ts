@@ -31,7 +31,7 @@ export function combineFs<T>(...fs: Array<(x: T) => T>) {
 }
 
 export function keys<T>(obj: T): Array<keyof T> {
-    return Object.keys(obj) as any;
+    return Object.keys(obj) as Array<keyof T>;
 }
 
 export function mapObject<T, U>(
@@ -39,11 +39,11 @@ export function mapObject<T, U>(
     f: <K extends keyof T, V extends T[K]>(k: K, v: V) => U,
 ): { [k in keyof T]: U } {
     return keys(obj).reduce((acc, key) =>
-        ({ ...acc, [key]: f(key, obj[key]) }), {} as any);
+        ({ ...acc, [key]: f(key, obj[key]) }), {} as any); // NOTE: need to cast so reducer infer 'any' as type arg
 }
 
 export function pick<T, Keys extends keyof T>(obj: T, ...ks: Keys[]): Pick<T, Keys> {
-    return ks.reduce((ret, key) => ({ ...ret, [key]: obj[key] }), {}) as any;
+    return ks.reduce((ret, key) => ({ ...ret, [key]: obj[key] }), {}) as Pick<T, Keys>;
 }
 
 export function def<T = undefined>() {
@@ -71,4 +71,35 @@ export function timeouted<T, U>(f: (x: T) => U, timeout?: number): (x: T) => Pro
 
 export function filterUndefined<T>(arr: Array<T | undefined>): T[] {
     return arr.filter(e => e !== undefined) as T[];
+}
+
+// String
+
+export function isWhitespaces(input: string): boolean {
+    return input.match(/^\s*$/) ? true : false;
+}
+
+export function trimStart(input: string, trimSet: string) {
+    return input.replace(new RegExp(`([${trimSet}]*)(.*)`), '$2');
+}
+
+export function trimEnd(input: string, trimSet: string) {
+    return trimStart(input.split('').reverse().join(''), trimSet)
+        .split('').reverse().join('');
+}
+
+export function trim(input: string, trimSet: string) {
+    return trimEnd(trimStart(input, trimSet), trimSet);
+}
+
+export function trimNewLines(line: string) {
+    return trim(line, '\n');
+}
+
+export function caseInsensitiveEq(left: string, right: string) {
+    return left.localeCompare(right, undefined, { sensitivity: 'base' }) === 0;
+}
+
+export function caseSensitiveEq(left: string, right: string) {
+    return left.localeCompare(right) === 0;
 }

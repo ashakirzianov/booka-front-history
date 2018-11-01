@@ -122,7 +122,7 @@ export function choice<TI>(...ps: Array<Parser<TI, any>>): Parser<TI, any[]> {
 export function projectLast<TI, T1, T2>(parser: Parser<TI, [T1, T2]>): Parser<TI, T2>;
 export function projectLast<TI, T1, T2, T3>(parser: Parser<TI, [T1, T2, T3]>): Parser<TI, T3>;
 export function projectLast<TI>(parser: Parser<TI, any>): Parser<TI, any> {
-    return translate(parser, result => result[result.length - 1] as any);
+    return translate(parser, result => result[result.length - 1]);
 }
 
 export function some<TI, T>(parser: Parser<TI, T>): Parser<TI, T[]> {

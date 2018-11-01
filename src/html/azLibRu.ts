@@ -1,15 +1,14 @@
 import { combineFs, throwExp, letExp } from '../utils';
-import { string2tree } from './xmlNode';
-import { html2xmlFixes } from './html2xml';
+import { string2tree } from '../xml/xmlNode';
+import { html2xmlFixes, multiRun } from './html2xml';
 import {
     nodeAny, path, textNode,
     children, XmlParser, element, nameEq, headNode,
-} from "./xml2json";
-import { multiRun } from './xmlUtils';
-import { Chapter, BookNode } from '../model/book';
+} from "../xml/treeParser";
+import { Chapter, BookNode } from '../model';
 import {
     translate, some, choice, and, seq, oneOrMore, projectLast, not, skipTo,
-} from './parserCombinators';
+} from '../xml/parserCombinators';
 
 // ---------- html2xml
 

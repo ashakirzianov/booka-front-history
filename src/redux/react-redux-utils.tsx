@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Dispatch, connect } from "react-redux";
+import { connect } from "react-redux";
+import { Dispatch, Action } from "redux";
 import { mapObject, pick, ExcludeKeys } from "../utils";
 import {
     ActionDispatchers, ActionCreators,
@@ -19,7 +19,7 @@ export function buildConnectRedux<S, AT>(at: AT) {
             }
 
             const ac = buildActionCreators(pick(at, ...ak));
-            function mapDispatchToProps(dispatch: Dispatch<any>) {
+            function mapDispatchToProps(dispatch: Dispatch<Action<any>>) {
                 function buildCallbacks<T>(creators: ActionCreators<T>): ActionDispatchers<T> {
                     return mapObject(creators, (key, value) => (x: any) => dispatch(value(x)));
                 }
@@ -30,7 +30,7 @@ export function buildConnectRedux<S, AT>(at: AT) {
 
             const connector = connect(mapStateToProps, mapDispatchToProps);
 
-            const connected = connector(Comp);
+            const connected = connector(Comp as any); // TODO: try not to use 'as any'
             return connected as any; // TODO: try not to use 'as any'
         };
     };

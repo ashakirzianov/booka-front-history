@@ -1,6 +1,5 @@
-import { string2tree } from "../xmlProcessing/xmlNode";
+import { string2tree, XmlParser } from "../xml";
 import { sectionP, titlePageP, normalPageP, separatorP, separatorHeaderP } from "./traumConverter";
-import { XmlParser } from "../xmlProcessing/xml2json";
 import { expectSuccess } from "../testUtils";
 
 /* spellchecker:disable */

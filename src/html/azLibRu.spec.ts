@@ -1,13 +1,12 @@
-import { loadText as shortTextLoad } from '../samples/warAndPeaceShort';
+import { loadText as shortTextLoad } from './azLibRu.sample';
 import { throwExp } from '../utils';
 import {
     tree2book, html2xml, nonParagraphStart,
     paragraph, bookInfo, junkAtTheBeginning,
 } from './azLibRu';
-import { string2tree, xmlText, xmlElement } from './xmlNode';
-import { htmlFragmentToNodes } from './xmlUtils';
+import { string2tree, xmlText, xmlElement, XmlNode, hasChildren } from '../xml/xmlNode';
 import { expectDefined } from '../testUtils';
-import { skipTo } from './parserCombinators';
+import { skipTo } from '../xml/parserCombinators';
 
 it('War and Peace short parsing', () => {
     const xmlString = html2xml(shortTextLoad());
@@ -77,3 +76,15 @@ it('bookInfo', () => {
     expect(result.success).toBeTruthy();
     expect(result.success && result.value).toEqual({ title: 'Hello', author: 'John Smith' });
 });
+
+function htmlFragmentToNodes(html: string, html2xmlFunc?: (h: string) => string): XmlNode[] {
+    const properHtml = `<html>${html}</html>`;
+    const xml = html2xmlFunc ? html2xmlFunc(`<html>${html}</html>`) : properHtml;
+    const document = string2tree(xml);
+    if (!document) {
+        throw new Error("Can't parse xml");
+    }
+    const root = document.children[0];
+
+    return root && hasChildren(root) ? root.children : throwExp("Can't parse html: " + html);
+}

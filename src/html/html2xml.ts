@@ -1,5 +1,4 @@
-import { combineFs } from "../utils";
-import { multiRun } from "./xmlUtils";
+import { combineFs, caseSensitiveEq } from "../utils";
 
 export function fixAllUnquotedAttributes(html: string) {
     return multiRun(s => s
@@ -74,3 +73,15 @@ export const html2xmlFixes = combineFs(
     fixInvalidComments,
     fixCharEntity,
 );
+
+export function multiRun(f: (s: string) => string) {
+    return (input: string) => {
+        let next = input;
+        let current;
+        do {
+            current = next;
+            next = f(current);
+        } while (!caseSensitiveEq(current, next));
+        return next;
+    };
+}

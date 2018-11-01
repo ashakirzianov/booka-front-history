@@ -1,6 +1,7 @@
 import { xmlElement } from "./xmlNode";
 import { skipTo, and } from "./parserCombinators";
-import { element, children } from "./xml2json";
+import { element, children } from "./treeParser";
+import { expectSuccess } from "../testUtils";
 
 it('skipTo', () => {
     const input = [
@@ -16,5 +17,7 @@ it('skipTo', () => {
 
     const result = parser(input);
     expect(result.success).toBeTruthy();
-    expect((result as any).value[1].name).toBe('ca');
+    if (expectSuccess(result)) {
+        expect(result.value[1].name).toBe('ca');
+    }
 });

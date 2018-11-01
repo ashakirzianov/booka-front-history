@@ -2,7 +2,7 @@ import {
     XmlNode, hasChildren, isElement,
     XmlAttributes, XmlNodeElement,
 } from "./xmlNode";
-import { caseInsensitiveEq, isWhitespaces } from "./xmlUtils";
+import { caseInsensitiveEq, isWhitespaces } from "../utils";
 import {
     Parser, Result, success, fail,
     head,
@@ -23,7 +23,7 @@ export function nameEq(n1: string, n2: string) {
 export function attrsCompare(attrs1: XmlAttributes, attrs2: XmlAttributes) {
     return Object.keys(attrs1).every(k =>
         (attrs1[k] === attrs2[k])
-        || (!attrs1[k]) // TODO: consider implementing 'negative' comparison
+        || (!attrs1[k] && !attrs2[k])
     );
 }
 
@@ -152,8 +152,10 @@ export function between<T>(left: XmlParser<any>, right: XmlParser<any>, inside: 
     };
 }
 
-// TODO: handle empty path scenario
 function parsePathHelper<T>(pathComponents: string[], then: XmlParser<T>, input: XmlNode[]): Result<XmlNode, T> {
+    if (pathComponents.length === 0) {
+        return fail("parse path: can't parse to empty path");
+    }
     const pc = pathComponents[0];
 
     const childIndex = input.findIndex(ch =>
@@ -167,7 +169,7 @@ function parsePathHelper<T>(pathComponents: string[], then: XmlParser<T>, input:
         return report('parse path: then', then)(input.slice(childIndex));
     }
 
-    const nextInput = hasChildren(child) ? child.children : []; // TODO: rethink
+    const nextInput = hasChildren(child) ? child.children : [];
 
     return parsePathHelper(pathComponents.slice(1), then, nextInput);
 }

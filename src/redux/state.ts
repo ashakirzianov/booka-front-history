@@ -1,5 +1,5 @@
 import * as store from "store";
-import { App } from "../model/app";
+import { App } from "../model";
 
 export type State = App;
 
