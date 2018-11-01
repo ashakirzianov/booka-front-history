@@ -1,4 +1,3 @@
-import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch, Action } from "redux";
 import { mapObject, pick, ExcludeKeys } from "../utils";
