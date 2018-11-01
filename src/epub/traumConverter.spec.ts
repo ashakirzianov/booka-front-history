@@ -1,4 +1,4 @@
-import { string2tree, XmlParser } from "../xmlProcessing";
+import { string2tree, XmlParser } from "../xml";
 import { sectionP, titlePageP, normalPageP, separatorP, separatorHeaderP } from "./traumConverter";
 import { expectSuccess } from "../testUtils";
 

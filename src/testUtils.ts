@@ -1,4 +1,4 @@
-import { Result, Fail, Success } from "./xmlProcessing";
+import { Result, Fail, Success } from "./xml";
 
 export function expectSuccess<TIn, TOut>(result: Result<TIn, TOut>): result is Success<TIn, TOut> {
     const failReason = (result as Fail).reason;

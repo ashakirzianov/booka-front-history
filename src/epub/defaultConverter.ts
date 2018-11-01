@@ -4,7 +4,7 @@ import {
     string2tree, XmlNodeDocument, XmlNode,
     textNode, children,
     translate, choice, some, Result,
-} from "../xmlProcessing";
+} from "../xml";
 import { EpubConverter } from "./epubConverter";
 import { filterUndefined } from "../utils";
 
