@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Book, noBook, errorBook, BookLocator } from "../model";
-import { arrayBuffer2book } from "../epub/epubConverter";
+import { arrayBuffer2book } from "../epub";
 
 export async function fetchBL(bookLocator: BookLocator): Promise<Book> {
     switch (bookLocator.bl) {
