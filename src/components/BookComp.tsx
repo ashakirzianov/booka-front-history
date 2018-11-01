@@ -3,7 +3,7 @@ import { Comp } from './comp-utils';
 import {
     Book, BookNode, Chapter, Paragraph,
     isParagraph, LoadingStub, NoBook, ActualBook, ErrorBook,
-} from '../model/book';
+} from '../model';
 import {
     TextBlock, Column, BookTitle, ChapterTitle, PartTitle, SubpartTitle,
     Route, Redirect, Switch,

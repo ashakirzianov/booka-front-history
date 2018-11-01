@@ -1,4 +1,4 @@
-import { Book, BookNode } from "../model/book";
+import { Book, BookNode } from "../model";
 import { Epub, Section } from "./epubParser";
 import { string2tree, XmlNodeDocument, XmlNode } from "../xmlProcessing/xmlNode";
 import { textNode, children } from "../xmlProcessing/xml2json";

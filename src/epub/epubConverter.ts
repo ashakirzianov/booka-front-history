@@ -1,4 +1,4 @@
-import { Book } from '../model/book';
+import { Book } from '../model';
 import { Epub, epubParser } from './epubParser';
 import { converter as defaultConverter } from './defaultConverter';
 import { converter as traumConverter } from './traumConverter';

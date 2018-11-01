@@ -2,7 +2,7 @@ import {
     children, textNode, element, path, afterWhitespaces, headNode, projectElement,
 } from "../xmlProcessing/xml2json";
 import { Epub, Section } from "./epubParser";
-import { Book, BookNode } from "../model/book";
+import { Book, BookNode } from "../model";
 import { string2tree, XmlNodeDocument } from "../xmlProcessing/xmlNode";
 import { filterUndefined } from "../utils";
 import {

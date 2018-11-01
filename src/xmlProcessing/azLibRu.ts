@@ -6,7 +6,7 @@ import {
     children, XmlParser, element, nameEq, headNode,
 } from "./xml2json";
 import { multiRun } from './xmlUtils';
-import { Chapter, BookNode } from '../model/book';
+import { Chapter, BookNode } from '../model';
 import {
     translate, some, choice, and, seq, oneOrMore, projectLast, not, skipTo,
 } from './parserCombinators';
