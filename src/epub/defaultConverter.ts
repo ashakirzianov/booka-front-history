@@ -1,8 +1,10 @@
 import { Book, BookNode } from "../model";
 import { Epub, Section } from "./epubParser";
-import { string2tree, XmlNodeDocument, XmlNode } from "../xmlProcessing/xmlNode";
-import { textNode, children } from "../xmlProcessing/xml2json";
-import { translate, choice, some, Result } from "../xmlProcessing/parserCombinators";
+import {
+    string2tree, XmlNodeDocument, XmlNode,
+    textNode, children,
+    translate, choice, some, Result,
+} from "../xmlProcessing";
 import { EpubConverter } from "./epubConverter";
 import { filterUndefined } from "../utils";
 

@@ -1,14 +1,11 @@
 import {
     children, textNode, element, path, afterWhitespaces, headNode, projectElement,
-} from "../xmlProcessing/xml2json";
-import { Epub, Section } from "./epubParser";
+    string2tree, XmlNodeDocument,
+    head, Parser, choice, translate, seq, and, oneOrMore, some,
+} from "../xmlProcessing";
 import { Book, BookNode } from "../model";
-import { string2tree, XmlNodeDocument } from "../xmlProcessing/xmlNode";
 import { filterUndefined } from "../utils";
-import {
-    head, Parser, choice, translate,
-    seq, and, oneOrMore, some,
-} from "../xmlProcessing/parserCombinators";
+import { Epub, Section } from "./epubParser";
 import { EpubConverter } from "./epubConverter";
 
 // ---- Export
