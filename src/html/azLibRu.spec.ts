@@ -1,4 +1,4 @@
-import { loadText as shortTextLoad } from '../samples/warAndPeaceShort';
+import { loadText as shortTextLoad } from './azLibRu.sample';
 import { throwExp } from '../utils';
 import {
     tree2book, html2xml, nonParagraphStart,
