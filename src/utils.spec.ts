@@ -12,4 +12,8 @@ describe("Utils", () => {
         expect(trimStart("   hello ", " ho")).toBe("ello ");
         expect(trimEnd("   hello ", " ho")).toBe("   hell");
     });
+
+    it('should fail', () => {
+        expect(false).toBeTruthy();
+    });
 });
