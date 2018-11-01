@@ -2,7 +2,7 @@ import {
     XmlNode, hasChildren, isElement,
     XmlAttributes, XmlNodeElement,
 } from "./xmlNode";
-import { caseInsensitiveEq, isWhitespaces } from "./xmlUtils";
+import { caseInsensitiveEq, isWhitespaces } from "../utils";
 import {
     Parser, Result, success, fail,
     head,
