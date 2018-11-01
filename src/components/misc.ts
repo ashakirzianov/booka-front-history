@@ -1,5 +1,5 @@
 import { createBrowserHistory, Location, Action } from "history";
-import { loadBL } from "../api/bookLocator";
+import { fetchBL } from "../api/fetch";
 import { store } from "../redux/store";
 import { buildActionCreators } from "../redux/redux-utils";
 import { staticBookLocator, BookLocator } from "../model/bookLocator";
@@ -15,7 +15,7 @@ export function dispatchHistoryEvent(location: Location, action?: Action) {
 
 const actionCreators = buildActionCreators(actionsTemplate);
 export function dispatchLoadBLAction(bl: BookLocator) {
-    store.dispatch(actionCreators.setBook(loadBL(bl)));
+    store.dispatch(actionCreators.setBook(fetchBL(bl)));
 }
 
 export const connect = buildConnectRedux<App, typeof actionsTemplate>(actionsTemplate);
