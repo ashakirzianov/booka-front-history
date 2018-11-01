@@ -1,11 +1,9 @@
 import { createBrowserHistory, Location, Action } from "history";
 import { fetchBL } from "../api/fetch";
-import { store } from "../redux/store";
-import { buildActionCreators } from "../redux/redux-utils";
+import { store, buildActionCreators, buildConnectRedux } from '../redux';
 import { staticBookLocator, BookLocator } from "../model/bookLocator";
 import { actionsTemplate } from "../model/actions";
 import { App } from '../model/app';
-import { buildConnectRedux } from '../redux/react-redux-utils';
 
 export const history = createBrowserHistory();
 
