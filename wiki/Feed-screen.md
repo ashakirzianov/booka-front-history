@@ -1,4 +1,4 @@
-[[feed-screen-only.jpeg|Feed screen "mockup"]]
+[[feed-screen.jpeg|Feed screen "mockup"]]
 
 (TODO: add an actual mockup)
 

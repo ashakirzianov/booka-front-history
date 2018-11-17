@@ -1,4 +1,4 @@
-[[lib-screen-only.jpeg|"Library screen mockup"]]
+[[lib-screen.jpeg|"Library screen mockup"]]
 
 (TODO: add an actual mockup)
 

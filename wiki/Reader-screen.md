@@ -1,4 +1,4 @@
-[[reader-screen-only.jpeg|"Reader screen mockup"]]
+[[reader-screen.jpeg|"Reader screen mockup"]]
 
 (TODO: add an actual mockup)
 
