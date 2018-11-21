@@ -10,7 +10,7 @@ export async function fetchBL(bookLocator: BookLocator): Promise<Book> {
         case 'no-book':
             return Promise.resolve(noBook());
         case 'static-epub':
-            return fetchStaticEpub(bookLocator.name + '.epub');
+            return fetchStaticEpub(bookLocator.name);
         default:
             return Promise.resolve(noBook());
     }
@@ -18,7 +18,7 @@ export async function fetchBL(bookLocator: BookLocator): Promise<Book> {
 
 export async function fetchStaticEpub(fileName: string): Promise<Book> {
     try {
-        const buffer = await fetchStaticBuffer(fileName);
+        const buffer = await fetchStaticBuffer(epubPath + fileName);
         return arrayBuffer2book(buffer);
     } catch (reason) {
         return errorBook("Can't find static book: " + fileName);
@@ -39,8 +39,10 @@ export async function fetchStaticString(fileName: string): Promise<string> {
 }
 
 export async function fetchStaticBuffer(fileName: string): Promise<ArrayBuffer> {
-    const response = await axios.get(backendBase + epubPath + fileName, {
-        responseType: 'arraybuffer',
-    });
+    const response = await axios
+        .get(backendBase + fileName, {
+            responseType: 'arraybuffer',
+        })
+        ;
     return response.data;
 }
