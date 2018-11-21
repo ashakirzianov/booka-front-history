@@ -34,14 +34,20 @@
     "react-native-web": "^0.9.5",
     "react-redux": "^5.1.0",
     "react-router-dom": "^4.3.1",
-    "react-scripts-ts": "^3.1.0",
+    "react-scripts-ts": "^4.0.8",
     "redux": "^4.0.1",
     "redux-promise-middleware": "^5.1.1",
     "store": "^2.0.12",
     "typescript": "^3.1.4"
   },
   "devDependencies": {
-    "react-native": "^0.57.4",
+    "react-native": "^0.57.5",
     "ts-jest": "^22.4.6"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
