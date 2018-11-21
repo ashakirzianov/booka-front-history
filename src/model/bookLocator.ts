@@ -4,7 +4,7 @@ export type StaticEpubLocator = {
     name: string,
 };
 export type StaticBookLocator = {
-    bl: 'static-epub',
+    bl: 'static-book',
     name: string,
 };
 
