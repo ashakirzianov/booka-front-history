@@ -2,7 +2,7 @@
   "compilerOptions": {
     "types": [
       "lodash", "radium", "react-native", "react-redux",
-      "react", "react-dom"
+      "jest", "react", "react-dom"
     ],
     "skipLibCheck": true,
     "baseUrl": ".",
