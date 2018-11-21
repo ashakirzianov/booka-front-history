@@ -2,6 +2,9 @@ import axios from 'axios';
 import { Book, noBook, errorBook, BookLocator } from "../model";
 import { arrayBuffer2book } from "../epub";
 
+const backendBase = 'http://localhost:3042/';
+const epubPath = 'epub/';
+
 export async function fetchBL(bookLocator: BookLocator): Promise<Book> {
     switch (bookLocator.bl) {
         case 'no-book':
@@ -36,7 +39,7 @@ export async function fetchStaticString(fileName: string): Promise<string> {
 }
 
 export async function fetchStaticBuffer(fileName: string): Promise<ArrayBuffer> {
-    const response = await axios.get(fileName, {
+    const response = await axios.get(backendBase + epubPath + fileName, {
         responseType: 'arraybuffer',
     });
     return response.data;
