@@ -4,6 +4,7 @@ import { arrayBuffer2book } from "../epub";
 
 const backendBase = 'https://reader-back.herokuapp.com';
 const epubPath = '/epub';
+const jsonPath = '/json';
 
 export async function fetchBL(bookLocator: BookLocator): Promise<Book> {
     switch (bookLocator.bl) {
@@ -11,8 +12,19 @@ export async function fetchBL(bookLocator: BookLocator): Promise<Book> {
             return Promise.resolve(noBook());
         case 'static-epub':
             return fetchStaticEpub(bookLocator.name);
+        case 'static-book':
+            return fetchStaticBook(bookLocator.name);
         default:
             return Promise.resolve(noBook());
+    }
+}
+
+export async function fetchStaticBook(fileName: string): Promise<Book> {
+    try {
+        const response = await fetchStaticJson(jsonPath + fileName);
+        return response as Book;
+    } catch (reason) {
+        return errorBook("Can't find static book: " + fileName);
     }
 }
 
@@ -45,4 +57,15 @@ export async function fetchStaticBuffer(fileName: string): Promise<ArrayBuffer> 
         })
         ;
     return response.data;
+}
+
+export async function fetchStaticJson(fileName: string): Promise<object> {
+    const response = await axios
+        .get(backendBase + fileName, {
+            responseType: 'json',
+        })
+        ;
+    const json = JSON.parse(response.data);
+
+    return json;
 }
