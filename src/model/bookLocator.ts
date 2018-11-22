@@ -16,6 +16,13 @@ export function noBookLocator(): NoBookLocator {
     };
 }
 
+export function staticEpubLocator(name: string): StaticEpubLocator {
+    return {
+        bl: 'static-epub',
+        name: name,
+    };
+}
+
 export function staticBookLocator(name: string): StaticEpubLocator {
     return {
         bl: 'static-epub',
