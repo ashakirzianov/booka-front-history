@@ -23,9 +23,9 @@ export function staticEpubLocator(name: string): StaticEpubLocator {
     };
 }
 
-export function staticBookLocator(name: string): StaticEpubLocator {
+export function staticBookLocator(name: string): StaticBookLocator {
     return {
-        bl: 'static-epub',
+        bl: 'static-book',
         name: name,
     };
 }

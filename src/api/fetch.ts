@@ -60,12 +60,9 @@ export async function fetchStaticBuffer(fileName: string): Promise<ArrayBuffer> 
 }
 
 export async function fetchStaticJson(fileName: string): Promise<object> {
-    const response = await axios
-        .get(backendBase + fileName, {
-            responseType: 'json',
-        })
-        ;
-    const json = JSON.parse(response.data);
+    const json = await axios.get(backendBase + fileName, {
+        responseType: 'json',
+    });
 
-    return json;
+    return json.data;
 }
