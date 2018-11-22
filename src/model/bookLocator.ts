@@ -1,14 +1,10 @@
 export type NoBookLocator = { bl: 'no-book' };
-export type StaticEpubLocator = {
-    bl: 'static-epub',
-    name: string,
-};
 export type StaticBookLocator = {
     bl: 'static-book',
     name: string,
 };
 
-export type BookLocator = NoBookLocator | StaticEpubLocator | StaticBookLocator;
+export type BookLocator = NoBookLocator | StaticBookLocator;
 
 export function noBookLocator(): NoBookLocator {
     return {
@@ -16,9 +12,9 @@ export function noBookLocator(): NoBookLocator {
     };
 }
 
-export function staticBookLocator(name: string): StaticEpubLocator {
+export function staticBookLocator(name: string): StaticBookLocator {
     return {
-        bl: 'static-epub',
+        bl: 'static-book',
         name: name,
     };
 }
